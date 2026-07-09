@@ -55,5 +55,5 @@ See `.github/workflows/` for pipeline details.
 | BA | Requirements & acceptance criteria |
 | Soft Skills | Stakeholder communication |
 
-**Sponsor:** Derivco — Contact: Danielle Thompson  
+**Sponsor:** Derivco  
 **Mentor:** Dirk Snyman
