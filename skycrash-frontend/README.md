@@ -1,59 +1,54 @@
-# SkyCrash — Frontend
+# .
 
-The user-facing interface for SkyCrash, a multiplayer crash-style educational game developed for Derivco.
+This template should help get you started developing with Vue 3 in Vite.
 
-## Tech Stack
+## Recommended IDE Setup
 
-> Update this section once your stack is finalised (e.g. React, Vite, Tailwind CSS).
+[VS Code](https://code.visualstudio.com/) + [Vue (Official)](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
 
-## Getting Started
+## Recommended Browser Setup
 
-```bash
-# Install dependencies
+- Chromium-based browsers (Chrome, Edge, Brave, etc.):
+  - [Vue.js devtools](https://chromewebstore.google.com/detail/vuejs-devtools/nhdogjmejiglipccpnnnanhbledajbpd)
+  - [Turn on Custom Object Formatter in Chrome DevTools](http://bit.ly/object-formatters)
+- Firefox:
+  - [Vue.js devtools](https://addons.mozilla.org/en-US/firefox/addon/vue-js-devtools/)
+  - [Turn on Custom Object Formatter in Firefox DevTools](https://fxdx.dev/firefox-devtools-custom-object-formatters/)
+
+## Type Support for `.vue` Imports in TS
+
+TypeScript cannot handle type information for `.vue` imports by default, so we replace the `tsc` CLI with `vue-tsc` for type checking. In editors, we need [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) to make the TypeScript language service aware of `.vue` types.
+
+## Customize configuration
+
+See [Vite Configuration Reference](https://vite.dev/config/).
+
+## Project Setup
+
+```sh
 npm install
+```
 
-# Run development server
+### Compile and Hot-Reload for Development
+
+```sh
 npm run dev
-
-# Run tests
-npm test
 ```
 
-## Repository Structure
+### Type-Check, Compile and Minify for Production
 
-```
-skycrash-frontend/
-├── .github/
-│   └── workflows/        # CI/CD pipelines
-├── docs/
-│   ├── diagrams/         # Architecture, UI wireframes, flow diagrams
-│   └── ...               # Any other documentation (specs, meeting notes)
-├── src/                  # Application source code
-├── CONTRIBUTING.md       # Branching & PR conventions
-└── README.md
+```sh
+npm run build
 ```
 
-## Documentation & Diagrams
+### Run Unit Tests with [Vitest](https://vitest.dev/)
 
-All project documentation lives in the `docs/` folder:
-- Drop `.drawio`, `.png`, `.pdf`, or `.md` files into `docs/diagrams/` for any system or UI diagrams
-- General docs (specs, decisions, meeting notes) go directly in `docs/`
+```sh
+npm run test:unit
+```
 
-## CI/CD
+### Lint with [ESLint](https://eslint.org/)
 
-- **Feature branches** — tests run automatically on every push
-- **`main` branch** — tests must pass before any merge is accepted (branch protection rule)
-
-See `.github/workflows/` for pipeline details.
-
-## Team
-
-| Role | Responsibility |
-|------|---------------|
-| PM | Project planning & delivery |
-| Developer | Frontend implementation |
-| BA | Requirements & acceptance criteria |
-| Soft Skills | Stakeholder communication |
-
-**Sponsor:** Derivco  
-**Mentor:** Dirk Snyman
+```sh
+npm run lint
+```
