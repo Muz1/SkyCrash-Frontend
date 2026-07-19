@@ -8,3 +8,21 @@ export interface ApiError {
   message: string
   statusCode: number
 }
+
+export interface RegisterPayload {
+  username: string
+  email: string
+  password: string
+}
+
+export interface LoginPayload {
+  username: string
+  password: string
+}
+
+export interface AuthResponse {
+  token: string
+  playerId: string
+  username: string
+  expiresAtUtc: string
+}
