@@ -26,3 +26,15 @@ export interface AuthResponse {
   username: string
   expiresAtUtc: string
 }
+
+export interface PlayerProfile {
+  playerId: string
+  username: string
+  email: string
+  creditBalance: number
+  memberSinceUtc: string
+}
+
+export interface UpdateProfilePayload {
+  email: string
+}
