@@ -38,3 +38,8 @@ export interface PlayerProfile {
 export interface UpdateProfilePayload {
   email: string
 }
+
+export interface OnlinePlayer {
+  playerId: string
+  username: string
+}
