@@ -43,3 +43,16 @@ export interface OnlinePlayer {
   playerId: string
   username: string
 }
+
+export interface WalletBalance {
+  creditBalance: number
+}
+
+export interface CreditTransactionRecord {
+  id: string
+  amount: number
+  type: string
+  balanceAfter: number
+  description: string | null
+  createdAtUtc: string
+}
