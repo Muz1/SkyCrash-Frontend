@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import * as authService from '@/services/AuthService'
 import type { LoginPayload, RegisterPayload } from '@/types'
+import { stopConnection } from '@/services/signalr'
 
 export const useAuthStore = defineStore('auth', () => {
   const token = ref<string | null>(localStorage.getItem('skycrash_token'))
@@ -30,13 +31,16 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   function logout() {
-    token.value = null
-    username.value = null
-    playerId.value = null
-    localStorage.removeItem('skycrash_token')
-    localStorage.removeItem('skycrash_username')
-    localStorage.removeItem('skycrash_player_id')
-  }
+  token.value = null
+  username.value = null
+  playerId.value = null
+  localStorage.removeItem('skycrash_token')
+  localStorage.removeItem('skycrash_username')
+  localStorage.removeItem('skycrash_player_id')
+  stopConnection()
+}
+
+  
 
   return { token, username, playerId, isAuthenticated, register, login, logout }
 })

@@ -3,12 +3,9 @@ import { ref } from 'vue'
 import * as lobbyService from '@/services/lobbyService'
 import type { OnlinePlayer } from '@/types'
 
-const POLL_INTERVAL_MS = 5_000
-
 export const useLobbyStore = defineStore('lobby', () => {
   const onlinePlayers = ref<OnlinePlayer[]>([])
   const isLoading = ref(false)
-  let pollIntervalId: ReturnType<typeof setInterval> | undefined
 
   async function fetchOnlinePlayers() {
     isLoading.value = true
@@ -19,18 +16,18 @@ export const useLobbyStore = defineStore('lobby', () => {
     }
   }
 
-  function startPolling() {
-    fetchOnlinePlayers()
-    stopPolling()
-    pollIntervalId = setInterval(fetchOnlinePlayers, POLL_INTERVAL_MS)
-  }
-
-  function stopPolling() {
-    if (pollIntervalId) {
-      clearInterval(pollIntervalId)
-      pollIntervalId = undefined
+  function addOnlinePlayer(player: OnlinePlayer) {
+    const alreadyPresent = onlinePlayers.value.some((p) => p.playerId === player.playerId)
+    if (!alreadyPresent) {
+      onlinePlayers.value = [...onlinePlayers.value, player].sort((a, b) =>
+        a.username.localeCompare(b.username)
+      )
     }
   }
 
-  return { onlinePlayers, isLoading, fetchOnlinePlayers, startPolling, stopPolling }
+  function removeOnlinePlayer(playerId: string) {
+    onlinePlayers.value = onlinePlayers.value.filter((p) => p.playerId !== playerId)
+  }
+
+  return { onlinePlayers, isLoading, fetchOnlinePlayers, addOnlinePlayer, removeOnlinePlayer }
 })

@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { RouterView } from 'vue-router'
 import AppNavBar from './components/AppNavBar.vue'
-import { useHeartbeat } from '@/composables/useHeartbeat'
+import { useSignalRConnection } from '@/composables/useSignalRConnection'
 
-useHeartbeat()
+useSignalRConnection()
 </script>
 
 <template>

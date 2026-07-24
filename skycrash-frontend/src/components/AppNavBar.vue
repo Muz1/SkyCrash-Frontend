@@ -28,10 +28,9 @@ function handleLogout() {
     
     <div class="flex items-center gap-4 text-sm">
       <span class="text-slate-400">
-        Credits: <span class="text-slate-100 font-medium">{{ playerStore.profile?.creditBalance ?? '—' }}</span>
         <RouterLink to="/wallet" class="text-slate-400 hover:text-slate-200">
-  Credits: <span class="text-slate-100 font-medium">{{ playerStore.profile?.creditBalance ?? '—' }}</span>
-</RouterLink>
+        Credits: <span class="text-slate-100 font-medium">{{ playerStore.profile?.creditBalance ?? '—' }}</span>
+        </RouterLink>
       </span>
       <RouterLink to="/profile" class="text-slate-300 hover:text-slate-100">
         {{ playerStore.profile?.username ?? authStore.username }}

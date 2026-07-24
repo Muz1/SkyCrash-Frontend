@@ -13,3 +13,10 @@ export function getConnection(): signalR.HubConnection {
   }
   return connection
 }
+
+export async function stopConnection(): Promise<void> {
+  if (connection) {
+    await connection.stop()
+    connection = null
+  }
+}

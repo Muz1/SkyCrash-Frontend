@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, onUnmounted } from 'vue'
+import { onMounted } from 'vue'
 import { useLobbyStore } from '@/stores/lobbyStore'
 import { usePlayerStore } from '@/stores/playerStore'
 
@@ -7,11 +7,7 @@ const lobbyStore = useLobbyStore()
 const playerStore = usePlayerStore()
 
 onMounted(() => {
-  lobbyStore.startPolling()
-})
-
-onUnmounted(() => {
-  lobbyStore.stopPolling()
+  lobbyStore.fetchOnlinePlayers()
 })
 </script>
 
