@@ -2,6 +2,34 @@ import { onMounted, onUnmounted, watch } from 'vue'
 import { getConnection, stopConnection } from '@/services/signalr'
 import { useAuthStore } from '@/stores/AuthStore'
 import { useLobbyStore } from '@/stores/lobbyStore'
+import { useGameStore, type RoundPhase } from '@/stores/gameStore'
+
+type RoundSnapshot = {
+  roundId: string
+  roundNumber: number
+  status: RoundPhase
+  serverSeedHash: string
+  currentMultiplier: number
+  crashMultiplier: number | null
+  countdownSeconds: number | null
+}
+
+type RoundWaitingPayload = {
+  roundId: string
+  roundNumber: number
+  serverSeedHash: string
+  countdownSeconds: number
+}
+
+type MultiplierTickPayload = {
+  multiplier: number
+}
+
+type RoundCrashedPayload = {
+  crashMultiplier: number
+  serverSeed: string
+}
+
 
 export function useSignalRConnection() {
   const authStore = useAuthStore()
@@ -25,6 +53,25 @@ export function useSignalRConnection() {
         console.error('SignalR connection failed to start:', err)
       }
     }
+
+    const gameStore = useGameStore()
+
+    connection.on('RoundSnapshot', (snapshot: RoundSnapshot) => {
+      gameStore.applySnapshot(snapshot)
+    })
+    connection.on('RoundWaiting', (payload: RoundWaitingPayload) => {
+      gameStore.onRoundWaiting(payload)
+    })
+    connection.on('RoundStarted', () => {
+      gameStore.onRoundStarted()
+    })
+    connection.on('MultiplierTick', (payload: MultiplierTickPayload) => {
+      gameStore.onMultiplierTick(payload)
+    })
+    connection.on('RoundCrashed', (payload: RoundCrashedPayload) => {
+      gameStore.onRoundCrashed(payload)
+    })
+
   }
 
   onMounted(() => {

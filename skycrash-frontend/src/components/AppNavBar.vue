@@ -36,6 +36,7 @@ function handleLogout() {
         {{ playerStore.profile?.username ?? authStore.username }}
       </RouterLink>
       <RouterLink to="/lobby" class="text-slate-300 hover:text-slate-100">Lobby</RouterLink>
+      <RouterLink to="/game" class="text-slate-300 hover:text-slate-100">Play</RouterLink>
       <button @click="handleLogout" class="text-slate-400 hover:text-red-400 transition">
         Log out
       </button>
