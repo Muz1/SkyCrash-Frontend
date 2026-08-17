@@ -12,6 +12,10 @@ export const useGameStore = defineStore('game', () => {
   const countdownSeconds = ref<number | null>(null)
   const lastCrashPoints = ref<number[]>([])
   const lastRevealedSeed = ref<string | null>(null)
+  const myBetAmount = ref<number | null>(null)
+  const myBetStatus = ref<'None' | 'Placed' | 'Rejected'>('None')
+  const betRejectionReason = ref<string | null>(null)
+  const roundBets = ref<{ playerId: string; username: string; amount: number }[]>([])
 
   function applySnapshot(snapshot: {
     roundId: string
@@ -30,13 +34,22 @@ export const useGameStore = defineStore('game', () => {
     countdownSeconds.value = snapshot.countdownSeconds
   }
 
-  function onRoundWaiting(payload: { roundId: string; roundNumber: number; serverSeedHash: string; countdownSeconds: number }) {
+  function onRoundWaiting(payload: {
+    roundId: string
+    roundNumber: number
+    serverSeedHash: string
+    countdownSeconds: number
+  }) {
     roundId.value = payload.roundId
     roundNumber.value = payload.roundNumber
     serverSeedHash.value = payload.serverSeedHash
     countdownSeconds.value = payload.countdownSeconds
     currentMultiplier.value = 1.0
     phase.value = 'Waiting'
+    myBetAmount.value = null
+    myBetStatus.value = 'None'
+    betRejectionReason.value = null
+    roundBets.value = []
   }
 
   function onRoundStarted() {
@@ -56,6 +69,21 @@ export const useGameStore = defineStore('game', () => {
     lastCrashPoints.value = [payload.crashMultiplier, ...lastCrashPoints.value].slice(0, 10)
   }
 
+  function onBetConfirmed(payload: { betId: string; amount: number }) {
+    myBetAmount.value = payload.amount
+    myBetStatus.value = 'Placed'
+    betRejectionReason.value = null
+  }
+
+  function onBetRejected(payload: { message: string }) {
+    myBetStatus.value = 'Rejected'
+    betRejectionReason.value = payload.message
+  }
+
+  function onBetPlacedByPlayer(payload: { playerId: string; username: string; amount: number }) {
+    roundBets.value = [...roundBets.value, payload]
+  }
+
   return {
     roundId,
     roundNumber,
@@ -65,10 +93,17 @@ export const useGameStore = defineStore('game', () => {
     countdownSeconds,
     lastCrashPoints,
     lastRevealedSeed,
+    myBetAmount,
+    myBetStatus,
+    betRejectionReason,
+    roundBets,
     applySnapshot,
     onRoundWaiting,
     onRoundStarted,
     onMultiplierTick,
-    onRoundCrashed
+    onRoundCrashed,
+    onBetConfirmed,
+    onBetRejected,
+    onBetPlacedByPlayer,
   }
 })

@@ -3,6 +3,8 @@ import { getConnection, stopConnection } from '@/services/signalr'
 import { useAuthStore } from '@/stores/AuthStore'
 import { useLobbyStore } from '@/stores/lobbyStore'
 import { useGameStore, type RoundPhase } from '@/stores/gameStore'
+import { usePlayerStore } from '@/stores/playerStore'
+
 
 type RoundSnapshot = {
   roundId: string
@@ -30,6 +32,20 @@ type RoundCrashedPayload = {
   serverSeed: string
 }
 
+type BetConfirmedPayload = {
+  betId: string
+  amount: number
+}
+
+type BetRejectedPayload = {
+  message: string
+}
+
+type BetPlacedByPlayerPayload = {
+  playerId: string
+  username: string
+  amount: number
+}
 
 export function useSignalRConnection() {
   const authStore = useAuthStore()
@@ -71,7 +87,16 @@ export function useSignalRConnection() {
     connection.on('RoundCrashed', (payload: RoundCrashedPayload) => {
       gameStore.onRoundCrashed(payload)
     })
-
+    connection.on('BetConfirmed', (payload: BetConfirmedPayload) => {
+      gameStore.onBetConfirmed(payload)
+      usePlayerStore().fetchProfile() // refresh nav bar balance
+    })
+    connection.on('BetRejected', (payload: BetRejectedPayload) => {
+      gameStore.onBetRejected(payload)
+    })
+    connection.on('BetPlacedByPlayer', (payload: BetPlacedByPlayerPayload) => {
+      gameStore.onBetPlacedByPlayer(payload)
+    })
   }
 
   onMounted(() => {
@@ -88,7 +113,7 @@ export function useSignalRConnection() {
       } else {
         await stopConnection()
       }
-    }
+    },
   )
 
   onUnmounted(() => {
