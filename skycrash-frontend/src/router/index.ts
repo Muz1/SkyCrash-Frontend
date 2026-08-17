@@ -9,6 +9,10 @@ import WalletView from '../views/WalletView.vue'
 import GameView from '../views/GameView.vue'
 import HistoryView from '../views/HistoryView.vue'
 import LeaderboardView from '../views/LeaderboardView.vue'
+import OperationsView from '../views/OperationsView.vue'
+import { usePlayerStore } from '../stores/playerStore'
+
+
 
 
 
@@ -23,7 +27,9 @@ const router = createRouter({
     { path: '/wallet', name: 'wallet', component: WalletView, meta: { requiresAuth: true } },
     { path: '/game', name: 'game', component: GameView, meta: { requiresAuth: true } },
     { path: '/history', name: 'history', component: HistoryView, meta: { requiresAuth: true } },
-    { path: '/leaderboard', name: 'leaderboard', component: LeaderboardView, meta: { requiresAuth: true } }
+    { path: '/leaderboard', name: 'leaderboard', component: LeaderboardView, meta: { requiresAuth: true } },
+    { path: '/ops', name: 'operations', component: OperationsView, meta: { requiresAuth: true, requiresAdmin: true } }
+
 
 
   ]
@@ -34,6 +40,13 @@ router.beforeEach((to) => {
   if (to.meta.requiresAuth && !authStore.isAuthenticated) {
     return { name: 'login' }
   }
+  if (to.meta.requiresAdmin) {
+    const playerStore = usePlayerStore()
+    if (!playerStore.profile?.isAdmin) {
+      return { name: 'home' }
+    }
+  }
 })
+
 
 export default router

@@ -33,6 +33,7 @@ export interface PlayerProfile {
   email: string
   creditBalance: number
   memberSinceUtc: string
+  isAdmin: boolean
 }
 
 export interface UpdateProfilePayload {
@@ -97,3 +98,15 @@ export interface LeaderboardData {
   bestMultipliers: BestMultiplierEntry[]
   mostActive: MostActiveEntry[]
 }
+
+export interface OperationsMetrics {
+  onlinePlayers: number
+  currentRoundStatus: string
+  currentRoundNumber: number | null
+  currentMultiplier: number | null
+  roundsLastHour: number
+  totalWageredLastHour: number
+  activeBetsThisRound: number
+}
+
+
