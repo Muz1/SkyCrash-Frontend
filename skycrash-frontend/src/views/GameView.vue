@@ -4,10 +4,25 @@ import { useGameStore } from '@/stores/gameStore'
 import { usePlayerStore } from '@/stores/playerStore'
 import * as gameService from '@/services/gameService'
 
+
 const gameStore = useGameStore()
 const playerStore = usePlayerStore()
 const betAmountInput = ref(100)
 const isPlacingBet = ref(false)
+const isCashingOut = ref(false)
+const potentialPayout = computed(() =>
+  gameStore.myBetAmount ? (gameStore.myBetAmount * gameStore.currentMultiplier).toFixed(2) : '0.00'
+)
+
+async function handleCashOut() {
+  isCashingOut.value = true
+  try {
+    await gameService.cashOut()
+  } finally {
+    isCashingOut.value = false
+  }
+}
+
 
 const displayMultiplier = computed(() => `${gameStore.currentMultiplier.toFixed(2)}x`)
 
@@ -72,9 +87,30 @@ async function handlePlaceBet() {
             {{ point.toFixed(2) }}x
           </span-->
             <div class="bg-slate-900 rounded-xl p-4 space-y-3 text-left">
-                <div v-if="gameStore.myBetStatus === 'Placed'" class="text-emerald-400 text-sm">
-                    Bet placed: {{ gameStore.myBetAmount }} credits
-                </div>
+                <div v-if="gameStore.myBetStatus === 'Placed' && gameStore.phase === 'Running'" class="space-y-2">
+  <div class="text-emerald-400 text-sm">
+    Bet: {{ gameStore.myBetAmount }} credits — potential payout: {{ potentialPayout }}
+  </div>
+  <button
+    @click="handleCashOut"
+    :disabled="isCashingOut"
+    class="w-full rounded-md bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 py-2 font-medium transition"
+  >
+    {{ isCashingOut ? 'Cashing out…' : `Cash Out (${potentialPayout})` }}
+  </button>
+</div>
+
+<div v-else-if="gameStore.myBetStatus === 'Placed'" class="text-emerald-400 text-sm">
+  Bet placed: {{ gameStore.myBetAmount }} credits — waiting for round to start
+</div>
+
+<div v-if="gameStore.cashOutStatus === 'CashedOut' && gameStore.cashOutResult" class="text-emerald-400 text-sm">
+  Cashed out at {{ gameStore.cashOutResult.cashOutMultiplier.toFixed(2) }}x for {{ gameStore.cashOutResult.payout }} credits!
+</div>
+<div v-if="gameStore.cashOutStatus === 'Rejected'" class="text-sm text-red-400">
+  {{ gameStore.cashOutRejectionReason }}
+</div>
+
 
                 <div v-else class="space-y-2">
                     <div class="flex gap-2">

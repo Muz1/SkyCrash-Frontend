@@ -47,6 +47,22 @@ type BetPlacedByPlayerPayload = {
   amount: number
 }
 
+type CashOutConfirmedPayload = {
+  cashOutMultiplier: number
+  payout: number
+}
+
+type CashOutRejectedPayload = {
+  message : string
+}
+
+type PlayerCashedOutPayload = {
+  playerId: string
+  username: string
+  cashOutMultiplier: number
+  payout: number
+}
+
 export function useSignalRConnection() {
   const authStore = useAuthStore()
   const lobbyStore = useLobbyStore()
@@ -97,7 +113,25 @@ export function useSignalRConnection() {
     connection.on('BetPlacedByPlayer', (payload: BetPlacedByPlayerPayload) => {
       gameStore.onBetPlacedByPlayer(payload)
     })
+    connection.on('CashOutConfirmed', (payload: CashOutConfirmedPayload) => {
+  gameStore.onCashOutConfirmed(payload)
+  usePlayerStore().fetchProfile()
+})
+connection.on('CashOutRejected', (payload: CashOutRejectedPayload) => {
+  gameStore.onCashOutRejected(payload)
+})
+connection.on('PlayerCashedOut', (payload: PlayerCashedOutPayload) => {
+  // Reuse the same "bets this round" list for cash-out atmosphere too —
+  // shown as a distinct entry so it reads clearly in the UI (handled in GameView.vue).
+  gameStore.roundBets.push({
+    playerId: payload.playerId,
+    username: `${payload.username} (cashed out ${payload.cashOutMultiplier.toFixed(2)}x)`,
+    amount: payload.payout
+  })
+})
+
   }
+
 
   onMounted(() => {
     if (authStore.isAuthenticated) {

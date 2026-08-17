@@ -16,6 +16,9 @@ export const useGameStore = defineStore('game', () => {
   const myBetStatus = ref<'None' | 'Placed' | 'Rejected'>('None')
   const betRejectionReason = ref<string | null>(null)
   const roundBets = ref<{ playerId: string; username: string; amount: number }[]>([])
+  const cashOutStatus = ref<'None' | 'CashedOut' | 'Rejected'>('None')
+  const cashOutResult = ref<{ cashOutMultiplier: number; payout: number } | null>(null)
+  const cashOutRejectionReason = ref<string | null>(null)
 
   function applySnapshot(snapshot: {
     roundId: string
@@ -50,6 +53,9 @@ export const useGameStore = defineStore('game', () => {
     myBetStatus.value = 'None'
     betRejectionReason.value = null
     roundBets.value = []
+    cashOutStatus.value = 'None'
+    cashOutResult.value = null
+    cashOutRejectionReason.value = null
   }
 
   function onRoundStarted() {
@@ -84,6 +90,17 @@ export const useGameStore = defineStore('game', () => {
     roundBets.value = [...roundBets.value, payload]
   }
 
+  function onCashOutConfirmed(payload: { cashOutMultiplier: number; payout: number }) {
+    cashOutStatus.value = 'CashedOut'
+    cashOutResult.value = { cashOutMultiplier: payload.cashOutMultiplier, payout: payload.payout }
+    myBetStatus.value = 'None' // the bet is resolved now — no longer an active "placed" bet
+  }
+
+  function onCashOutRejected(payload: { message: string }) {
+    cashOutStatus.value = 'Rejected'
+    cashOutRejectionReason.value = payload.message
+  }
+
   return {
     roundId,
     roundNumber,
@@ -97,6 +114,11 @@ export const useGameStore = defineStore('game', () => {
     myBetStatus,
     betRejectionReason,
     roundBets,
+    cashOutStatus,
+    cashOutResult,
+    cashOutRejectionReason,
+    onCashOutConfirmed,
+    onCashOutRejected,
     applySnapshot,
     onRoundWaiting,
     onRoundStarted,
@@ -104,6 +126,6 @@ export const useGameStore = defineStore('game', () => {
     onRoundCrashed,
     onBetConfirmed,
     onBetRejected,
-    onBetPlacedByPlayer,
+    onBetPlacedByPlayer
   }
 })
