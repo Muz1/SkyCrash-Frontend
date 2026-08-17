@@ -56,3 +56,20 @@ export interface CreditTransactionRecord {
   description: string | null
   createdAtUtc: string
 }
+
+export interface RoundHistoryEntry {
+  roundId: string
+  roundNumber: number
+  crashMultiplier: number
+  crashedAtUtc: string
+}
+
+export interface BetHistoryEntry {
+  betId: string
+  roundNumber: number
+  amount: number
+  status: string
+  cashOutMultiplier: number | null
+  payout: number | null
+  placedAtUtc: string
+}

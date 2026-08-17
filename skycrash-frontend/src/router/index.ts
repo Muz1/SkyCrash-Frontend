@@ -7,6 +7,8 @@ import ProfileView from '../views/ProfileView.vue'
 import LobbyView from '../views/LobbyView.vue'
 import WalletView from '../views/WalletView.vue'
 import GameView from '../views/GameView.vue'
+import HistoryView from '../views/HistoryView.vue'
+
 
 
 const router = createRouter({
@@ -18,7 +20,8 @@ const router = createRouter({
     { path: '/profile', name: 'profile', component: ProfileView, meta: { requiresAuth: true } },
     { path: '/lobby', name: 'lobby', component: LobbyView, meta: { requiresAuth: true } },
     { path: '/wallet', name: 'wallet', component: WalletView, meta: { requiresAuth: true } },
-    { path: '/game', name: 'game', component: GameView, meta: { requiresAuth: true } }
+    { path: '/game', name: 'game', component: GameView, meta: { requiresAuth: true } },
+    { path: '/history', name: 'history', component: HistoryView, meta: { requiresAuth: true } }
 
   ]
 })
