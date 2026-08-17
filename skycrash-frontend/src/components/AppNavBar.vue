@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/AuthStore'
 import { usePlayerStore } from '../stores/playerStore'
 
+
 const authStore = useAuthStore()
 const playerStore = usePlayerStore()
 const router = useRouter()
@@ -37,6 +38,7 @@ function handleLogout() {
       </RouterLink>
       <RouterLink to="/history" class="text-slate-300 hover:text-slate-100">History</RouterLink>
       <RouterLink to="/lobby" class="text-slate-300 hover:text-slate-100">Lobby</RouterLink>
+      <RouterLink to="/leaderboard" class="text-slate-300 hover:text-slate-100">Leaderboard</RouterLink>
       <RouterLink to="/game" class="text-slate-300 hover:text-slate-100">Play</RouterLink>
       <button @click="handleLogout" class="text-slate-400 hover:text-red-400 transition">
         Log out

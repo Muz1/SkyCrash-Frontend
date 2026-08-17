@@ -8,6 +8,7 @@ import LobbyView from '../views/LobbyView.vue'
 import WalletView from '../views/WalletView.vue'
 import GameView from '../views/GameView.vue'
 import HistoryView from '../views/HistoryView.vue'
+import LeaderboardView from '../views/LeaderboardView.vue'
 
 
 
@@ -21,7 +22,9 @@ const router = createRouter({
     { path: '/lobby', name: 'lobby', component: LobbyView, meta: { requiresAuth: true } },
     { path: '/wallet', name: 'wallet', component: WalletView, meta: { requiresAuth: true } },
     { path: '/game', name: 'game', component: GameView, meta: { requiresAuth: true } },
-    { path: '/history', name: 'history', component: HistoryView, meta: { requiresAuth: true } }
+    { path: '/history', name: 'history', component: HistoryView, meta: { requiresAuth: true } },
+    { path: '/leaderboard', name: 'leaderboard', component: LeaderboardView, meta: { requiresAuth: true } }
+
 
   ]
 })

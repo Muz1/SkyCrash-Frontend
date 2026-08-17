@@ -73,3 +73,27 @@ export interface BetHistoryEntry {
   payout: number | null
   placedAtUtc: string
 }
+
+export interface BiggestWinEntry {
+  username: string
+  payout: number
+  cashOutMultiplier: number
+  roundNumber: number
+}
+
+export interface BestMultiplierEntry {
+  username: string
+  cashOutMultiplier: number
+  roundNumber: number
+}
+
+export interface MostActiveEntry {
+  username: string
+  betsPlaced: number
+}
+
+export interface LeaderboardData {
+  biggestWins: BiggestWinEntry[]
+  bestMultipliers: BestMultiplierEntry[]
+  mostActive: MostActiveEntry[]
+}
