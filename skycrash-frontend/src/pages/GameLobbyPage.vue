@@ -62,7 +62,7 @@
             </div>
             <div>
               <div class="text-[10px] text-amber-400 font-bold uppercase tracking-tighter">BIG WIN!</div>
-              <div class="text-[12px] text-white">x***7 just won $12,400!</div>
+              <div class="text-[12px] text-white">x***7 just won R12,400!</div>
             </div>
           </div>
 
@@ -88,7 +88,7 @@
 
         <div class="p-4 border-t border-white/5 bg-black/20">
           <div class="flex items-center justify-between text-[10px] text-on-surface-variant uppercase tracking-tighter">
-            <span>Total Bets: $1,450.00</span>
+            <span>Total Bets: R1,450.00</span>
             <span class="text-secondary">Active: 4</span>
           </div>
         </div>
@@ -151,7 +151,7 @@
               <div class="flex justify-between items-center mb-4">
                 <div class="flex items-center gap-2">
                   <span class="font-label-caps text-label-caps text-on-surface-variant tracking-tighter">BET AMOUNT</span>
-                  <span class="text-[10px] text-white/40 font-technical-mono">USD</span>
+                  <span class="text-[10px] text-white/40 font-technical-mono">ZAR</span>
                 </div>
                 <div class="flex gap-1">
                   <button class="bg-surface-container-highest px-3 py-1 rounded text-[10px] font-black font-technical-mono border border-white/5 hover:bg-white/10 transition-colors uppercase">Manual</button>
@@ -166,7 +166,7 @@
                 <div class="flex items-center gap-2">
                   <span class="font-label-caps text-label-caps text-secondary font-black tracking-tighter">LIVE BET ACTIVE</span>
                 </div>
-                <span class="font-technical-mono text-[12px] text-secondary font-bold glow-text-secondary">PROFIT: +$15.00</span>
+                <span class="font-technical-mono text-[12px] text-secondary font-bold glow-text-secondary">PROFIT: +R15.00</span>
               </div>
             </div>
           </div>
@@ -179,7 +179,7 @@
 <script setup>
 import { ref } from 'vue'
 
-const balance = ref('$1,254.80')
+const balance = ref('R1,254.80')
 const currentMultiplier = ref('2.50')
 const leaderboardTabs = ['Live Bets', 'My Bets', 'Top']
 const activeTab = ref('Live Bets')
