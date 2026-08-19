@@ -18,7 +18,7 @@ function statusColor(status: string) {
 </script>
 
 <template>
-  <div class="min-h-screen bg-slate-950 text-slate-100 px-4 py-10 flex justify-center">
+  <div class="min-h-screen bg-slate-950 text-slate-100 px-4 py-6 sm:py-10 flex justify-center">
     <div class="w-full max-w-lg space-y-4">
       <h1 class="text-2xl font-bold">History</h1>
 

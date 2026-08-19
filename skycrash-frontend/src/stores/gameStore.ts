@@ -20,6 +20,26 @@ export const useGameStore = defineStore('game', () => {
   const cashOutResult = ref<{ cashOutMultiplier: number; payout: number } | null>(null)
   const cashOutRejectionReason = ref<string | null>(null)
 
+  let countdownTimer: ReturnType<typeof setInterval> | null = null
+
+  function stopCountdownTimer() {
+    if (countdownTimer !== null) {
+      clearInterval(countdownTimer)
+      countdownTimer = null
+    }
+  }
+
+  function startCountdownTimer() {
+    stopCountdownTimer()
+    countdownTimer = setInterval(() => {
+      if (countdownSeconds.value === null || countdownSeconds.value <= 0) {
+        stopCountdownTimer()
+        return
+      }
+      countdownSeconds.value -= 1
+    }, 1000)
+  }
+
   function applySnapshot(snapshot: {
     roundId: string
     roundNumber: number
@@ -35,6 +55,12 @@ export const useGameStore = defineStore('game', () => {
     serverSeedHash.value = snapshot.serverSeedHash
     currentMultiplier.value = snapshot.currentMultiplier
     countdownSeconds.value = snapshot.countdownSeconds
+
+    if (snapshot.status === 'Waiting' && snapshot.countdownSeconds !== null) {
+      startCountdownTimer()
+    } else {
+      stopCountdownTimer()
+    }
   }
 
   function onRoundWaiting(payload: {
@@ -56,12 +82,14 @@ export const useGameStore = defineStore('game', () => {
     cashOutStatus.value = 'None'
     cashOutResult.value = null
     cashOutRejectionReason.value = null
+    startCountdownTimer()
   }
 
   function onRoundStarted() {
     phase.value = 'Running'
     countdownSeconds.value = null
     currentMultiplier.value = 1.0
+    stopCountdownTimer()
   }
 
   function onMultiplierTick(payload: { multiplier: number }) {

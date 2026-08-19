@@ -54,11 +54,11 @@ async function handlePlaceBet() {
 </script>
 
 <template>
-    <div class="min-h-screen bg-slate-950 text-slate-100 px-4 py-10 flex flex-col items-center">
+    <div class="min-h-screen bg-slate-950 text-slate-100 px-4 py-6 sm:py-10 flex flex-col items-center">
         <div class="w-full max-w-lg space-y-6 text-center">
             <p class="text-slate-400 text-sm">Round #{{ gameStore.roundNumber ?? '—' }}</p>
 
-            <div class="rounded-2xl py-16 text-6xl font-bold transition-colors" :class="{
+            <div class="rounded-2xl py-10 sm:py-16 text-4xl sm:text-6xl font-bold transition-colors" :class="{
                 'bg-slate-900 text-slate-100': gameStore.phase !== 'Crashed',
                 'bg-red-950 text-red-400': gameStore.phase === 'Crashed'
             }">
@@ -113,12 +113,12 @@ async function handlePlaceBet() {
 
 
                 <div v-else class="space-y-2">
-                    <div class="flex gap-2">
+                    <div class="flex flex-col sm:flex-row gap-2">
                         <input v-model.number="betAmountInput" type="number" min="1"
                             :max="playerStore.profile?.creditBalance ?? undefined"
-                            class="flex-1 rounded-md bg-slate-800 border border-slate-700 px-3 py-2 text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+                            class="flex-1 min-w-0 rounded-md bg-slate-800 border border-slate-700 px-3 py-2 text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500" />
                         <button @click="handlePlaceBet" :disabled="!canPlaceBet || isPlacingBet"
-                            class="rounded-md bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 px-4 py-2 font-medium transition">
+                            class="w-full sm:w-auto rounded-md bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 px-4 py-2 font-medium transition">
                             {{ isPlacingBet ? 'Placing…' : 'Place Bet' }}
                         </button>
                     </div>

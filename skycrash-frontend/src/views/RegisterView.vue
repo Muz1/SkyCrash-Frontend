@@ -12,6 +12,7 @@ const password = ref('')
 const errorMessage = ref('')
 const isSubmitting = ref(false)
 
+
 async function handleSubmit() {
   errorMessage.value = ''
   isSubmitting.value = true
@@ -31,6 +32,8 @@ async function handleSubmit() {
   } finally {
     isSubmitting.value = false
   }
+
+  
 }
 </script>
 

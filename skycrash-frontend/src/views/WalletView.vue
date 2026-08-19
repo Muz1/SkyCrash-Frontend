@@ -24,7 +24,7 @@ async function handleTopUp() {
 </script>
 
 <template>
-  <div class="min-h-screen bg-slate-950 text-slate-100 px-4 py-10 flex justify-center">
+  <div class="min-h-screen bg-slate-950 text-slate-100 px-4 py-6 sm:py-10 flex justify-center">
     <div class="w-full max-w-md space-y-6">
       <div class="flex items-center justify-between">
         <h1 class="text-2xl font-bold">Wallet</h1>
