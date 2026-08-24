@@ -1,0 +1,23 @@
+@import "tailwindcss";
+
+@theme {
+  --breakpoint-xs: 30rem;
+
+  --color-aviator-950: #150406;
+  --color-aviator-900: #220709;
+  --color-aviator-850: #2b090c;
+  --color-aviator-800: #360b0e;
+  --color-aviator-700: #4a0f12;
+  --color-aviator-600: #6e1417;
+  --color-aviator-500: #9c1c1f;
+  --color-aviator-400: #c9282b;
+
+  --color-gold-300: #f6d888;
+  --color-gold-400: #f0c14b;
+  --color-gold-500: #d9a52c;
+  --color-gold-600: #b3841f;
+}
+
+body {
+  background-color: var(--color-aviator-950);
+}
