@@ -53,6 +53,10 @@ function handleLogout() {
         >
           Operations
         </RouterLink>
+        <RouterLink v-if="playerStore.profile?.isAdmin" to="/rtp" class="text-amber-400 hover:text-amber-300">
+  RTP
+</RouterLink>
+
         <RouterLink to="/profile" class="text-rose-200/80 hover:text-gold-300 transition">
           {{ playerStore.profile?.username ?? authStore.username }}
         </RouterLink>

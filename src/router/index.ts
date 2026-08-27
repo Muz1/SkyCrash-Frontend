@@ -11,6 +11,7 @@ import HistoryView from '../views/HistoryView.vue'
 import LeaderboardView from '../views/LeaderboardView.vue'
 import OperationsView from '../views/OperationsView.vue'
 import { usePlayerStore } from '../stores/playerStore'
+import RtpView from '../views/RtpView.vue'
 
 
 
@@ -28,7 +29,8 @@ const router = createRouter({
     { path: '/game', name: 'game', component: GameView, meta: { requiresAuth: true } },
     { path: '/history', name: 'history', component: HistoryView, meta: { requiresAuth: true } },
     { path: '/leaderboard', name: 'leaderboard', component: LeaderboardView, meta: { requiresAuth: true } },
-    { path: '/ops', name: 'operations', component: OperationsView, meta: { requiresAuth: true, requiresAdmin: true } }
+    { path: '/ops', name: 'operations', component: OperationsView, meta: { requiresAuth: true, requiresAdmin: true } },
+{ path: '/rtp', name: 'rtp', component: RtpView, meta: { requiresAuth: true, requiresAdmin: true } }
 
 
 

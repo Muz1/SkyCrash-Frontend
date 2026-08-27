@@ -109,4 +109,18 @@ export interface OperationsMetrics {
   activeBetsThisRound: number
 }
 
+export interface RtpWindowStats {
+  totalWagered: number
+  totalPaidOut: number
+  actualRtpPercentage: number
+  betsResolved: number
+}
+
+export interface RtpSummary {
+  allTime: RtpWindowStats
+  last24Hours: RtpWindowStats
+  theoreticalRtpPercentage: number
+  houseEdgePercentage: number
+}
+
 
