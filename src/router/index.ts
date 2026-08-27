@@ -12,10 +12,7 @@ import LeaderboardView from '../views/LeaderboardView.vue'
 import OperationsView from '../views/OperationsView.vue'
 import { usePlayerStore } from '../stores/playerStore'
 import RtpView from '../views/RtpView.vue'
-
-
-
-
+import VolatilityView from '../views/VolatilityView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -28,13 +25,31 @@ const router = createRouter({
     { path: '/wallet', name: 'wallet', component: WalletView, meta: { requiresAuth: true } },
     { path: '/game', name: 'game', component: GameView, meta: { requiresAuth: true } },
     { path: '/history', name: 'history', component: HistoryView, meta: { requiresAuth: true } },
-    { path: '/leaderboard', name: 'leaderboard', component: LeaderboardView, meta: { requiresAuth: true } },
-    { path: '/ops', name: 'operations', component: OperationsView, meta: { requiresAuth: true, requiresAdmin: true } },
-{ path: '/rtp', name: 'rtp', component: RtpView, meta: { requiresAuth: true, requiresAdmin: true } }
-
-
-
-  ]
+    {
+      path: '/volatility',
+      name: 'volatility',
+      component: VolatilityView,
+      meta: { requiresAuth: true, requiresAdmin: true },
+    },
+    {
+      path: '/leaderboard',
+      name: 'leaderboard',
+      component: LeaderboardView,
+      meta: { requiresAuth: true },
+    },
+    {
+      path: '/ops',
+      name: 'operations',
+      component: OperationsView,
+      meta: { requiresAuth: true, requiresAdmin: true },
+    },
+    {
+      path: '/rtp',
+      name: 'rtp',
+      component: RtpView,
+      meta: { requiresAuth: true, requiresAdmin: true },
+    },
+  ],
 })
 
 router.beforeEach((to) => {
@@ -49,6 +64,5 @@ router.beforeEach((to) => {
     }
   }
 })
-
 
 export default router

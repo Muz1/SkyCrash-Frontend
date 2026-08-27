@@ -123,4 +123,21 @@ export interface RtpSummary {
   houseEdgePercentage: number
 }
 
+export interface HistogramBucket {
+  label: string
+  count: number
+  percentage: number
+}
+
+export interface VolatilitySummary {
+  sampleSize: number
+  meanCrashPoint: number
+  medianCrashPoint: number
+  standardDeviation: number
+  p10: number
+  p25: number
+  p75: number
+  p90: number
+  histogram: HistogramBucket[]
+}
 
