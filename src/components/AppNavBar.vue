@@ -57,6 +57,10 @@ function handleLogout() {
         <RouterLink v-if="playerStore.profile?.isAdmin" to="/volatility" class="text-amber-400 hover:text-amber-300">
           Volatility
         </RouterLink>
+        <RouterLink v-if="playerStore.profile?.isAdmin" to="/admin" class="text-amber-400 hover:text-amber-300">
+          Admin
+        </RouterLink>
+
 
         <RouterLink to="/profile" class="text-rose-200/80 hover:text-gold-300 transition">
           {{ playerStore.profile?.username ?? authStore.username }}

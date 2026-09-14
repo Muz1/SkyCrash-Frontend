@@ -141,3 +141,13 @@ export interface VolatilitySummary {
   histogram: HistogramBucket[]
 }
 
+export interface AdminPlayerSummary {
+  playerId: string
+  username: string
+  email: string
+  creditBalance: number
+  isAdmin: boolean
+  memberSinceUtc: string
+  lastSeenUtc: string
+}
+
