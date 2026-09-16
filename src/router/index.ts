@@ -15,7 +15,6 @@ import RtpView from '../views/RtpView.vue'
 import VolatilityView from '../views/VolatilityView.vue'
 import AdminView from '../views/AdminView.vue'
 
-
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -51,8 +50,12 @@ const router = createRouter({
       component: RtpView,
       meta: { requiresAuth: true, requiresAdmin: true },
     },
-    { path: '/admin', name: 'admin', component: AdminView, meta: { requiresAuth: true, requiresAdmin: true } }
-,
+    {
+      path: '/admin',
+      name: 'admin',
+      component: AdminView,
+      meta: { requiresAuth: true, requiresAdmin: true },
+    },
   ],
 })
 

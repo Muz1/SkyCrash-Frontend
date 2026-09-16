@@ -7,13 +7,24 @@ export const usePlayerStore = defineStore('player', () => {
   const profile = ref<PlayerProfile | null>(null)
   const isLoading = ref(false)
 
+  let inFlightRequest: Promise<void> | null = null
+
   async function fetchProfile() {
-    isLoading.value = true
-    try {
-      profile.value = await playerService.getMyProfile()
-    } finally {
-      isLoading.value = false
+    if (inFlightRequest) {
+      return inFlightRequest
     }
+
+    isLoading.value = true
+    inFlightRequest = (async () => {
+      try {
+        profile.value = await playerService.getMyProfile()
+      } finally {
+        isLoading.value = false
+        inFlightRequest = null
+      }
+    })()
+
+    return inFlightRequest
   }
 
   async function updateProfile(payload: UpdateProfilePayload) {
