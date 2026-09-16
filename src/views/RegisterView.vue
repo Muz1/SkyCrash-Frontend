@@ -2,6 +2,11 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/AuthStore'
+import ArcadeButton from '@/components/sky/ArcadeButton.vue'
+import ArcadeField from '@/components/sky/ArcadeField.vue'
+import CRTOverlay from '@/components/sky/CRTOverlay.vue'
+import SkyEnvironment from '@/components/sky/SkyEnvironment.vue'
+import Wordmark from '@/components/sky/Wordmark.vue'
 
 const authStore = useAuthStore()
 const router = useRouter()
@@ -9,12 +14,19 @@ const router = useRouter()
 const username = ref('')
 const email = ref('')
 const password = ref('')
+const confirmPassword = ref('')
+const agreedToTerms = ref(false)
 const errorMessage = ref('')
 const isSubmitting = ref(false)
 
-
 async function handleSubmit() {
   errorMessage.value = ''
+
+  if (password.value !== confirmPassword.value) {
+    errorMessage.value = 'Passwords do not match.'
+    return
+  }
+
   isSubmitting.value = true
   try {
     await authStore.register({ username: username.value, email: email.value, password: password.value })
@@ -32,41 +44,50 @@ async function handleSubmit() {
   } finally {
     isSubmitting.value = false
   }
-
-  
 }
 </script>
 
 <template>
-  <div class="min-h-screen bg-slate-950 text-slate-100 flex flex-col items-center justify-center px-4">
-    <form @submit.prevent="handleSubmit" class="w-full max-w-sm bg-slate-900 rounded-xl p-6 space-y-4">
-      <h1 class="text-2xl font-bold">Create your SkyCrash account</h1>
+  <div class="relative grid min-h-screen place-items-center overflow-hidden bg-void px-4 py-12">
+    <SkyEnvironment skin="cloud-city" :dim="0.55" />
+    <CRTOverlay />
 
-      <div>
-        <label class="block text-sm text-slate-400 mb-1">Username</label>
-        <input v-model="username" type="text" required class="w-full rounded-md bg-slate-800 border border-slate-700 px-3 py-2 text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+    <div class="relative z-10 w-full max-w-md">
+      <div class="mb-8 text-center">
+        <Wordmark compact />
       </div>
 
-      <div>
-        <label class="block text-sm text-slate-400 mb-1">Email</label>
-        <input v-model="email" type="email" required class="w-full rounded-md bg-slate-800 border border-slate-700 px-3 py-2 text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500" />
-      </div>
+      <form class="neon-panel clip-hud crt-scan p-6 sm:p-8" @submit.prevent="handleSubmit">
+        <h1 class="text-center font-display text-xl font-black uppercase tracking-[0.18em] text-lime text-glow-lime">
+          Join The Flight
+        </h1>
+        <p class="mt-1 text-center text-xs uppercase tracking-[0.25em] text-muted-foreground">Register your call sign</p>
 
-      <div>
-        <label class="block text-sm text-slate-400 mb-1">Password</label>
-        <input v-model="password" type="password" required class="w-full rounded-md bg-slate-800 border border-slate-700 px-3 py-2 text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500" />
-      </div>
+        <div class="mt-7 space-y-4">
+          <ArcadeField v-model="username" label="Username" placeholder="pilot_name" required />
+          <ArcadeField v-model="email" label="Email" type="email" placeholder="pilot@skycrash.io" required />
+          <ArcadeField v-model="password" label="Password" type="password" placeholder="••••••••" required />
+          <ArcadeField v-model="confirmPassword" label="Confirm Password" type="password" placeholder="••••••••" required />
+        </div>
 
-      <p v-if="errorMessage" class="text-sm text-red-400">{{ errorMessage }}</p>
+        <label class="mt-5 flex items-center gap-2 text-xs text-muted-foreground">
+          <input v-model="agreedToTerms" type="checkbox" required class="accent-[var(--neon-lime)]" />I agree to the flight
+          terms
+        </label>
 
-      <button type="submit" :disabled="isSubmitting" class="w-full rounded-md bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 py-2 font-medium transition">
-        {{ isSubmitting ? 'Creating account…' : 'Register' }}
-      </button>
+        <p v-if="errorMessage" role="alert" class="mt-4 font-arcade text-[8px] uppercase leading-relaxed text-danger">
+          {{ errorMessage }}
+        </p>
 
-      <p class="text-sm text-slate-400 text-center">
-        Already have an account?
-        <RouterLink to="/login" class="text-indigo-400 hover:underline">Log in</RouterLink>
-      </p>
-    </form>
+        <ArcadeButton type="submit" size="lg" variant="cash" class="mt-6 w-full" :disabled="isSubmitting">
+          {{ isSubmitting ? 'Establishing Flight Path…' : 'Create Account' }}
+        </ArcadeButton>
+
+        <p class="mt-5 text-center text-xs uppercase tracking-[0.2em] text-muted-foreground">
+          Already a pilot?
+          <RouterLink to="/login" class="text-electric hover:text-glow-blue">Login</RouterLink>
+        </p>
+      </form>
+    </div>
   </div>
 </template>

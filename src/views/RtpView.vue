@@ -1,6 +1,10 @@
 <script setup lang="ts">
 import { onMounted } from 'vue'
 import { useRtpStore } from '@/stores/rtpStore'
+import Shell from '@/components/sky/Shell.vue'
+import NeonPanel from '@/components/sky/NeonPanel.vue'
+import ScoreDisplay from '@/components/sky/ScoreDisplay.vue'
+import AdminTabs from '@/components/sky/AdminTabs.vue'
 
 const rtpStore = useRtpStore()
 
@@ -10,35 +14,37 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-background text-text-primary px-4 py-10 flex justify-center">
-    <div class="w-full max-w-2xl space-y-6">
-      <h1 class="text-2xl font-bold">RTP Dashboard</h1>
+  <Shell skin="midnight" :dim="0.65">
+    <div class="mx-auto w-full max-w-2xl">
+      <h1 class="font-display text-2xl font-black uppercase tracking-[0.2em] text-ember text-glow-ember sm:text-3xl">
+        RTP Dashboard
+      </h1>
+      <div class="mt-4"><AdminTabs /></div>
 
-      <div v-if="rtpStore.summary" class="space-y-6">
-        <div class="bg-surface rounded-xl p-4">
-          <div class="text-xs text-text-muted">Theoretical RTP (house edge {{ rtpStore.summary.houseEdgePercentage }}%)</div>
-          <div class="text-3xl font-bold">{{ rtpStore.summary.theoreticalRtpPercentage }}%</div>
-        </div>
+      <div v-if="rtpStore.summary" class="mt-5 space-y-4">
+        <NeonPanel accent="ember" :title="`Theoretical RTP (house edge ${rtpStore.summary.houseEdgePercentage}%)`">
+          <ScoreDisplay tone="ember">{{ rtpStore.summary.theoreticalRtpPercentage }}%</ScoreDisplay>
+        </NeonPanel>
 
-        <div class="grid md:grid-cols-2 gap-4">
-          <div class="bg-surface rounded-xl p-4 space-y-2">
-            <h2 class="text-sm text-text-muted">All-Time</h2>
-            <div class="text-2xl font-bold">{{ rtpStore.summary.allTime.actualRtpPercentage }}%</div>
-            <div class="text-xs text-text-muted">
-              {{ rtpStore.summary.allTime.betsResolved }} bets · wagered {{ rtpStore.summary.allTime.totalWagered }} · paid out {{ rtpStore.summary.allTime.totalPaidOut }}
-            </div>
-          </div>
-          <div class="bg-surface rounded-xl p-4 space-y-2">
-            <h2 class="text-sm text-text-muted">Last 24 Hours</h2>
-            <div class="text-2xl font-bold">{{ rtpStore.summary.last24Hours.actualRtpPercentage }}%</div>
-            <div class="text-xs text-text-muted">
-              {{ rtpStore.summary.last24Hours.betsResolved }} bets · wagered {{ rtpStore.summary.last24Hours.totalWagered }} · paid out {{ rtpStore.summary.last24Hours.totalPaidOut }}
-            </div>
-          </div>
+        <div class="grid gap-4 sm:grid-cols-2">
+          <NeonPanel title="All-Time" accent="blue">
+            <ScoreDisplay tone="blue">{{ rtpStore.summary.allTime.actualRtpPercentage }}%</ScoreDisplay>
+            <p class="mt-3 text-center text-xs text-muted-foreground">
+              {{ rtpStore.summary.allTime.betsResolved }} bets · wagered {{ rtpStore.summary.allTime.totalWagered }} · paid out
+              {{ rtpStore.summary.allTime.totalPaidOut }}
+            </p>
+          </NeonPanel>
+          <NeonPanel title="Last 24 Hours" accent="lime">
+            <ScoreDisplay tone="lime">{{ rtpStore.summary.last24Hours.actualRtpPercentage }}%</ScoreDisplay>
+            <p class="mt-3 text-center text-xs text-muted-foreground">
+              {{ rtpStore.summary.last24Hours.betsResolved }} bets · wagered {{ rtpStore.summary.last24Hours.totalWagered }} · paid
+              out {{ rtpStore.summary.last24Hours.totalPaidOut }}
+            </p>
+          </NeonPanel>
         </div>
       </div>
 
-      <p v-else class="text-text-muted">Loading…</p>
+      <p v-else class="mt-6 text-muted-foreground">Loading…</p>
     </div>
-  </div>
+  </Shell>
 </template>

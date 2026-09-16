@@ -1,6 +1,10 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted } from 'vue'
 import { useOperationsStore } from '@/stores/operationsStore'
+import Shell from '@/components/sky/Shell.vue'
+import NeonPanel from '@/components/sky/NeonPanel.vue'
+import ScoreDisplay from '@/components/sky/ScoreDisplay.vue'
+import AdminTabs from '@/components/sky/AdminTabs.vue'
 
 const operationsStore = useOperationsStore()
 
@@ -14,38 +18,23 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-slate-950 text-slate-100 px-4 py-6 sm:py-10 flex justify-center">
-    <div class="w-full max-w-2xl space-y-4">
-      <h1 class="text-2xl font-bold">Operations</h1>
+  <Shell skin="midnight" :dim="0.65">
+    <div class="mx-auto w-full max-w-4xl">
+      <h1 class="font-display text-2xl font-black uppercase tracking-[0.2em] text-ember text-glow-ember sm:text-3xl">
+        Operations
+      </h1>
+      <div class="mt-4"><AdminTabs /></div>
 
-      <div v-if="operationsStore.metrics" class="grid grid-cols-1 xs:grid-cols-2 md:grid-cols-3 gap-4">
-        <div class="bg-slate-900 rounded-xl p-4">
-          <div class="text-xs text-slate-400">Online Players</div>
-          <div class="text-2xl font-bold">{{ operationsStore.metrics.onlinePlayers }}</div>
-        </div>
-        <div class="bg-slate-900 rounded-xl p-4">
-          <div class="text-xs text-slate-400">Round Status</div>
-          <div class="text-2xl font-bold">{{ operationsStore.metrics.currentRoundStatus }}</div>
-        </div>
-        <div class="bg-slate-900 rounded-xl p-4">
-          <div class="text-xs text-slate-400">Current Round</div>
-          <div class="text-2xl font-bold">#{{ operationsStore.metrics.currentRoundNumber ?? '—' }}</div>
-        </div>
-        <div class="bg-slate-900 rounded-xl p-4">
-          <div class="text-xs text-slate-400">Rounds (Last Hour)</div>
-          <div class="text-2xl font-bold">{{ operationsStore.metrics.roundsLastHour }}</div>
-        </div>
-        <div class="bg-slate-900 rounded-xl p-4">
-          <div class="text-xs text-slate-400">Wagered (Last Hour)</div>
-          <div class="text-2xl font-bold">{{ operationsStore.metrics.totalWageredLastHour }}</div>
-        </div>
-        <div class="bg-slate-900 rounded-xl p-4">
-          <div class="text-xs text-slate-400">Active Bets (Round)</div>
-          <div class="text-2xl font-bold">{{ operationsStore.metrics.activeBetsThisRound }}</div>
-        </div>
+      <div v-if="operationsStore.metrics" class="mt-5 grid grid-cols-2 gap-4 sm:grid-cols-3">
+        <NeonPanel accent="blue"><ScoreDisplay label="Online Players" tone="blue">{{ operationsStore.metrics.onlinePlayers }}</ScoreDisplay></NeonPanel>
+        <NeonPanel accent="magenta"><ScoreDisplay label="Round Status" tone="magenta">{{ operationsStore.metrics.currentRoundStatus }}</ScoreDisplay></NeonPanel>
+        <NeonPanel accent="ember"><ScoreDisplay label="Current Round" tone="ember">#{{ operationsStore.metrics.currentRoundNumber ?? '—' }}</ScoreDisplay></NeonPanel>
+        <NeonPanel accent="lime"><ScoreDisplay label="Rounds (Last Hour)" tone="lime">{{ operationsStore.metrics.roundsLastHour }}</ScoreDisplay></NeonPanel>
+        <NeonPanel accent="ember"><ScoreDisplay label="Wagered (Last Hour)" tone="ember">{{ operationsStore.metrics.totalWageredLastHour }}</ScoreDisplay></NeonPanel>
+        <NeonPanel accent="blue"><ScoreDisplay label="Active Bets (Round)" tone="blue">{{ operationsStore.metrics.activeBetsThisRound }}</ScoreDisplay></NeonPanel>
       </div>
 
-      <p v-else class="text-slate-400">Loading metrics…</p>
+      <p v-else class="mt-6 text-muted-foreground">Loading metrics…</p>
     </div>
-  </div>
+  </Shell>
 </template>

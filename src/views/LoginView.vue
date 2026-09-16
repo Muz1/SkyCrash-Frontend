@@ -2,6 +2,11 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/AuthStore'
+import ArcadeButton from '@/components/sky/ArcadeButton.vue'
+import ArcadeField from '@/components/sky/ArcadeField.vue'
+import CRTOverlay from '@/components/sky/CRTOverlay.vue'
+import SkyEnvironment from '@/components/sky/SkyEnvironment.vue'
+import Wordmark from '@/components/sky/Wordmark.vue'
 
 const authStore = useAuthStore()
 const router = useRouter()
@@ -31,44 +36,46 @@ async function handleSubmit() {
 </script>
 
 <template>
-  <div class="min-h-screen bg-slate-950 text-slate-100 flex flex-col items-center justify-center px-4">
-    <form @submit.prevent="handleSubmit" class="w-full max-w-sm bg-slate-900 rounded-xl p-6 space-y-4">
-      <h1 class="text-2xl font-bold">Log in to SkyCrash</h1>
+  <div class="relative grid min-h-screen place-items-center overflow-hidden bg-void px-4 py-12">
+    <SkyEnvironment skin="sunset-runway" :dim="0.55" />
+    <CRTOverlay />
 
-      <div>
-        <label class="block text-sm text-slate-400 mb-1">Username</label>
-        <input
-          v-model="username"
-          type="text"
-          required
-          class="w-full rounded-md bg-slate-800 border border-slate-700 px-3 py-2 text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-        />
+    <div class="relative z-10 w-full max-w-md">
+      <div class="mb-8 text-center">
+        <Wordmark compact />
       </div>
 
-      <div>
-        <label class="block text-sm text-slate-400 mb-1">Password</label>
-        <input
-          v-model="password"
-          type="password"
-          required
-          class="w-full rounded-md bg-slate-800 border border-slate-700 px-3 py-2 text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-        />
-      </div>
+      <form class="neon-panel clip-hud crt-scan p-6 sm:p-8" @submit.prevent="handleSubmit">
+        <h1 class="text-center font-display text-xl font-black uppercase tracking-[0.18em] text-magenta text-glow-magenta">
+          Welcome Back, Pilot
+        </h1>
+        <p class="mt-1 text-center text-xs uppercase tracking-[0.25em] text-muted-foreground">Cleared for boarding</p>
 
-      <p v-if="errorMessage" class="text-sm text-red-400">{{ errorMessage }}</p>
+        <div class="mt-7 space-y-4">
+          <ArcadeField v-model="username" label="Username" autocomplete="username" placeholder="pilot_name" required />
+          <ArcadeField
+            v-model="password"
+            label="Password"
+            type="password"
+            autocomplete="current-password"
+            placeholder="••••••••"
+            required
+          />
+        </div>
 
-      <button
-        type="submit"
-        :disabled="isSubmitting"
-        class="w-full rounded-md bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 py-2 font-medium transition"
-      >
-        {{ isSubmitting ? 'Logging in…' : 'Log in' }}
-      </button>
+        <p v-if="errorMessage" role="alert" class="mt-4 font-arcade text-[8px] uppercase leading-relaxed text-danger">
+          {{ errorMessage }}
+        </p>
 
-      <p class="text-sm text-slate-400 text-center">
-        No account?
-        <RouterLink to="/register" class="text-indigo-400 hover:underline">Register</RouterLink>
-      </p>
-    </form>
+        <ArcadeButton type="submit" size="lg" variant="primary" class="mt-7 w-full" :disabled="isSubmitting">
+          {{ isSubmitting ? 'Preparing Aircraft…' : 'Login' }}
+        </ArcadeButton>
+
+        <p class="mt-5 text-center text-xs uppercase tracking-[0.2em] text-muted-foreground">
+          New here?
+          <RouterLink to="/register" class="text-lime hover:text-glow-lime">Create account</RouterLink>
+        </p>
+      </form>
+    </div>
   </div>
 </template>

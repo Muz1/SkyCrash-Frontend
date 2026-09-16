@@ -14,6 +14,7 @@ import { usePlayerStore } from '../stores/playerStore'
 import RtpView from '../views/RtpView.vue'
 import VolatilityView from '../views/VolatilityView.vue'
 import AdminView from '../views/AdminView.vue'
+import HangarView from '../views/HangarView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -25,6 +26,7 @@ const router = createRouter({
     { path: '/lobby', name: 'lobby', component: LobbyView, meta: { requiresAuth: true } },
     { path: '/wallet', name: 'wallet', component: WalletView, meta: { requiresAuth: true } },
     { path: '/game', name: 'game', component: GameView, meta: { requiresAuth: true } },
+    { path: '/hangar', name: 'hangar', component: HangarView, meta: { requiresAuth: true } },
     { path: '/history', name: 'history', component: HistoryView, meta: { requiresAuth: true } },
     {
       path: '/volatility',
@@ -59,11 +61,27 @@ const router = createRouter({
   ],
 })
 
-router.beforeEach((to) => {
+router.beforeEach(async (to) => {
   const authStore = useAuthStore()
   if (to.meta.requiresAuth && !authStore.isAuthenticated) {
     return { name: 'login' }
   }
+
+  if (to.meta.requiresAuth && authStore.isAuthenticated) {
+    const playerStore = usePlayerStore()
+    // A fresh page load (deep link, reload) mounts a brand-new Pinia store,
+    // so the profile (and its isAdmin flag) needs loading before any guard
+    // below - or any HUD relying on it - can see it.
+    if (!playerStore.profile) {
+      try {
+        await playerStore.fetchProfile()
+      } catch {
+        // Stale/invalid token: let the axios 401 interceptor and the next
+        // authenticated request clear the session instead of blocking here.
+      }
+    }
+  }
+
   if (to.meta.requiresAdmin) {
     const playerStore = usePlayerStore()
     if (!playerStore.profile?.isAdmin) {

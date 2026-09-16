@@ -30,6 +30,6 @@ describe('App', () => {
     })
     await router.isReady()
 
-    expect(wrapper.text()).toContain('Log in to SkyCrash')
+    expect(wrapper.text()).toContain('Welcome Back, Pilot')
   })
 })

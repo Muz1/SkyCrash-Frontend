@@ -1,8 +1,14 @@
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue'
-import { usePlayerStore } from '../stores/playerStore'
+import { computed, onMounted, ref, watch } from 'vue'
+import { usePlayerStore } from '@/stores/playerStore'
+import { useHistoryStore } from '@/stores/historyStore'
+import Shell from '@/components/sky/Shell.vue'
+import NeonPanel from '@/components/sky/NeonPanel.vue'
+import ArcadeField from '@/components/sky/ArcadeField.vue'
+import ArcadeButton from '@/components/sky/ArcadeButton.vue'
 
 const playerStore = usePlayerStore()
+const historyStore = useHistoryStore()
 const email = ref('')
 const successMessage = ref('')
 const errorMessage = ref('')
@@ -15,10 +21,27 @@ onMounted(async () => {
   if (playerStore.profile) {
     email.value = playerStore.profile.email
   }
+  historyStore.fetchBets(1)
 })
 
-watch(() => playerStore.profile, (profile) => {
-  if (profile) email.value = profile.email
+watch(
+  () => playerStore.profile,
+  (profile) => {
+    if (profile) email.value = profile.email
+  },
+)
+
+const stats = computed(() => {
+  const bets = historyStore.bets
+  const cashedOut = bets.filter((b) => b.status === 'CashedOut')
+  const best = cashedOut.reduce((m, b) => Math.max(m, b.cashOutMultiplier ?? 0), 0)
+  const biggest = cashedOut.reduce((m, b) => Math.max(m, b.payout ?? 0), 0)
+  return [
+    { label: 'Total Flights', value: bets.length.toString() },
+    { label: 'Win Rate', value: `${Math.round((cashedOut.length / Math.max(bets.length, 1)) * 100)}%` },
+    { label: 'Highest Multiplier', value: `${best.toFixed(2)}x` },
+    { label: 'Biggest Cash-Out', value: biggest.toLocaleString() },
+  ]
 })
 
 async function handleSave() {
@@ -34,8 +57,7 @@ async function handleSave() {
     if (Array.isArray(data)) {
       errorMessage.value = data.join(' ')
     } else if (data && typeof data === 'object' && 'message' in data) {
-      const msg = String((data as Record<string, unknown>).message)
-      errorMessage.value = msg || 'Update failed.'
+      errorMessage.value = String((data as Record<string, unknown>).message) || 'Update failed.'
     } else {
       errorMessage.value = 'Update failed.'
     }
@@ -46,49 +68,51 @@ async function handleSave() {
 </script>
 
 <template>
-  <div class="min-h-screen bg-slate-950 text-slate-100 px-4 py-6 sm:py-10 flex justify-center">
-    <div class="w-full max-w-md space-y-6">
-      <h1 class="text-2xl font-bold">Your profile</h1>
+  <Shell skin="deep-space" :dim="0.5">
+    <div class="mx-auto w-full max-w-3xl">
+      <h1 class="text-center font-display text-2xl font-black uppercase tracking-[0.2em] text-magenta text-glow-magenta sm:text-3xl">
+        Pilot Profile
+      </h1>
 
-      <div v-if="playerStore.profile" class="bg-slate-900 rounded-xl p-6 space-y-4">
-        <div>
-          <span class="block text-sm text-slate-400">Username</span>
-          <span class="text-slate-100">{{ playerStore.profile.username }}</span>
-        </div>
+      <template v-if="playerStore.profile">
+        <NeonPanel class="mt-6" accent="magenta">
+          <div class="grid grid-cols-[auto_minmax(0,1fr)] items-center gap-4">
+            <div class="grid h-16 w-16 shrink-0 place-items-center border-2 border-electric bg-void/70 clip-hud font-arcade text-lg text-electric text-glow-blue">
+              {{ playerStore.profile.username.slice(0, 2).toUpperCase() }}
+            </div>
+            <div class="min-w-0">
+              <p class="truncate font-display text-xl font-black uppercase tracking-[0.18em] text-foreground">
+                {{ playerStore.profile.username }}
+              </p>
+              <p class="font-arcade text-[8px] uppercase tracking-[0.3em] text-ember">
+                Pilot since {{ new Date(playerStore.profile.memberSinceUtc).toLocaleDateString() }}
+              </p>
+            </div>
+          </div>
 
-        <div>
-          <span class="block text-sm text-slate-400">Member since</span>
-          <span class="text-slate-100">{{ new Date(playerStore.profile.memberSinceUtc).toLocaleDateString() }}</span>
-        </div>
+          <dl class="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
+            <div v-for="s in stats" :key="s.label" class="clip-hud border border-violet/40 bg-void/50 p-3">
+              <dt class="font-arcade text-[7px] uppercase tracking-[0.24em] text-muted-foreground">{{ s.label }}</dt>
+              <dd class="mt-1 font-arcade text-sm text-electric text-glow-blue">{{ s.value }}</dd>
+            </div>
+          </dl>
+        </NeonPanel>
 
-        <div>
-          <span class="block text-sm text-slate-400">Credit balance</span>
-          <span class="text-slate-100">{{ playerStore.profile.creditBalance }}</span>
-        </div>
+        <NeonPanel class="mt-5" title="Account" accent="blue">
+          <form class="space-y-4" @submit.prevent="handleSave">
+            <ArcadeField v-model="email" label="Email" type="email" required />
 
-        <form @submit.prevent="handleSave" class="space-y-3 pt-2 border-t border-slate-800">
-          <label class="block text-sm text-slate-400 mb-1">Email</label>
-          <input
-            v-model="email"
-            type="email"
-            required
-            class="w-full rounded-md bg-slate-800 border border-slate-700 px-3 py-2 text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-          />
+            <p v-if="successMessage" class="font-arcade text-[8px] uppercase tracking-[0.2em] text-lime">{{ successMessage }}</p>
+            <p v-if="errorMessage" class="font-arcade text-[8px] uppercase tracking-[0.2em] text-danger">{{ errorMessage }}</p>
 
-          <p v-if="successMessage" class="text-sm text-emerald-400">{{ successMessage }}</p>
-          <p v-if="errorMessage" class="text-sm text-red-400">{{ errorMessage }}</p>
+            <ArcadeButton type="submit" size="md" variant="blue" :disabled="isSaving">
+              {{ isSaving ? 'Saving…' : 'Save changes' }}
+            </ArcadeButton>
+          </form>
+        </NeonPanel>
+      </template>
 
-          <button
-            type="submit"
-            :disabled="isSaving"
-            class="rounded-md bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 px-4 py-2 font-medium transition"
-          >
-            {{ isSaving ? 'Saving…' : 'Save changes' }}
-          </button>
-        </form>
-      </div>
-
-      <p v-else class="text-slate-400">Loading profile…</p>
+      <p v-else class="mt-6 text-center text-muted-foreground">Loading profile…</p>
     </div>
-  </div>
+  </Shell>
 </template>

@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { onMounted } from 'vue'
 import { useLeaderboardStore } from '@/stores/leaderboardStore'
+import Shell from '@/components/sky/Shell.vue'
+import NeonPanel from '@/components/sky/NeonPanel.vue'
 
 const leaderboardStore = useLeaderboardStore()
 
@@ -10,66 +12,57 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-slate-950 text-slate-100 px-4 py-6 sm:py-10 flex justify-center">
-    <div class="w-full max-w-2xl space-y-8">
-      <h1 class="text-2xl font-bold">Leaderboard</h1>
+  <Shell skin="johannesburg" :dim="0.55">
+    <div class="mx-auto w-full max-w-4xl">
+      <h1 class="text-center font-display text-2xl font-black uppercase tracking-[0.2em] text-ember text-glow-ember sm:text-3xl">
+        Leaderboard
+      </h1>
 
-      <p v-if="leaderboardStore.isLoading && !leaderboardStore.data" class="text-slate-400">
-        Loading…
-      </p>
+      <p v-if="leaderboardStore.isLoading && !leaderboardStore.data" class="mt-6 text-center text-muted-foreground">Loading…</p>
 
-      <div v-if="leaderboardStore.data" class="grid gap-6 md:grid-cols-3">
-        <section class="bg-slate-900 rounded-xl p-4">
-          <h2 class="text-sm text-slate-400 mb-3">Biggest Wins</h2>
+      <div v-if="leaderboardStore.data" class="mt-6 grid gap-4 sm:grid-cols-3">
+        <NeonPanel title="Biggest Wins" accent="lime">
           <ol class="space-y-2 text-sm">
             <li
               v-for="(entry, i) in leaderboardStore.data.biggestWins"
               :key="i"
-              class="flex justify-between"
+              class="flex items-center justify-between gap-2"
             >
-              <span>{{ i + 1 }}. {{ entry.username }}</span>
-              <span class="text-emerald-400">{{ entry.payout }}</span>
+              <span class="truncate text-muted-foreground">{{ i + 1 }}. {{ entry.username }}</span>
+              <span class="font-arcade text-xs text-lime text-glow-lime">+{{ entry.payout.toLocaleString() }}</span>
             </li>
-            <li v-if="leaderboardStore.data.biggestWins.length === 0" class="text-slate-500">
-              No wins yet.
-            </li>
+            <li v-if="leaderboardStore.data.biggestWins.length === 0" class="text-muted-foreground">No wins yet.</li>
           </ol>
-        </section>
+        </NeonPanel>
 
-        <section class="bg-slate-900 rounded-xl p-4">
-          <h2 class="text-sm text-slate-400 mb-3">Best Multipliers</h2>
+        <NeonPanel title="Best Multipliers" accent="blue">
           <ol class="space-y-2 text-sm">
             <li
               v-for="(entry, i) in leaderboardStore.data.bestMultipliers"
               :key="i"
-              class="flex justify-between"
+              class="flex items-center justify-between gap-2"
             >
-              <span>{{ i + 1 }}. {{ entry.username }}</span>
-              <span class="text-emerald-400">{{ entry.cashOutMultiplier.toFixed(2) }}x</span>
+              <span class="truncate text-muted-foreground">{{ i + 1 }}. {{ entry.username }}</span>
+              <span class="font-arcade text-xs text-electric text-glow-blue">{{ entry.cashOutMultiplier.toFixed(2) }}x</span>
             </li>
-            <li v-if="leaderboardStore.data.bestMultipliers.length === 0" class="text-slate-500">
-              No cash-outs yet.
-            </li>
+            <li v-if="leaderboardStore.data.bestMultipliers.length === 0" class="text-muted-foreground">No cash-outs yet.</li>
           </ol>
-        </section>
+        </NeonPanel>
 
-        <section class="bg-slate-900 rounded-xl p-4">
-          <h2 class="text-sm text-slate-400 mb-3">Most Active</h2>
+        <NeonPanel title="Most Active" accent="magenta">
           <ol class="space-y-2 text-sm">
             <li
               v-for="(entry, i) in leaderboardStore.data.mostActive"
               :key="i"
-              class="flex justify-between"
+              class="flex items-center justify-between gap-2"
             >
-              <span>{{ i + 1 }}. {{ entry.username }}</span>
-              <span class="text-slate-300">{{ entry.betsPlaced }} bets</span>
+              <span class="truncate text-muted-foreground">{{ i + 1 }}. {{ entry.username }}</span>
+              <span class="font-arcade text-xs text-magenta text-glow-magenta">{{ entry.betsPlaced }} bets</span>
             </li>
-            <li v-if="leaderboardStore.data.mostActive.length === 0" class="text-slate-500">
-              No bets yet.
-            </li>
+            <li v-if="leaderboardStore.data.mostActive.length === 0" class="text-muted-foreground">No bets yet.</li>
           </ol>
-        </section>
+        </NeonPanel>
       </div>
     </div>
-  </div>
+  </Shell>
 </template>
