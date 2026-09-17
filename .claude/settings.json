@@ -1,0 +1,38 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx vue-tsc *)",
+      "Bash(echo \"EXIT:$?\")",
+      "Bash(echo \"TYPECHECK_EXIT:$?\")",
+      "Read(//c/Users/muzim/Downloads/SkyCrash-Frontend-Anjiii/SkyCrash-Frontend-Anji/src/routes/**)",
+      "Read(//c/Users/muzim/Downloads/skycrash-backend/skycrash-backend/src/SkyCrash.Api/Controllers/**)",
+      "Read(//c/Users/muzim/Downloads/skycrash-backend/skycrash-backend/**)",
+      "Bash(dotnet build *)",
+      "Bash(npx vitest *)",
+      "Bash(npx vite *)",
+      "Bash(docker --version)",
+      "Bash(npx --yes playwright --version)",
+      "Bash(npx --yes playwright install chromium --with-deps)",
+      "Read(//c/Users/muzim/Downloads/skycrash-database/skycrash-database/**)",
+      "Read(//c/Users/muzim/Downloads/**)",
+      "Bash(docker volume *)",
+      "Bash(ls -la \"/c/Users/muzim/Downloads/skycrash-database/skycrash-database\" 2>&1)",
+      "Bash(docker compose *)",
+      "Read(//c/Users/muzim/Downloads/skycrash-backend/skycrash-backend/src/SkyCrash.Api/**)",
+      "Bash(dotnet run *)",
+      "Bash(echo \"started with pid $!\")",
+      "Bash(npm run *)",
+      "Bash(node \"C:\\\\Users\\\\muzim\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-muzim-Downloads-skycrash-frontend\\\\a100a46b-6f6e-48ad-8b5d-52fd3ee9362c\\\\scratchpad\\\\drive.mjs\")",
+      "Bash(npm init *)",
+      "Bash(node drive.mjs)",
+      "Read(//c/Users/muzim/Downloads/SkyCrash-Frontend-Anjiii/SkyCrash-Frontend-Anji/src/**)",
+      "Bash(docker exec *)",
+      "Bash(node drive-admin.mjs)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)"
+    ],
+    "additionalDirectories": [
+      "C:\\Users\\muzim\\Downloads\\skycrash-backend\\skycrash-backend\\src\\SkyCrash.Api\\Controllers"
+    ]
+  }
+}

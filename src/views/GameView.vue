@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
+import { computed, ref } from 'vue'
 import { useGameStore } from '@/stores/gameStore'
 import { usePlayerStore } from '@/stores/playerStore'
 import { useHangarStore } from '@/stores/hangarStore'
@@ -24,10 +24,10 @@ const skin = computed(() => (hangarStore.skinId === 'taking-off' ? 'taking-off' 
 const craft = computed(() => hangarStore.craftId)
 
 const betAmountInput = ref(250)
+const autoCashoutEnabled = ref(false)
 const autoCashoutTarget = ref(2)
 const isPlacingBet = ref(false)
 const isCashingOut = ref(false)
-const autoCashoutFired = ref(false)
 
 const credits = computed(() => playerStore.profile?.creditBalance ?? 0)
 const hasActiveBet = computed(() => gameStore.myBetStatus === 'Placed')
@@ -58,32 +58,23 @@ const flying = computed(() => gameStore.phase === 'Running')
 const crashed = computed(() => gameStore.phase === 'Crashed')
 const cashedOutThisRound = computed(() => gameStore.cashOutStatus === 'CashedOut')
 
-watch(
-  () => gameStore.myBetStatus,
-  (status) => {
-    if (status === 'Placed') autoCashoutFired.value = false
-  },
-)
-
-watch(
-  () => gameStore.currentMultiplier,
-  (multiplier) => {
-    if (
-      !autoCashoutFired.value &&
-      canCashOut.value &&
-      autoCashoutTarget.value > 1 &&
-      multiplier >= autoCashoutTarget.value
-    ) {
-      autoCashoutFired.value = true
-      handleCashOut()
-    }
-  },
-)
+// Auto cashout is enforced by the backend (RoundEngineService checks every active
+// bet's target against the multiplier each tick and cashes it out authoritatively) —
+// the frontend only sends the target once at bet-placement time and then just
+// reflects whatever CashOutConfirmed event comes back, auto-triggered or not.
+const autoCashoutError = computed(() => {
+  if (!autoCashoutEnabled.value) return null
+  if (!Number.isFinite(autoCashoutTarget.value) || autoCashoutTarget.value < 1.01) {
+    return 'Auto cashout target must be at least 1.01x.'
+  }
+  return null
+})
 
 async function handlePlaceBet() {
   isPlacingBet.value = true
   try {
-    await gameService.placeBet(betAmountInput.value)
+    const target = autoCashoutEnabled.value ? autoCashoutTarget.value : null
+    await gameService.placeBet(betAmountInput.value, target)
   } finally {
     isPlacingBet.value = false
   }
@@ -161,7 +152,9 @@ async function handleCashOut() {
       </div>
 
       <div v-if="cashedOutThisRound" class="animate-sky-pop neon-panel clip-hud w-full max-w-md p-6 text-center">
-        <p class="font-display text-sm font-black uppercase tracking-[0.3em] text-lime text-glow-lime">Cashed Out</p>
+        <p class="font-display text-sm font-black uppercase tracking-[0.3em] text-lime text-glow-lime">
+          Cashed Out{{ gameStore.cashOutResult?.auto ? ' (Auto)' : '' }}
+        </p>
         <p class="mt-3 font-arcade text-3xl text-lime text-glow-lime">
           +{{ (gameStore.cashOutResult?.payout ?? 0).toLocaleString() }}
         </p>
@@ -240,21 +233,24 @@ async function handleCashOut() {
                     class="mt-1 w-28 border-2 border-violet/50 bg-void/70 px-2 py-1 font-arcade text-lg text-ember text-glow-ember focus:border-magenta focus:outline-none"
                   />
                 </div>
-                <label class="min-w-[180px]">
-                  <span class="font-arcade text-[7px] uppercase tracking-[0.3em] text-muted-foreground">
-                    Auto cashout {{ autoCashoutTarget.toFixed(2) }}x
+                <label class="min-w-[200px]">
+                  <span class="flex items-center gap-2 font-arcade text-[7px] uppercase tracking-[0.3em] text-muted-foreground">
+                    <input v-model="autoCashoutEnabled" type="checkbox" class="accent-[var(--neon-blue)]" />
+                    Auto Cashout
                   </span>
                   <input
                     v-model.number="autoCashoutTarget"
-                    type="range"
-                    min="1"
-                    max="10"
-                    step="0.25"
-                    class="mt-1 w-full accent-[var(--neon-blue)]"
+                    type="number"
+                    min="1.01"
+                    step="0.05"
+                    :disabled="!autoCashoutEnabled"
+                    class="mt-1.5 w-28 border-2 border-violet/50 bg-void/70 px-2 py-1 font-arcade text-sm text-electric text-glow-blue focus:border-magenta focus:outline-none disabled:opacity-40"
                   />
+                  <span v-if="autoCashoutEnabled" class="ml-1 text-[9px] text-muted-foreground">x target</span>
                 </label>
               </div>
 
+              <p v-if="autoCashoutError" class="mt-2 text-sm text-danger">{{ autoCashoutError }}</p>
               <p v-if="gameStore.myBetStatus === 'Rejected'" class="mt-2 text-sm text-danger">
                 {{ gameStore.betRejectionReason }}
               </p>
@@ -264,7 +260,12 @@ async function handleCashOut() {
             </div>
 
             <div class="flex flex-col gap-2">
-              <ArcadeButton size="xl" variant="primary" :disabled="betAmountInput > credits || isPlacingBet" @click="handlePlaceBet">
+              <ArcadeButton
+                size="xl"
+                variant="primary"
+                :disabled="betAmountInput > credits || isPlacingBet || !!autoCashoutError"
+                @click="handlePlaceBet"
+              >
                 {{ isPlacingBet ? 'Placing…' : 'Place Bet' }}
               </ArcadeButton>
               <RouterLink to="/hangar">
@@ -278,6 +279,9 @@ async function handleCashOut() {
           <StatusBadge status="LIVE" />
           <p class="mt-2 font-arcade text-sm text-ember text-glow-ember">
             {{ gameStore.myBetAmount }} credits locked in — {{ phaseLabel.toLowerCase() }}
+          </p>
+          <p v-if="gameStore.myAutoCashoutTarget" class="mt-1 font-arcade text-[8px] uppercase tracking-[0.2em] text-electric">
+            Auto cashout armed at {{ gameStore.myAutoCashoutTarget.toFixed(2) }}x
           </p>
         </NeonPanel>
 

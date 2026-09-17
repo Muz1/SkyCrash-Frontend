@@ -2,6 +2,7 @@
 import { computed, onMounted, ref, watch } from 'vue'
 import { usePlayerStore } from '@/stores/playerStore'
 import { useHistoryStore } from '@/stores/historyStore'
+import * as authService from '@/services/AuthService'
 import Shell from '@/components/sky/Shell.vue'
 import NeonPanel from '@/components/sky/NeonPanel.vue'
 import ArcadeField from '@/components/sky/ArcadeField.vue'
@@ -10,9 +11,14 @@ import ArcadeButton from '@/components/sky/ArcadeButton.vue'
 const playerStore = usePlayerStore()
 const historyStore = useHistoryStore()
 const email = ref('')
+const username = ref('')
 const successMessage = ref('')
 const errorMessage = ref('')
 const isSaving = ref(false)
+
+const usernameStatus = ref<'idle' | 'checking' | 'available' | 'taken'>('idle')
+const usernameSuggestions = ref<string[]>([])
+let usernameCheckTimer: ReturnType<typeof setTimeout> | undefined
 
 onMounted(async () => {
   if (!playerStore.profile) {
@@ -20,6 +26,7 @@ onMounted(async () => {
   }
   if (playerStore.profile) {
     email.value = playerStore.profile.email
+    username.value = playerStore.profile.username
   }
   historyStore.fetchBets(1)
 })
@@ -27,9 +34,39 @@ onMounted(async () => {
 watch(
   () => playerStore.profile,
   (profile) => {
-    if (profile) email.value = profile.email
+    if (profile) {
+      email.value = profile.email
+      username.value = profile.username
+    }
   },
 )
+
+watch(username, (value) => {
+  usernameSuggestions.value = []
+  if (usernameCheckTimer) clearTimeout(usernameCheckTimer)
+
+  const candidate = value.trim()
+  if (candidate.length < 3 || candidate === playerStore.profile?.username) {
+    usernameStatus.value = 'idle'
+    return
+  }
+
+  usernameStatus.value = 'checking'
+  usernameCheckTimer = setTimeout(async () => {
+    try {
+      const result = await authService.checkUsername(candidate)
+      if (username.value.trim() !== candidate) return // stale response
+      usernameStatus.value = result.available ? 'available' : 'taken'
+      usernameSuggestions.value = result.suggestions
+    } catch {
+      usernameStatus.value = 'idle'
+    }
+  }, 400)
+})
+
+function applySuggestion(suggestion: string) {
+  username.value = suggestion
+}
 
 const stats = computed(() => {
   const bets = historyStore.bets
@@ -49,7 +86,11 @@ async function handleSave() {
   errorMessage.value = ''
   isSaving.value = true
   try {
-    await playerStore.updateProfile({ email: email.value })
+    const usernameChanged = username.value.trim() !== playerStore.profile?.username
+    await playerStore.updateProfile({
+      email: email.value,
+      username: usernameChanged ? username.value.trim() : undefined,
+    })
     successMessage.value = 'Profile updated.'
   } catch (err: unknown) {
     const response = (err as { response?: { data?: unknown } })?.response
@@ -57,7 +98,12 @@ async function handleSave() {
     if (Array.isArray(data)) {
       errorMessage.value = data.join(' ')
     } else if (data && typeof data === 'object' && 'message' in data) {
-      errorMessage.value = String((data as Record<string, unknown>).message) || 'Update failed.'
+      const record = data as Record<string, unknown>
+      errorMessage.value = String(record.message) || 'Update failed.'
+      if (record.field === 'username' && Array.isArray(record.suggestions)) {
+        usernameStatus.value = 'taken'
+        usernameSuggestions.value = record.suggestions as string[]
+      }
     } else {
       errorMessage.value = 'Update failed.'
     }
@@ -100,6 +146,29 @@ async function handleSave() {
 
         <NeonPanel class="mt-5" title="Account" accent="blue">
           <form class="space-y-4" @submit.prevent="handleSave">
+            <div>
+              <ArcadeField v-model="username" label="Username" required />
+              <p v-if="usernameStatus === 'checking'" class="mt-1 text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+                Checking availability…
+              </p>
+              <p v-else-if="usernameStatus === 'available'" class="mt-1 text-[10px] uppercase tracking-[0.2em] text-lime">
+                Available
+              </p>
+              <div v-else-if="usernameStatus === 'taken'" class="mt-1.5">
+                <p class="text-[10px] uppercase tracking-[0.2em] text-danger">That username is already taken.</p>
+                <div v-if="usernameSuggestions.length > 0" class="mt-1.5 flex flex-wrap gap-1.5">
+                  <button
+                    v-for="suggestion in usernameSuggestions"
+                    :key="suggestion"
+                    type="button"
+                    class="clip-hud border border-electric/50 px-2 py-1 text-[10px] text-electric transition-all hover:[box-shadow:var(--glow-blue)]"
+                    @click="applySuggestion(suggestion)"
+                  >
+                    {{ suggestion }}
+                  </button>
+                </div>
+              </div>
+            </div>
             <ArcadeField v-model="email" label="Email" type="email" required />
 
             <p v-if="successMessage" class="font-arcade text-[8px] uppercase tracking-[0.2em] text-lime">{{ successMessage }}</p>

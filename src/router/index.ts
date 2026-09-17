@@ -14,6 +14,8 @@ import { usePlayerStore } from '../stores/playerStore'
 import RtpView from '../views/RtpView.vue'
 import VolatilityView from '../views/VolatilityView.vue'
 import AdminView from '../views/AdminView.vue'
+import AdminCurrentRoundView from '../views/AdminCurrentRoundView.vue'
+import AdminReportsView from '../views/AdminReportsView.vue'
 import HangarView from '../views/HangarView.vue'
 
 const router = createRouter({
@@ -56,6 +58,18 @@ const router = createRouter({
       path: '/admin',
       name: 'admin',
       component: AdminView,
+      meta: { requiresAuth: true, requiresAdmin: true },
+    },
+    {
+      path: '/admin/rounds',
+      name: 'admin-rounds',
+      component: AdminCurrentRoundView,
+      meta: { requiresAuth: true, requiresAdmin: true },
+    },
+    {
+      path: '/admin/reports',
+      name: 'admin-reports',
+      component: AdminReportsView,
       meta: { requiresAuth: true, requiresAdmin: true },
     },
   ],

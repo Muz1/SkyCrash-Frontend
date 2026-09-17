@@ -6,8 +6,10 @@ const route = useRoute()
 
 const tabs = [
   { to: '/admin', label: 'Players' },
+  { to: '/admin/rounds', label: 'Current Round' },
+  { to: '/admin/reports', label: 'Reports' },
+  { to: '/rtp', label: 'RTP & House Edge' },
   { to: '/ops', label: 'Operations' },
-  { to: '/rtp', label: 'RTP' },
   { to: '/volatility', label: 'Volatility' },
 ]
 </script>

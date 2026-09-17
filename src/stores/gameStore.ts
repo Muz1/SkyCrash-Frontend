@@ -14,10 +14,11 @@ export const useGameStore = defineStore('game', () => {
   const lastRevealedSeed = ref<string | null>(null)
   const myBetAmount = ref<number | null>(null)
   const myBetStatus = ref<'None' | 'Placed' | 'Rejected'>('None')
+  const myAutoCashoutTarget = ref<number | null>(null)
   const betRejectionReason = ref<string | null>(null)
   const roundBets = ref<{ playerId: string; username: string; amount: number }[]>([])
   const cashOutStatus = ref<'None' | 'CashedOut' | 'Rejected'>('None')
-  const cashOutResult = ref<{ cashOutMultiplier: number; payout: number } | null>(null)
+  const cashOutResult = ref<{ cashOutMultiplier: number; payout: number; auto: boolean } | null>(null)
   const cashOutRejectionReason = ref<string | null>(null)
 
   let countdownTimer: ReturnType<typeof setInterval> | null = null
@@ -77,6 +78,7 @@ export const useGameStore = defineStore('game', () => {
     phase.value = 'Waiting'
     myBetAmount.value = null
     myBetStatus.value = 'None'
+    myAutoCashoutTarget.value = null
     betRejectionReason.value = null
     roundBets.value = []
     cashOutStatus.value = 'None'
@@ -103,9 +105,10 @@ export const useGameStore = defineStore('game', () => {
     lastCrashPoints.value = [payload.crashMultiplier, ...lastCrashPoints.value].slice(0, 10)
   }
 
-  function onBetConfirmed(payload: { betId: string; amount: number }) {
+  function onBetConfirmed(payload: { betId: string; amount: number; autoCashoutTarget?: number | null }) {
     myBetAmount.value = payload.amount
     myBetStatus.value = 'Placed'
+    myAutoCashoutTarget.value = payload.autoCashoutTarget ?? null
     betRejectionReason.value = null
   }
 
@@ -118,9 +121,13 @@ export const useGameStore = defineStore('game', () => {
     roundBets.value = [...roundBets.value, payload]
   }
 
-  function onCashOutConfirmed(payload: { cashOutMultiplier: number; payout: number }) {
+  function onCashOutConfirmed(payload: { cashOutMultiplier: number; payout: number; auto?: boolean }) {
     cashOutStatus.value = 'CashedOut'
-    cashOutResult.value = { cashOutMultiplier: payload.cashOutMultiplier, payout: payload.payout }
+    cashOutResult.value = {
+      cashOutMultiplier: payload.cashOutMultiplier,
+      payout: payload.payout,
+      auto: payload.auto ?? false,
+    }
     myBetStatus.value = 'None' // the bet is resolved now — no longer an active "placed" bet
   }
 
@@ -140,6 +147,7 @@ export const useGameStore = defineStore('game', () => {
     lastRevealedSeed,
     myBetAmount,
     myBetStatus,
+    myAutoCashoutTarget,
     betRejectionReason,
     roundBets,
     cashOutStatus,

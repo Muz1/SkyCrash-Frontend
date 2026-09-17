@@ -1,4 +1,5 @@
 import { onMounted, onUnmounted, watch } from 'vue'
+import { useRouter } from 'vue-router'
 import { getConnection, stopConnection } from '@/services/signalr'
 import { useAuthStore } from '@/stores/AuthStore'
 import { useLobbyStore } from '@/stores/lobbyStore'
@@ -35,6 +36,7 @@ type RoundCrashedPayload = {
 type BetConfirmedPayload = {
   betId: string
   amount: number
+  autoCashoutTarget?: number | null
 }
 
 type BetRejectedPayload = {
@@ -50,6 +52,7 @@ type BetPlacedByPlayerPayload = {
 type CashOutConfirmedPayload = {
   cashOutMultiplier: number
   payout: number
+  auto?: boolean
 }
 
 type CashOutRejectedPayload = {
@@ -66,6 +69,7 @@ type PlayerCashedOutPayload = {
 export function useSignalRConnection() {
   const authStore = useAuthStore()
   const lobbyStore = useLobbyStore()
+  const router = useRouter()
 
   async function start() {
     const connection = getConnection()
@@ -77,6 +81,14 @@ export function useSignalRConnection() {
 
       connection.on('PlayerOffline', (payload: { playerId: string }) => {
         lobbyStore.removeOnlinePlayer(payload.playerId)
+      })
+
+      // Sent by the admin "block" action so an already-connected, still-unexpired
+      // session is cut off immediately instead of waiting for the JWT to expire.
+      connection.on('AccountBlocked', () => {
+        authStore.logout()
+        usePlayerStore().clear()
+        router.push({ name: 'login', query: { blocked: '1' } })
       })
 
       try {

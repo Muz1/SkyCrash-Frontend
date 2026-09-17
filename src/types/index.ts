@@ -16,7 +16,7 @@ export interface RegisterPayload {
 }
 
 export interface LoginPayload {
-  username: string
+  email: string
   password: string
 }
 
@@ -24,6 +24,7 @@ export interface AuthResponse {
   token: string
   playerId: string
   username: string
+  email: string
   expiresAtUtc: string
 }
 
@@ -38,6 +39,20 @@ export interface PlayerProfile {
 
 export interface UpdateProfilePayload {
   email: string
+  username?: string
+}
+
+export interface UsernameAvailability {
+  available: boolean
+  suggestions: string[]
+}
+
+// Shape of the 409 Conflict body the backend sends when a username is taken
+// (registration or profile update) — `field` tells the caller which input to flag.
+export interface UsernameConflictError {
+  message: string
+  field?: 'username' | 'email'
+  suggestions?: string[]
 }
 
 export interface OnlinePlayer {
@@ -147,7 +162,54 @@ export interface AdminPlayerSummary {
   email: string
   creditBalance: number
   isAdmin: boolean
+  isBlocked: boolean
   memberSinceUtc: string
   lastSeenUtc: string
+}
+
+export interface AdminPlayerFilters {
+  search?: string
+  isBlocked?: boolean
+  isAdmin?: boolean
+  sortBy?: 'username' | 'email' | 'balance' | 'membersince' | 'lastseen'
+  sortDir?: 'asc' | 'desc'
+}
+
+export interface GameSettings {
+  houseEdgePercentage: number
+  theoreticalRtpPercentage: number
+  maxMultiplier: number
+  updatedAtUtc: string
+  updatedByUsername: string | null
+}
+
+export interface AdminCurrentRound {
+  roundId: string
+  roundNumber: number
+  status: string
+  serverSeedHash: string
+  currentMultiplier: number
+  predeterminedCrashMultiplier: number
+  countdownSeconds: number | null
+  activeBetCount: number
+}
+
+export interface RoundReportItem {
+  roundId: string
+  roundNumber: number
+  crashMultiplier: number | null
+  status: string
+  createdAtUtc: string
+  crashedAtUtc: string | null
+  betCount: number
+  totalWagered: number
+  totalPaidOut: number
+}
+
+export interface RoundReportResponse {
+  page: number
+  pageSize: number
+  totalCount: number
+  rounds: RoundReportItem[]
 }
 
