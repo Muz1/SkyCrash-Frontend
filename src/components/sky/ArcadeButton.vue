@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import { cva, type VariantProps } from "class-variance-authority";
+import { useSoundStore } from "@/stores/sound";
+
+const sound = useSoundStore();
 
 const arcadeButton = cva(
   "relative inline-flex select-none items-center justify-center gap-2 font-display font-black uppercase tracking-[0.14em] transition-all duration-150 clip-hud border-2 disabled:pointer-events-none disabled:opacity-40 disabled:saturate-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-void active:translate-y-[2px]",
@@ -41,7 +44,7 @@ const classes = computed(() => arcadeButton({ variant: props.variant, size: prop
 </script>
 
 <template>
-  <button :class="classes">
+  <button :class="classes" @click="sound.playSelect()">
     <slot />
   </button>
 </template>

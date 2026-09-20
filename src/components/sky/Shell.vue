@@ -9,6 +9,7 @@ import CRTOverlay from "./CRTOverlay.vue";
 import CreditDisplay from "./CreditDisplay.vue";
 import Wordmark from "./Wordmark.vue";
 import NavDock from "./NavDock.vue";
+import MuteButton from "./MuteButton.vue";
 
 withDefaults(
   defineProps<{ skin?: SkinId; dim?: number; showHud?: boolean }>(),
@@ -29,7 +30,10 @@ const credits = computed(() => auth.player?.creditBalance ?? 0);
       <div class="min-w-0">
         <Wordmark compact />
       </div>
-      <CreditDisplay :credits="credits" />
+      <div class="flex items-center gap-2 justify-self-end">
+        <MuteButton />
+        <CreditDisplay :credits="credits" />
+      </div>
     </header>
     <main class="relative z-10 px-4 pb-40 sm:px-8">
       <slot />

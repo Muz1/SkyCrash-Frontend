@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from "vue";
+import { computed, onMounted, onUnmounted, ref, watch } from "vue";
 import CRTOverlay from "@/components/sky/CRTOverlay.vue";
 import CreditDisplay from "@/components/sky/CreditDisplay.vue";
 import NeonPanel from "@/components/sky/NeonPanel.vue";
@@ -10,14 +10,17 @@ import Plane from "@/components/sky/Plane.vue";
 import Explosion from "@/components/sky/Explosion.vue";
 import NavDock from "@/components/sky/NavDock.vue";
 import Wordmark from "@/components/sky/Wordmark.vue";
+import MuteButton from "@/components/sky/MuteButton.vue";
 import { useAuthStore } from "@/stores/auth";
 import { useHangarStore } from "@/stores/hangar";
 import { useRoundStore } from "@/stores/round";
+import { useSoundStore } from "@/stores/sound";
 import { getCraft } from "@/lib/craft";
 
 const auth = useAuthStore();
 const hangar = useHangarStore();
 const round = useRoundStore();
+const sound = useSoundStore();
 
 const BET_STEPS = [100, 250, 500, 1000, 2000, 5000] as const;
 function formatBet(v: number) {
@@ -49,6 +52,30 @@ const takeoffCurve = computed(() => Math.pow(climb.value, 1.85));
 const ascent = computed(() => (airborne.value ? climb.value : 0));
 const potential = computed(() => Math.round((round.myBetAmount ?? bet.value) * round.multiplier));
 
+// Shrinks the aircraft sprite on narrow viewports so it never overwhelms the bounded flight stage.
+const viewportWidth = ref(typeof window === "undefined" ? 1024 : window.innerWidth);
+function updateViewportWidth() {
+  viewportWidth.value = window.innerWidth;
+}
+onMounted(() => window.addEventListener("resize", updateViewportWidth));
+onUnmounted(() => window.removeEventListener("resize", updateViewportWidth));
+const planeScale = computed(() => {
+  if (viewportWidth.value < 400) return 0.55;
+  if (viewportWidth.value < 640) return 0.7;
+  if (viewportWidth.value < 1024) return 0.85;
+  return 1;
+});
+
+function selectBet(v: number) {
+  sound.playSelect();
+  bet.value = v;
+}
+
+function selectMaxBet() {
+  sound.playSelect();
+  bet.value = Math.floor(credits.value);
+}
+
 function placeBet() {
   if (bet.value > credits.value) return;
   round.placeBet(bet.value);
@@ -57,6 +84,15 @@ function placeBet() {
 function cashOut() {
   round.cashOut();
 }
+
+watch(
+  () => round.status,
+  (status, previous) => {
+    if (status === "Running" && previous !== "Running") {
+      sound.playTakeoff();
+    }
+  },
+);
 </script>
 
 <template>
@@ -84,7 +120,10 @@ function cashOut() {
       <div class="min-w-0">
         <Wordmark compact />
       </div>
-      <CreditDisplay :credits="credits" />
+      <div class="flex items-center gap-2 justify-self-end">
+        <MuteButton />
+        <CreditDisplay :credits="credits" />
+      </div>
     </header>
 
     <main class="relative z-10 mx-auto flex min-h-[70vh] w-full max-w-6xl flex-col items-center px-4 pb-44">
@@ -106,22 +145,25 @@ function cashOut() {
         </p>
       </div>
 
-      <!-- Flight stage — canonical 45° bottom-left → top-right trajectory -->
-      <div class="relative h-[42vh] min-h-[260px] w-full">
+      <!-- Flight stage — canonical 45° bottom-left → top-right trajectory, always bounded to this panel -->
+      <div class="relative h-[clamp(200px,42vh,420px)] w-full overflow-hidden">
         <div
           aria-hidden="true"
-          class="absolute bottom-[10%] left-[8%] h-[2px] w-[92%] origin-left -rotate-45 opacity-25"
+          class="absolute bottom-[10%] left-[6%] h-[2px] w-[76%] origin-left -rotate-45 opacity-25"
           style="background: repeating-linear-gradient(90deg, color-mix(in oklab, var(--neon-blue) 60%, transparent) 0 12px, transparent 12px 26px)"
         />
         <div
-          class="absolute bottom-[-5%] transition-transform duration-500 ease-out"
+          class="absolute transition-[left,bottom] duration-500 ease-out"
           :style="{
-            left: 'calc(50% - 50vw)',
-            transform: `translate3d(calc((100vw - 180px) * ${climb}), calc((200px - 42vh) * ${takeoffCurve}), 0) scale(${1 + climb * 0.12})`,
-            willChange: 'transform',
+            left: `${6 + climb * 62}%`,
+            bottom: `${6 + takeoffCurve * 58}%`,
+            willChange: 'left, bottom',
           }"
         >
-          <div>
+          <div
+            class="origin-bottom-left transition-transform duration-500 ease-out"
+            :style="{ transform: `translate(-30%, 20%) scale(${planeScale * (1 + climb * 0.12)})` }"
+          >
             <Plane :size="200" :crashing="phase === 'crashed'" :trail="airborne" :trail-intensity="0.6 + climb" />
             <div v-if="phase === 'cashed'" aria-hidden="true" class="pointer-events-none absolute inset-0">
               <span
@@ -201,13 +243,13 @@ function cashOut() {
                       ? 'border-ember text-ember [box-shadow:var(--glow-ember)]'
                       : 'border-violet/50 text-muted-foreground hover:border-electric hover:text-electric'
                   "
-                  @click="bet = v"
+                  @click="selectBet(v)"
                 >
                   {{ formatBet(v) }}
                 </button>
                 <button
                   class="clip-hud border-2 border-magenta/60 px-3 py-1.5 font-arcade text-[9px] text-magenta transition-all hover:[box-shadow:var(--glow-magenta)]"
-                  @click="bet = Math.floor(credits)"
+                  @click="selectMaxBet"
                 >
                   Max
                 </button>

@@ -52,24 +52,24 @@ watch(
 const active = computed(() => getCraft(previewCraft.value));
 const activeSky = computed(() => SKY_SKINS.find((s) => s.id === previewSky.value) ?? SKY_SKINS[0]!);
 
+// Selecting a craft or sky equips it immediately — no separate confirm click needed.
 function tryOn(id: CraftId) {
   if (id === previewCraft.value) return;
   outgoing.value = previewCraft.value;
   previewCraft.value = id;
   enterKey.value += 1;
   setTimeout(() => (outgoing.value = null), 620);
+  hangar.equip(id, hangar.skinId).catch(() => undefined);
+}
+
+function selectSky(id: SkinId) {
+  if (id === previewSky.value) return;
+  previewSky.value = id;
+  hangar.equip(hangar.craftId, id).catch(() => undefined);
 }
 
 const craftEquipped = computed(() => hangar.craftId === previewCraft.value);
 const skyEquipped = computed(() => hangar.skinId === previewSky.value);
-
-function equipCraft() {
-  hangar.equip(previewCraft.value, hangar.skinId);
-}
-
-function equipSky() {
-  hangar.equip(hangar.craftId, previewSky.value);
-}
 </script>
 
 <template>
@@ -153,15 +153,12 @@ function equipSky() {
 
             <p class="mt-5 font-arcade text-[7px] uppercase tracking-[0.3em] text-muted-foreground">Status</p>
             <p class="font-arcade text-sm" :class="craftEquipped ? 'text-lime text-glow-lime' : 'text-ember text-glow-ember'">
-              {{ craftEquipped ? "Equipped" : "Trying On" }}
+              {{ craftEquipped ? "Equipped" : "Equipping…" }}
             </p>
 
             <div class="mt-6 flex flex-col gap-3">
-              <ArcadeButton size="lg" variant="primary" :disabled="craftEquipped" @click="equipCraft">
-                {{ craftEquipped ? "Equipped" : "Equip Aircraft" }}
-              </ArcadeButton>
               <RouterLink to="/play">
-                <ArcadeButton size="sm" variant="blue" class="w-full">To The Runway</ArcadeButton>
+                <ArcadeButton size="lg" variant="primary" class="w-full">To The Runway</ArcadeButton>
               </RouterLink>
             </div>
           </div>
@@ -172,15 +169,12 @@ function equipSky() {
 
             <p class="mt-5 font-arcade text-[7px] uppercase tracking-[0.3em] text-muted-foreground">Status</p>
             <p class="font-arcade text-sm" :class="skyEquipped ? 'text-lime text-glow-lime' : 'text-electric text-glow-blue'">
-              {{ skyEquipped ? "Equipped" : "Previewing" }}
+              {{ skyEquipped ? "Equipped" : "Equipping…" }}
             </p>
 
             <div class="mt-6 flex flex-col gap-3">
-              <ArcadeButton size="lg" variant="primary" :disabled="skyEquipped" @click="equipSky">
-                {{ skyEquipped ? "Equipped" : "Equip Sky" }}
-              </ArcadeButton>
               <RouterLink to="/play">
-                <ArcadeButton size="sm" variant="blue" class="w-full">To The Runway</ArcadeButton>
+                <ArcadeButton size="lg" variant="primary" class="w-full">To The Runway</ArcadeButton>
               </RouterLink>
             </div>
           </div>
@@ -225,7 +219,7 @@ function equipSky() {
             <button
               class="clip-hud w-full overflow-hidden border-2 text-left transition-all duration-150 hover:-translate-y-0.5"
               :class="previewSky === s.id ? 'border-lime [box-shadow:var(--glow-lime)]' : 'border-violet/40 hover:border-magenta'"
-              @click="previewSky = s.id"
+              @click="selectSky(s.id)"
             >
               <img :src="s.src" alt="" width="1920" height="1088" loading="lazy" class="h-20 w-full object-cover" />
               <span class="block px-2 py-2 font-arcade text-[7px] uppercase text-foreground">

@@ -12,7 +12,10 @@ const items = [
 </script>
 
 <template>
-  <nav aria-label="Sky Crash navigation" class="fixed inset-x-0 bottom-0 z-30 flex justify-center px-2 pb-3 sm:pb-5">
+  <nav
+    aria-label="Sky Crash navigation"
+    class="fixed inset-x-0 bottom-0 z-30 flex justify-center px-2 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:pb-[max(1.25rem,env(safe-area-inset-bottom))]"
+  >
     <ul class="flex items-end gap-1.5 sm:gap-3">
       <li v-for="item in items" :key="item.to">
         <RouterLink
