@@ -52,19 +52,18 @@ const takeoffCurve = computed(() => Math.pow(climb.value, 1.85));
 const ascent = computed(() => (airborne.value ? climb.value : 0));
 const potential = computed(() => Math.round((round.myBetAmount ?? bet.value) * round.multiplier));
 
-// Shrinks the aircraft sprite on narrow viewports so it never overwhelms the bounded flight stage.
-const viewportWidth = ref(typeof window === "undefined" ? 1024 : window.innerWidth);
-function updateViewportWidth() {
-  viewportWidth.value = window.innerWidth;
+// Sizes the aircraft sprite as a fraction of the flight-stage panel's actual (viewport-driven) height,
+// not a fixed pixel size — otherwise a tall multiplier climb can push the sprite past the panel's own
+// top edge and get clipped by its overflow-hidden bound.
+const viewportHeight = ref(typeof window === "undefined" ? 800 : window.innerHeight);
+function updateViewportHeight() {
+  viewportHeight.value = window.innerHeight;
 }
-onMounted(() => window.addEventListener("resize", updateViewportWidth));
-onUnmounted(() => window.removeEventListener("resize", updateViewportWidth));
-const planeScale = computed(() => {
-  if (viewportWidth.value < 400) return 0.55;
-  if (viewportWidth.value < 640) return 0.7;
-  if (viewportWidth.value < 1024) return 0.85;
-  return 1;
-});
+onMounted(() => window.addEventListener("resize", updateViewportHeight));
+onUnmounted(() => window.removeEventListener("resize", updateViewportHeight));
+// Mirrors the flight stage's `h-[clamp(200px,42vh,420px)]` so sizing stays proportional to it.
+const flightStageHeight = computed(() => Math.min(420, Math.max(200, viewportHeight.value * 0.42)));
+const planeSize = computed(() => Math.round(flightStageHeight.value * 0.34));
 
 function selectBet(v: number) {
   sound.playSelect();
@@ -162,9 +161,9 @@ watch(
         >
           <div
             class="origin-bottom-left transition-transform duration-500 ease-out"
-            :style="{ transform: `translate(-30%, 20%) scale(${planeScale * (1 + climb * 0.12)})` }"
+            :style="{ transform: `translate(-30%, 20%) scale(${1 + climb * 0.12})` }"
           >
-            <Plane :size="200" :crashing="phase === 'crashed'" :trail="airborne" :trail-intensity="0.6 + climb" />
+            <Plane :size="planeSize" :crashing="phase === 'crashed'" :trail="airborne" :trail-intensity="0.6 + climb" />
             <div v-if="phase === 'cashed'" aria-hidden="true" class="pointer-events-none absolute inset-0">
               <span
                 v-for="i in 14"
