@@ -1,15 +1,19 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
+import { useRouter } from 'vue-router'
 import { usePlayerStore } from '@/stores/playerStore'
 import { useHistoryStore } from '@/stores/historyStore'
+import { useAuthStore } from '@/stores/AuthStore'
 import * as authService from '@/services/AuthService'
 import Shell from '@/components/sky/Shell.vue'
 import NeonPanel from '@/components/sky/NeonPanel.vue'
 import ArcadeField from '@/components/sky/ArcadeField.vue'
 import ArcadeButton from '@/components/sky/ArcadeButton.vue'
 
+const router = useRouter()
 const playerStore = usePlayerStore()
 const historyStore = useHistoryStore()
+const authStore = useAuthStore()
 const email = ref('')
 const username = ref('')
 const successMessage = ref('')
@@ -66,6 +70,12 @@ watch(username, (value) => {
 
 function applySuggestion(suggestion: string) {
   username.value = suggestion
+}
+
+function handleLogout() {
+  authStore.logout()
+  playerStore.clear()
+  router.push('/login')
 }
 
 const stats = computed(() => {
@@ -178,6 +188,12 @@ async function handleSave() {
               {{ isSaving ? 'Saving…' : 'Save changes' }}
             </ArcadeButton>
           </form>
+        </NeonPanel>
+
+        <NeonPanel class="mt-5" accent="ember">
+          <ArcadeButton type="button" size="md" variant="danger" class="w-full" @click="handleLogout">
+            Log Out
+          </ArcadeButton>
         </NeonPanel>
       </template>
 
