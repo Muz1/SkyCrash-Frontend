@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ShieldCheck } from '@lucide/vue'
+import { ShieldCheck, Users } from '@lucide/vue'
 import { usePlayerStore } from '@/stores/playerStore'
 import CreditDisplay from './CreditDisplay.vue'
 import Wordmark from './Wordmark.vue'
@@ -20,6 +20,13 @@ const playerStore = usePlayerStore()
         class="grid h-9 w-9 shrink-0 place-items-center border-2 border-ember/70 bg-void/70 text-ember clip-hud transition-all hover:[box-shadow:var(--glow-ember)]"
       >
         <ShieldCheck class="h-4 w-4" aria-hidden="true" />
+      </RouterLink>
+      <RouterLink
+        to="/lobby"
+        aria-label="Lobby"
+        class="grid h-9 w-9 shrink-0 place-items-center border-2 border-electric/70 bg-void/70 text-electric clip-hud transition-all hover:[box-shadow:var(--glow-blue)]"
+      >
+        <Users class="h-4 w-4" aria-hidden="true" />
       </RouterLink>
       <RouterLink to="/wallet" aria-label="Wallet" class="transition-transform hover:-translate-y-0.5">
         <CreditDisplay :credits="playerStore.profile?.creditBalance ?? 0" />

@@ -35,6 +35,7 @@ export interface PlayerProfile {
   creditBalance: number
   memberSinceUtc: string
   isAdmin: boolean
+  displayedAchievementKey: string | null
 }
 
 export interface UpdateProfilePayload {
@@ -58,6 +59,7 @@ export interface UsernameConflictError {
 export interface OnlinePlayer {
   playerId: string
   username: string
+  displayedAchievementKey: string | null
 }
 
 export interface WalletBalance {
@@ -92,6 +94,7 @@ export interface BetHistoryEntry {
 
 export interface BiggestWinEntry {
   username: string
+  displayedAchievementKey: string | null
   payout: number
   cashOutMultiplier: number
   roundNumber: number
@@ -99,12 +102,14 @@ export interface BiggestWinEntry {
 
 export interface BestMultiplierEntry {
   username: string
+  displayedAchievementKey: string | null
   cashOutMultiplier: number
   roundNumber: number
 }
 
 export interface MostActiveEntry {
   username: string
+  displayedAchievementKey: string | null
   betsPlaced: number
 }
 
@@ -211,5 +216,52 @@ export interface RoundReportResponse {
   pageSize: number
   totalCount: number
   rounds: RoundReportItem[]
+}
+
+export type AchievementKey =
+  | 'ClearedForTakeoff'
+  | 'MaybeTakeABreak'
+  | 'FrequentFlyer'
+  | 'VeteranPilot'
+  | 'SkyLegend'
+  | 'CloseCall'
+
+export interface Achievement {
+  key: AchievementKey
+  name: string
+  description: string
+  target: number
+  progress: number
+  unlocked: boolean
+  unlockedAtUtc: string | null
+  isDisplayed: boolean
+}
+
+export interface Challenge {
+  id: string
+  type: string
+  description: string
+  target: number
+  progress: number
+  rewardCredits: number
+  isCompleted: boolean
+  completedAtUtc: string | null
+}
+
+export interface LobbyMemberInfo {
+  playerId: string
+  username: string
+  displayedAchievementKey: string | null
+  joinedAtUtc: string
+  isHost: boolean
+}
+
+export interface LobbyDetails {
+  lobbyId: string
+  name: string
+  inviteCode: string
+  hostPlayerId: string
+  hostUsername: string
+  members: LobbyMemberInfo[]
 }
 

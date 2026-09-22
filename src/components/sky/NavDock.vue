@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useRoute } from 'vue-router'
-import { Home, Trophy, Warehouse, Plane, Coins, UserRound } from '@lucide/vue'
+import { Home, Trophy, Warehouse, Plane, Coins, UserRound, Medal } from '@lucide/vue'
 import { cn } from '@/lib/cn'
 
 const route = useRoute()
@@ -10,6 +10,7 @@ const items = [
   { to: '/leaderboard', label: 'Ranks', icon: Trophy, hero: false },
   { to: '/hangar', label: 'Hangar', icon: Warehouse, hero: false },
   { to: '/game', label: 'Play', icon: Plane, hero: true },
+  { to: '/missions', label: 'Missions', icon: Medal, hero: false },
   { to: '/history', label: 'Flights', icon: Coins, hero: false },
   { to: '/profile', label: 'Pilot', icon: UserRound, hero: false },
 ] as const

@@ -4,11 +4,16 @@ import { useRouter } from 'vue-router'
 import { usePlayerStore } from '@/stores/playerStore'
 import { useHistoryStore } from '@/stores/historyStore'
 import { useAuthStore } from '@/stores/AuthStore'
+import { useLobbyStore } from '@/stores/lobbyStore'
+import { useAchievementStore } from '@/stores/achievementStore'
+import { useChallengeStore } from '@/stores/challengeStore'
+import { usePrivateLobbyStore } from '@/stores/privateLobbyStore'
 import * as authService from '@/services/AuthService'
 import Shell from '@/components/sky/Shell.vue'
 import NeonPanel from '@/components/sky/NeonPanel.vue'
 import ArcadeField from '@/components/sky/ArcadeField.vue'
 import ArcadeButton from '@/components/sky/ArcadeButton.vue'
+import AchievementBadge from '@/components/sky/AchievementBadge.vue'
 
 const router = useRouter()
 const playerStore = usePlayerStore()
@@ -75,6 +80,10 @@ function applySuggestion(suggestion: string) {
 function handleLogout() {
   authStore.logout()
   playerStore.clear()
+  useLobbyStore().clear()
+  useAchievementStore().clear()
+  useChallengeStore().clear()
+  usePrivateLobbyStore().clear()
   router.push('/login')
 }
 
@@ -137,7 +146,8 @@ async function handleSave() {
               {{ playerStore.profile.username.slice(0, 2).toUpperCase() }}
             </div>
             <div class="min-w-0">
-              <p class="truncate font-display text-xl font-black uppercase tracking-[0.18em] text-foreground">
+              <p class="flex items-center gap-2 truncate font-display text-xl font-black uppercase tracking-[0.18em] text-foreground">
+                <AchievementBadge :achievement-key="playerStore.profile.displayedAchievementKey" size="md" />
                 {{ playerStore.profile.username }}
               </p>
               <p class="font-arcade text-[8px] uppercase tracking-[0.3em] text-ember">
@@ -188,6 +198,14 @@ async function handleSave() {
               {{ isSaving ? 'Saving…' : 'Save changes' }}
             </ArcadeButton>
           </form>
+        </NeonPanel>
+
+        <NeonPanel class="mt-5" accent="lime">
+          <RouterLink to="/missions">
+            <ArcadeButton type="button" size="md" variant="blue" class="w-full">
+              View Missions &amp; Achievements
+            </ArcadeButton>
+          </RouterLink>
         </NeonPanel>
 
         <NeonPanel class="mt-5" accent="ember">

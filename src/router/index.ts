@@ -17,6 +17,7 @@ import AdminView from '../views/AdminView.vue'
 import AdminCurrentRoundView from '../views/AdminCurrentRoundView.vue'
 import AdminReportsView from '../views/AdminReportsView.vue'
 import HangarView from '../views/HangarView.vue'
+import MissionsView from '../views/MissionsView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -29,6 +30,7 @@ const router = createRouter({
     { path: '/wallet', name: 'wallet', component: WalletView, meta: { requiresAuth: true } },
     { path: '/game', name: 'game', component: GameView, meta: { requiresAuth: true } },
     { path: '/hangar', name: 'hangar', component: HangarView, meta: { requiresAuth: true } },
+    { path: '/missions', name: 'missions', component: MissionsView, meta: { requiresAuth: true } },
     { path: '/history', name: 'history', component: HistoryView, meta: { requiresAuth: true } },
     {
       path: '/volatility',

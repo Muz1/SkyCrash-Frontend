@@ -16,7 +16,16 @@ export const useGameStore = defineStore('game', () => {
   const myBetStatus = ref<'None' | 'Placed' | 'Rejected'>('None')
   const myAutoCashoutTarget = ref<number | null>(null)
   const betRejectionReason = ref<string | null>(null)
-  const roundBets = ref<{ playerId: string; username: string; amount: number }[]>([])
+  const roundBets = ref<
+    {
+      playerId: string
+      username: string
+      displayedAchievementKey: string | null
+      amount: number
+      kind: 'bet' | 'cashout'
+      cashOutMultiplier?: number
+    }[]
+  >([])
   const cashOutStatus = ref<'None' | 'CashedOut' | 'Rejected'>('None')
   const cashOutResult = ref<{ cashOutMultiplier: number; payout: number; auto: boolean } | null>(null)
   const cashOutRejectionReason = ref<string | null>(null)
@@ -117,8 +126,42 @@ export const useGameStore = defineStore('game', () => {
     betRejectionReason.value = payload.message
   }
 
-  function onBetPlacedByPlayer(payload: { playerId: string; username: string; amount: number }) {
-    roundBets.value = [...roundBets.value, payload]
+  function onBetPlacedByPlayer(payload: {
+    playerId: string
+    username: string
+    displayedAchievementKey?: string | null
+    amount: number
+  }) {
+    roundBets.value = [
+      ...roundBets.value,
+      {
+        playerId: payload.playerId,
+        username: payload.username,
+        displayedAchievementKey: payload.displayedAchievementKey ?? null,
+        amount: payload.amount,
+        kind: 'bet',
+      },
+    ]
+  }
+
+  function onPlayerCashedOut(payload: {
+    playerId: string
+    username: string
+    displayedAchievementKey?: string | null
+    cashOutMultiplier: number
+    payout: number
+  }) {
+    roundBets.value = [
+      ...roundBets.value,
+      {
+        playerId: payload.playerId,
+        username: payload.username,
+        displayedAchievementKey: payload.displayedAchievementKey ?? null,
+        amount: payload.payout,
+        kind: 'cashout',
+        cashOutMultiplier: payload.cashOutMultiplier,
+      },
+    ]
   }
 
   function onCashOutConfirmed(payload: { cashOutMultiplier: number; payout: number; auto?: boolean }) {
@@ -162,6 +205,7 @@ export const useGameStore = defineStore('game', () => {
     onRoundCrashed,
     onBetConfirmed,
     onBetRejected,
-    onBetPlacedByPlayer
+    onBetPlacedByPlayer,
+    onPlayerCashedOut,
   }
 })

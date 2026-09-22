@@ -29,5 +29,23 @@ export const useLobbyStore = defineStore('lobby', () => {
     onlinePlayers.value = onlinePlayers.value.filter((p) => p.playerId !== playerId)
   }
 
-  return { onlinePlayers, isLoading, fetchOnlinePlayers, addOnlinePlayer, removeOnlinePlayer }
+  function updateDisplayedAchievement(playerId: string, displayedAchievementKey: string | null) {
+    onlinePlayers.value = onlinePlayers.value.map((p) =>
+      p.playerId === playerId ? { ...p, displayedAchievementKey } : p,
+    )
+  }
+
+  function clear() {
+    onlinePlayers.value = []
+  }
+
+  return {
+    onlinePlayers,
+    isLoading,
+    fetchOnlinePlayers,
+    addOnlinePlayer,
+    removeOnlinePlayer,
+    updateDisplayedAchievement,
+    clear,
+  }
 })

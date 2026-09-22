@@ -3,6 +3,7 @@ import { onMounted } from 'vue'
 import { useLeaderboardStore } from '@/stores/leaderboardStore'
 import Shell from '@/components/sky/Shell.vue'
 import NeonPanel from '@/components/sky/NeonPanel.vue'
+import AchievementBadge from '@/components/sky/AchievementBadge.vue'
 
 const leaderboardStore = useLeaderboardStore()
 
@@ -28,7 +29,9 @@ onMounted(() => {
               :key="i"
               class="flex items-center justify-between gap-2"
             >
-              <span class="truncate text-muted-foreground">{{ i + 1 }}. {{ entry.username }}</span>
+              <span class="flex min-w-0 items-center gap-1.5 truncate text-muted-foreground">
+                {{ i + 1 }}. <AchievementBadge :achievement-key="entry.displayedAchievementKey" size="xs" /> {{ entry.username }}
+              </span>
               <span class="font-arcade text-xs text-lime text-glow-lime">+{{ entry.payout.toLocaleString() }}</span>
             </li>
             <li v-if="leaderboardStore.data.biggestWins.length === 0" class="text-muted-foreground">No wins yet.</li>
@@ -42,7 +45,9 @@ onMounted(() => {
               :key="i"
               class="flex items-center justify-between gap-2"
             >
-              <span class="truncate text-muted-foreground">{{ i + 1 }}. {{ entry.username }}</span>
+              <span class="flex min-w-0 items-center gap-1.5 truncate text-muted-foreground">
+                {{ i + 1 }}. <AchievementBadge :achievement-key="entry.displayedAchievementKey" size="xs" /> {{ entry.username }}
+              </span>
               <span class="font-arcade text-xs text-electric text-glow-blue">{{ entry.cashOutMultiplier.toFixed(2) }}x</span>
             </li>
             <li v-if="leaderboardStore.data.bestMultipliers.length === 0" class="text-muted-foreground">No cash-outs yet.</li>
@@ -56,7 +61,9 @@ onMounted(() => {
               :key="i"
               class="flex items-center justify-between gap-2"
             >
-              <span class="truncate text-muted-foreground">{{ i + 1 }}. {{ entry.username }}</span>
+              <span class="flex min-w-0 items-center gap-1.5 truncate text-muted-foreground">
+                {{ i + 1 }}. <AchievementBadge :achievement-key="entry.displayedAchievementKey" size="xs" /> {{ entry.username }}
+              </span>
               <span class="font-arcade text-xs text-magenta text-glow-magenta">{{ entry.betsPlaced }} bets</span>
             </li>
             <li v-if="leaderboardStore.data.mostActive.length === 0" class="text-muted-foreground">No bets yet.</li>

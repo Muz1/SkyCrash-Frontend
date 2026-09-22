@@ -5,6 +5,11 @@ import { useAuthStore } from '@/stores/AuthStore'
 import { useLobbyStore } from '@/stores/lobbyStore'
 import { useGameStore, type RoundPhase } from '@/stores/gameStore'
 import { usePlayerStore } from '@/stores/playerStore'
+import { usePrivateLobbyStore } from '@/stores/privateLobbyStore'
+import { useToastStore } from '@/stores/toastStore'
+import { useAchievementStore } from '@/stores/achievementStore'
+import { useChallengeStore } from '@/stores/challengeStore'
+import { badgeFor } from '@/lib/achievements'
 
 
 type RoundSnapshot = {
@@ -46,6 +51,7 @@ type BetRejectedPayload = {
 type BetPlacedByPlayerPayload = {
   playerId: string
   username: string
+  displayedAchievementKey: string | null
   amount: number
 }
 
@@ -62,8 +68,45 @@ type CashOutRejectedPayload = {
 type PlayerCashedOutPayload = {
   playerId: string
   username: string
+  displayedAchievementKey: string | null
   cashOutMultiplier: number
   payout: number
+}
+
+type LobbyMemberJoinedPayload = {
+  lobbyId: string
+  playerId: string
+  username: string
+  displayedAchievementKey: string | null
+}
+
+type LobbyMemberLeftPayload = {
+  lobbyId: string
+  playerId: string
+}
+
+type LobbyHostChangedPayload = {
+  lobbyId: string
+  hostPlayerId: string
+  hostUsername: string
+}
+
+type AchievementUnlockedPayload = {
+  achievementKey: string
+  name: string
+  description: string
+}
+
+type ChallengeCompletedPayload = {
+  challengeId: string
+  description: string
+  rewardCredits: number
+  newBalance: number
+}
+
+type DisplayedAchievementChangedPayload = {
+  playerId: string
+  displayedAchievementKey: string | null
 }
 
 export function useSignalRConnection() {
@@ -75,7 +118,7 @@ export function useSignalRConnection() {
     const connection = getConnection()
 
     if (connection.state === 'Disconnected') {
-      connection.on('PlayerOnline', (player: { playerId: string; username: string }) => {
+      connection.on('PlayerOnline', (player: { playerId: string; username: string; displayedAchievementKey: string | null }) => {
         lobbyStore.addOnlinePlayer(player)
       })
 
@@ -88,6 +131,10 @@ export function useSignalRConnection() {
       connection.on('AccountBlocked', () => {
         authStore.logout()
         usePlayerStore().clear()
+        useLobbyStore().clear()
+        useAchievementStore().clear()
+        useChallengeStore().clear()
+        usePrivateLobbyStore().clear()
         router.push({ name: 'login', query: { blocked: '1' } })
       })
 
@@ -134,14 +181,49 @@ connection.on('CashOutRejected', (payload: CashOutRejectedPayload) => {
 })
 connection.on('PlayerCashedOut', (payload: PlayerCashedOutPayload) => {
   // Reuse the same "bets this round" list for cash-out atmosphere too —
-  // shown as a distinct entry so it reads clearly in the UI (handled in GameView.vue).
-  gameStore.roundBets.push({
-    playerId: payload.playerId,
-    username: `${payload.username} (cashed out ${payload.cashOutMultiplier.toFixed(2)}x)`,
-    amount: payload.payout
-  })
+  // shown as a distinct, badge-aware entry in GameView.vue.
+  gameStore.onPlayerCashedOut(payload)
 })
 
+    const privateLobbyStore = usePrivateLobbyStore()
+    const toastStore = useToastStore()
+    const achievementStore = useAchievementStore()
+    const challengeStore = useChallengeStore()
+
+    connection.on('LobbyMemberJoined', (payload: LobbyMemberJoinedPayload) => {
+      privateLobbyStore.memberJoined(payload)
+    })
+    connection.on('LobbyMemberLeft', (payload: LobbyMemberLeftPayload) => {
+      privateLobbyStore.memberLeft(payload.playerId)
+    })
+    connection.on('LobbyHostChanged', (payload: LobbyHostChangedPayload) => {
+      privateLobbyStore.hostChanged(payload.hostPlayerId, payload.hostUsername)
+    })
+    connection.on('LobbyClosed', () => {
+      privateLobbyStore.closed()
+    })
+    connection.on('DisplayedAchievementChanged', (payload: DisplayedAchievementChangedPayload) => {
+      lobbyStore.updateDisplayedAchievement(payload.playerId, payload.displayedAchievementKey)
+      privateLobbyStore.updateDisplayedAchievement(payload.playerId, payload.displayedAchievementKey)
+    })
+    connection.on('AchievementUnlocked', (payload: AchievementUnlockedPayload) => {
+      achievementStore.fetchAchievements()
+      toastStore.push({
+        title: 'Achievement Unlocked',
+        message: `${payload.name} — ${payload.description}`,
+        accent: 'ember',
+        imageSrc: badgeFor(payload.achievementKey),
+      })
+    })
+    connection.on('ChallengeCompleted', (payload: ChallengeCompletedPayload) => {
+      challengeStore.fetchTodayChallenges()
+      usePlayerStore().fetchProfile()
+      toastStore.push({
+        title: 'Challenge Complete',
+        message: `${payload.description} — +${payload.rewardCredits.toLocaleString()} credits`,
+        accent: 'lime',
+      })
+    })
   }
 
 

@@ -15,6 +15,7 @@ import HudHeader from '@/components/sky/HudHeader.vue'
 import NeonPanel from '@/components/sky/NeonPanel.vue'
 import ArcadeButton from '@/components/sky/ArcadeButton.vue'
 import StatusBadge from '@/components/sky/StatusBadge.vue'
+import AchievementBadge from '@/components/sky/AchievementBadge.vue'
 
 const gameStore = useGameStore()
 const playerStore = usePlayerStore()
@@ -177,11 +178,15 @@ async function handleCashOut() {
         <NeonPanel title="Bets This Round" accent="magenta">
           <div class="flex flex-wrap gap-2">
             <span
-              v-for="b in gameStore.roundBets"
-              :key="b.playerId"
-              class="clip-hud border border-violet/40 bg-void/50 px-2 py-1 font-arcade text-[8px] text-muted-foreground"
+              v-for="(b, i) in gameStore.roundBets"
+              :key="`${b.playerId}-${i}`"
+              :class="[
+                'clip-hud flex items-center gap-1 border bg-void/50 px-2 py-1 font-arcade text-[8px]',
+                b.kind === 'cashout' ? 'border-lime/50 text-lime' : 'border-violet/40 text-muted-foreground',
+              ]"
             >
-              {{ b.username }}: {{ b.amount }}
+              <AchievementBadge :achievement-key="b.displayedAchievementKey" size="xs" />
+              {{ b.username }}: {{ b.kind === 'cashout' ? `+${b.amount} @ ${b.cashOutMultiplier?.toFixed(2)}x` : b.amount }}
             </span>
           </div>
         </NeonPanel>
