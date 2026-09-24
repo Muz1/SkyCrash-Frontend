@@ -6,6 +6,8 @@ import AdminShell from '@/components/sky/AdminShell.vue'
 import NeonPanel from '@/components/sky/NeonPanel.vue'
 import ArcadeButton from '@/components/sky/ArcadeButton.vue'
 import ArcadeField from '@/components/sky/ArcadeField.vue'
+import ExportPdfButton from '@/components/sky/ExportPdfButton.vue'
+import { buildReportsPageReport } from '@/lib/adminReports'
 import type { AdminPlayerSummary, BetHistoryEntry, RoundReportResponse } from '@/types'
 
 const roundsReport = ref<RoundReportResponse | null>(null)
@@ -16,6 +18,14 @@ const playerResults = ref<AdminPlayerSummary[]>([])
 const selectedPlayer = ref<AdminPlayerSummary | null>(null)
 const playerBets = ref<BetHistoryEntry[]>([])
 const isSearchingPlayers = ref(false)
+
+function buildReport() {
+  if (!roundsReport.value) return null
+  return buildReportsPageReport(
+    roundsReport.value,
+    selectedPlayer.value ? { player: selectedPlayer.value, bets: playerBets.value } : null,
+  )
+}
 
 async function loadRoundsReport(page: number) {
   roundsPage.value = page
@@ -45,9 +55,12 @@ onMounted(() => {
   <AdminShell
     help-text="Rounds Report lists every round with its outcome and betting activity, most recent first. Player Activity lets you look up one player's full bet history for support or investigation purposes. Both are read-only."
   >
-    <h1 class="font-display text-2xl font-black uppercase tracking-[0.2em] text-ember text-glow-ember sm:text-3xl">
-      Reports
-    </h1>
+    <div class="flex flex-wrap items-start justify-between gap-3">
+      <h1 class="font-display text-2xl font-black uppercase tracking-[0.2em] text-ember text-glow-ember sm:text-3xl">
+        Reports
+      </h1>
+      <ExportPdfButton :build="buildReport" />
+    </div>
 
     <NeonPanel class="mt-5" title="Rounds Report" accent="ember">
       <div v-if="roundsReport" class="overflow-x-auto">

@@ -6,10 +6,25 @@ import AdminShell from '@/components/sky/AdminShell.vue'
 import NeonPanel from '@/components/sky/NeonPanel.vue'
 import ArcadeButton from '@/components/sky/ArcadeButton.vue'
 import AdjustBalanceModal from '@/components/AdjustBalanceModal.vue'
+import ExportPdfButton from '@/components/sky/ExportPdfButton.vue'
+import { buildPlayersReport } from '@/lib/adminReports'
 
 const adminStore = useAdminStore()
 const authStore = useAuthStore()
 const modalTarget = ref<{ playerId: string; username: string } | null>(null)
+
+const BLOCKED_LABELS = { all: 'All accounts', active: 'Active only', blocked: 'Blocked only' } as const
+const ROLE_LABELS = { all: 'All roles', admin: 'Admins only', player: 'Players only' } as const
+
+function buildReport() {
+  return buildPlayersReport(adminStore.players, {
+    search: adminStore.searchTerm,
+    blocked: BLOCKED_LABELS[adminStore.blockedFilter],
+    role: ROLE_LABELS[adminStore.adminFilter],
+    sortBy: adminStore.sortBy,
+    sortDir: adminStore.sortDir,
+  })
+}
 
 onMounted(() => {
   adminStore.fetchPlayers()
@@ -20,9 +35,12 @@ onMounted(() => {
   <AdminShell
     help-text="Search, filter and sort every player account. Promote/demote grants or removes admin access. Block immediately prevents that player from logging in or playing, and disconnects any live session — unblock restores access. Adjust changes a player's credit balance directly, for support or correction purposes, and is logged."
   >
-    <h1 class="font-display text-2xl font-black uppercase tracking-[0.2em] text-ember text-glow-ember sm:text-3xl">
-      Player Management
-    </h1>
+    <div class="flex flex-wrap items-start justify-between gap-3">
+      <h1 class="font-display text-2xl font-black uppercase tracking-[0.2em] text-ember text-glow-ember sm:text-3xl">
+        Player Management
+      </h1>
+      <ExportPdfButton :build="buildReport" />
+    </div>
 
     <NeonPanel class="mt-5" title="Players" accent="ember">
       <div class="flex flex-wrap items-center gap-2">

@@ -2,6 +2,7 @@
 import { RouterView } from 'vue-router'
 import { useSignalRConnection } from '@/composables/useSignalRConnection'
 import ToastStack from '@/components/sky/ToastStack.vue'
+import BadgeViewer from '@/components/sky/BadgeViewer.vue'
 
 useSignalRConnection()
 </script>
@@ -9,4 +10,5 @@ useSignalRConnection()
 <template>
   <RouterView />
   <ToastStack />
+  <BadgeViewer />
 </template>

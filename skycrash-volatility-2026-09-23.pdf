@@ -1,0 +1,645 @@
+%PDF-1.3
+%ºß¬à
+3 0 obj
+<</Type /Page
+/Parent 1 0 R
+/Resources 2 0 R
+/MediaBox [0 0 595.2799999999999727 841.8899999999999864]
+/Contents 4 0 R
+>>
+endobj
+4 0 obj
+<<
+/Length 7067
+>>
+stream
+0.200025 w
+0 G
+BT
+/F2 9 Tf
+10.3499999999999996 TL
+0.918 0.345 0.047 rg
+40. 792.8899999999999864 Td
+(SKYCRASH — ADMIN REPORT) Tj
+ET
+BT
+/F2 20 Tf
+23. TL
+0.118 0.118 0.157 rg
+40. 767.7400000000000091 Td
+(Volatility Report) Tj
+ET
+BT
+/F1 9 Tf
+10.3499999999999996 TL
+0.431 0.431 0.49 rg
+40. 751.7400000000000091 Td
+(Generated 23/09/2026, 19:25:01) Tj
+ET
+0.92 0.35 0.05 RG
+1.5 w
+40. 742.5899999999999181 m
+555.2799999999999727 742.5899999999999181 l
+S
+BT
+/F1 10 Tf
+11.5 TL
+0.118 0.118 0.157 rg
+40. 718.5899999999999181 Td
+(Statistics on where the last 500 crashed rounds actually crashed. Use this to sanity-check that the live game) Tj
+T* (behaves as the configured house edge predicts and to spot anomalies.) Tj
+ET
+BT
+/F2 13 Tf
+14.9499999999999993 TL
+0.918 0.345 0.047 rg
+40. 678.5899999999999181 Td
+(Crash Point Statistics) Tj
+ET
+BT
+/F1 9.5 Tf
+10.9249999999999989 TL
+0.431 0.431 0.49 rg
+40. 662.5399999999999636 Td
+(The "crash point" is the multiplier at which a round ended. The mean is pulled up by rare very high crashes, so the median) Tj
+T* (\(the middle value\) better reflects a typical round. Standard deviation measures how spread out crash points are. P10) Tj
+T* (means 10% of rounds crashed at or below that value; P90 means 90% did.) Tj
+ET
+0.92 0.35 0.05 RG
+1.5 w
+0.92 0.35 0.05 RG
+1.5 w
+0.92 0.35 0.05 RG
+1.5 w
+0.97 0.96 0.94 rg
+0.78 G
+0.1 w
+0.97 0.96 0.94 rg
+40. 627.5649999999999409 231.8760000000000048 -23.5 re
+B
+BT
+/F2 10 Tf
+11.5 TL
+0.118 0.118 0.157 rg
+46. 613.0649999999999409 Td
+(Rounds sampled) Tj
+ET
+1. g
+0.78 G
+0.1 w
+1. g
+271.8759999999999764 627.5649999999999409 283.4039999999999964 -23.5 re
+B
+BT
+/F1 10 Tf
+11.5 TL
+0.118 0.118 0.157 rg
+277.8759999999999764 613.0649999999999409 Td
+(500) Tj
+ET
+0.97 0.96 0.94 rg
+0.78 G
+0.1 w
+0.97 0.96 0.94 rg
+40. 604.0649999999999409 231.8760000000000048 -23.5 re
+B
+BT
+/F2 10 Tf
+11.5 TL
+0.118 0.118 0.157 rg
+46. 589.5649999999999409 Td
+(Mean crash point) Tj
+ET
+1. g
+0.78 G
+0.1 w
+1. g
+271.8759999999999764 604.0649999999999409 283.4039999999999964 -23.5 re
+B
+BT
+/F1 10 Tf
+11.5 TL
+0.118 0.118 0.157 rg
+277.8759999999999764 589.5649999999999409 Td
+(3.2x) Tj
+ET
+0.97 0.96 0.94 rg
+0.78 G
+0.1 w
+0.97 0.96 0.94 rg
+40. 580.5649999999999409 231.8760000000000048 -23.5 re
+B
+BT
+/F2 10 Tf
+11.5 TL
+0.118 0.118 0.157 rg
+46. 566.0649999999999409 Td
+(Median crash point) Tj
+ET
+1. g
+0.78 G
+0.1 w
+1. g
+271.8759999999999764 580.5649999999999409 283.4039999999999964 -23.5 re
+B
+BT
+/F1 10 Tf
+11.5 TL
+0.118 0.118 0.157 rg
+277.8759999999999764 566.0649999999999409 Td
+(1.9x) Tj
+ET
+0.97 0.96 0.94 rg
+0.78 G
+0.1 w
+0.97 0.96 0.94 rg
+40. 557.0649999999999409 231.8760000000000048 -23.5 re
+B
+BT
+/F2 10 Tf
+11.5 TL
+0.118 0.118 0.157 rg
+46. 542.5649999999999409 Td
+(Standard deviation) Tj
+ET
+1. g
+0.78 G
+0.1 w
+1. g
+271.8759999999999764 557.0649999999999409 283.4039999999999964 -23.5 re
+B
+BT
+/F1 10 Tf
+11.5 TL
+0.118 0.118 0.157 rg
+277.8759999999999764 542.5649999999999409 Td
+(8.1) Tj
+ET
+0.97 0.96 0.94 rg
+0.78 G
+0.1 w
+0.97 0.96 0.94 rg
+40. 533.5649999999999409 231.8760000000000048 -23.5 re
+B
+BT
+/F2 10 Tf
+11.5 TL
+0.118 0.118 0.157 rg
+46. 519.0649999999999409 Td
+(P10 / P90) Tj
+ET
+1. g
+0.78 G
+0.1 w
+1. g
+271.8759999999999764 533.5649999999999409 283.4039999999999964 -23.5 re
+B
+BT
+/F1 10 Tf
+11.5 TL
+0.118 0.118 0.157 rg
+277.8759999999999764 519.0649999999999409 Td
+(1.05x / 7.2x) Tj
+ET
+0.97 0.96 0.94 rg
+0.78 G
+0.1 w
+0.97 0.96 0.94 rg
+40. 510.0649999999999409 231.8760000000000048 -23.5 re
+B
+BT
+/F2 10 Tf
+11.5 TL
+0.118 0.118 0.157 rg
+46. 495.5649999999999409 Td
+(P25 / P75) Tj
+ET
+1. g
+0.78 G
+0.1 w
+1. g
+271.8759999999999764 510.0649999999999409 283.4039999999999964 -23.5 re
+B
+BT
+/F1 10 Tf
+11.5 TL
+0.118 0.118 0.157 rg
+277.8759999999999764 495.5649999999999409 Td
+(1.3x / 3.4x) Tj
+ET
+0.92 0.35 0.05 RG
+1.5 w
+0.78 G
+0. w
+0.92 0.35 0.05 RG
+1.5 w
+0.92 0.35 0.05 RG
+1.5 w
+BT
+/F2 13 Tf
+14.9499999999999993 TL
+0.918 0.345 0.047 rg
+40. 455.5649999999999409 Td
+(Crash Point Distribution) Tj
+ET
+BT
+/F1 9.5 Tf
+10.9249999999999989 TL
+0.431 0.431 0.49 rg
+40. 439.5149999999999295 Td
+(How many sampled rounds crashed within each multiplier range. In a fair crash game most rounds end at low multipliers,) Tj
+T* (with the share falling steadily as the range increases.) Tj
+ET
+0.92 0.35 0.05 RG
+1.5 w
+0.92 0.35 0.05 RG
+1.5 w
+0.92 0.35 0.05 rg
+0.78 G
+0. w
+0.92 0.35 0.05 rg
+40. 417.3649999999999523 152.5286159554731 -17.7749999999999986 re
+f
+BT
+/F2 8.5 Tf
+9.7749999999999986 TL
+1. g
+44. 406.1399999999999295 Td
+(Range) Tj
+ET
+0.92 0.35 0.05 rg
+0.78 G
+0. w
+0.92 0.35 0.05 rg
+192.5286159554731 417.3649999999999523 125.983888682745814 -17.7749999999999986 re
+f
+BT
+/F2 8.5 Tf
+9.7749999999999986 TL
+1. g
+196.5286159554731 406.1399999999999295 Td
+(Rounds) Tj
+ET
+0.92 0.35 0.05 rg
+0.78 G
+0. w
+0.92 0.35 0.05 rg
+318.5125046382188998 417.3649999999999523 236.7674953617810729 -17.7749999999999986 re
+f
+BT
+/F2 8.5 Tf
+9.7749999999999986 TL
+1. g
+322.5125046382188998 406.1399999999999295 Td
+(Share of Sample) Tj
+ET
+0.92 0.35 0.05 RG
+1.5 w
+0.96 g
+0.78 G
+0. w
+0.96 g
+40. 399.589999999999975 152.5286159554731 -17.7749999999999986 re
+f
+BT
+/F1 8.5 Tf
+9.7749999999999986 TL
+0.118 0.118 0.157 rg
+44. 388.3649999999999523 Td
+(1.00-1.50x) Tj
+ET
+0.96 g
+0.78 G
+0. w
+0.96 g
+192.5286159554731 399.589999999999975 125.983888682745814 -17.7749999999999986 re
+f
+BT
+/F1 8.5 Tf
+9.7749999999999986 TL
+0.118 0.118 0.157 rg
+196.5286159554731 388.3649999999999523 Td
+(200) Tj
+ET
+0.96 g
+0.78 G
+0. w
+0.96 g
+318.5125046382188998 399.589999999999975 236.7674953617810729 -17.7749999999999986 re
+f
+BT
+/F1 8.5 Tf
+9.7749999999999986 TL
+0.118 0.118 0.157 rg
+322.5125046382188998 388.3649999999999523 Td
+(40%) Tj
+ET
+1. g
+0.78 G
+0. w
+1. g
+40. 381.8149999999999977 152.5286159554731 -17.7749999999999986 re
+f
+BT
+/F1 8.5 Tf
+9.7749999999999986 TL
+0.118 0.118 0.157 rg
+44. 370.589999999999975 Td
+(1.50-2.00x) Tj
+ET
+1. g
+0.78 G
+0. w
+1. g
+192.5286159554731 381.8149999999999977 125.983888682745814 -17.7749999999999986 re
+f
+BT
+/F1 8.5 Tf
+9.7749999999999986 TL
+0.118 0.118 0.157 rg
+196.5286159554731 370.589999999999975 Td
+(100) Tj
+ET
+1. g
+0.78 G
+0. w
+1. g
+318.5125046382188998 381.8149999999999977 236.7674953617810729 -17.7749999999999986 re
+f
+BT
+/F1 8.5 Tf
+9.7749999999999986 TL
+0.118 0.118 0.157 rg
+322.5125046382188998 370.589999999999975 Td
+(20%) Tj
+ET
+0.96 g
+0.78 G
+0. w
+0.96 g
+40. 364.0400000000000205 152.5286159554731 -17.7749999999999986 re
+f
+BT
+/F1 8.5 Tf
+9.7749999999999986 TL
+0.118 0.118 0.157 rg
+44. 352.8149999999999977 Td
+(2x+) Tj
+ET
+0.96 g
+0.78 G
+0. w
+0.96 g
+192.5286159554731 364.0400000000000205 125.983888682745814 -17.7749999999999986 re
+f
+BT
+/F1 8.5 Tf
+9.7749999999999986 TL
+0.118 0.118 0.157 rg
+196.5286159554731 352.8149999999999977 Td
+(200) Tj
+ET
+0.96 g
+0.78 G
+0. w
+0.96 g
+318.5125046382188998 364.0400000000000205 236.7674953617810729 -17.7749999999999986 re
+f
+BT
+/F1 8.5 Tf
+9.7749999999999986 TL
+0.118 0.118 0.157 rg
+322.5125046382188998 352.8149999999999977 Td
+(40%) Tj
+ET
+0.92 0.35 0.05 RG
+1.5 w
+0.78 G
+0. w
+0.92 0.35 0.05 RG
+1.5 w
+0.92 0.35 0.05 RG
+1.5 w
+BT
+/F1 8 Tf
+9.1999999999999993 TL
+0.431 0.431 0.49 rg
+246.1199999999999761 20. Td
+(Volatility Report · Page 1 of 1) Tj
+ET
+endstream
+endobj
+1 0 obj
+<</Type /Pages
+/Kids [3 0 R ]
+/Count 1
+>>
+endobj
+5 0 obj
+<<
+/Type /Font
+/BaseFont /Helvetica
+/Subtype /Type1
+/Encoding /WinAnsiEncoding
+/FirstChar 32
+/LastChar 255
+>>
+endobj
+6 0 obj
+<<
+/Type /Font
+/BaseFont /Helvetica-Bold
+/Subtype /Type1
+/Encoding /WinAnsiEncoding
+/FirstChar 32
+/LastChar 255
+>>
+endobj
+7 0 obj
+<<
+/Type /Font
+/BaseFont /Helvetica-Oblique
+/Subtype /Type1
+/Encoding /WinAnsiEncoding
+/FirstChar 32
+/LastChar 255
+>>
+endobj
+8 0 obj
+<<
+/Type /Font
+/BaseFont /Helvetica-BoldOblique
+/Subtype /Type1
+/Encoding /WinAnsiEncoding
+/FirstChar 32
+/LastChar 255
+>>
+endobj
+9 0 obj
+<<
+/Type /Font
+/BaseFont /Courier
+/Subtype /Type1
+/Encoding /WinAnsiEncoding
+/FirstChar 32
+/LastChar 255
+>>
+endobj
+10 0 obj
+<<
+/Type /Font
+/BaseFont /Courier-Bold
+/Subtype /Type1
+/Encoding /WinAnsiEncoding
+/FirstChar 32
+/LastChar 255
+>>
+endobj
+11 0 obj
+<<
+/Type /Font
+/BaseFont /Courier-Oblique
+/Subtype /Type1
+/Encoding /WinAnsiEncoding
+/FirstChar 32
+/LastChar 255
+>>
+endobj
+12 0 obj
+<<
+/Type /Font
+/BaseFont /Courier-BoldOblique
+/Subtype /Type1
+/Encoding /WinAnsiEncoding
+/FirstChar 32
+/LastChar 255
+>>
+endobj
+13 0 obj
+<<
+/Type /Font
+/BaseFont /Times-Roman
+/Subtype /Type1
+/Encoding /WinAnsiEncoding
+/FirstChar 32
+/LastChar 255
+>>
+endobj
+14 0 obj
+<<
+/Type /Font
+/BaseFont /Times-Bold
+/Subtype /Type1
+/Encoding /WinAnsiEncoding
+/FirstChar 32
+/LastChar 255
+>>
+endobj
+15 0 obj
+<<
+/Type /Font
+/BaseFont /Times-Italic
+/Subtype /Type1
+/Encoding /WinAnsiEncoding
+/FirstChar 32
+/LastChar 255
+>>
+endobj
+16 0 obj
+<<
+/Type /Font
+/BaseFont /Times-BoldItalic
+/Subtype /Type1
+/Encoding /WinAnsiEncoding
+/FirstChar 32
+/LastChar 255
+>>
+endobj
+17 0 obj
+<<
+/Type /Font
+/BaseFont /ZapfDingbats
+/Subtype /Type1
+/FirstChar 32
+/LastChar 255
+>>
+endobj
+18 0 obj
+<<
+/Type /Font
+/BaseFont /Symbol
+/Subtype /Type1
+/FirstChar 32
+/LastChar 255
+>>
+endobj
+2 0 obj
+<<
+/ProcSet [/PDF /Text /ImageB /ImageC /ImageI]
+/Font <<
+/F1 5 0 R
+/F2 6 0 R
+/F3 7 0 R
+/F4 8 0 R
+/F5 9 0 R
+/F6 10 0 R
+/F7 11 0 R
+/F8 12 0 R
+/F9 13 0 R
+/F10 14 0 R
+/F11 15 0 R
+/F12 16 0 R
+/F13 17 0 R
+/F14 18 0 R
+>>
+/XObject <<
+>>
+>>
+endobj
+19 0 obj
+<<
+/Producer (jsPDF 4.2.1)
+/CreationDate (D:20260923192501+02'00')
+>>
+endobj
+20 0 obj
+<<
+/Type /Catalog
+/Pages 1 0 R
+/OpenAction [3 0 R /FitH null]
+/PageLayout /OneColumn
+>>
+endobj
+xref
+0 21
+0000000000 65535 f 
+0000007271 00000 n 
+0000009088 00000 n 
+0000000015 00000 n 
+0000000152 00000 n 
+0000007328 00000 n 
+0000007453 00000 n 
+0000007583 00000 n 
+0000007716 00000 n 
+0000007853 00000 n 
+0000007976 00000 n 
+0000008105 00000 n 
+0000008237 00000 n 
+0000008373 00000 n 
+0000008501 00000 n 
+0000008628 00000 n 
+0000008757 00000 n 
+0000008890 00000 n 
+0000008992 00000 n 
+0000009336 00000 n 
+0000009422 00000 n 
+trailer
+<<
+/Size 21
+/Root 20 0 R
+/Info 19 0 R
+/ID [ <DEAE42D86ABC789B9B6D542C7D428D9A> <DEAE42D86ABC789B9B6D542C7D428D9A> ]
+>>
+startxref
+9526
+%%EOF

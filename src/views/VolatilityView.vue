@@ -5,8 +5,14 @@ import AdminShell from '@/components/sky/AdminShell.vue'
 import NeonPanel from '@/components/sky/NeonPanel.vue'
 import ScoreDisplay from '@/components/sky/ScoreDisplay.vue'
 import ArcadeButton from '@/components/sky/ArcadeButton.vue'
+import ExportPdfButton from '@/components/sky/ExportPdfButton.vue'
+import { buildVolatilityReport } from '@/lib/adminReports'
 
 const volatilityStore = useVolatilityStore()
+
+function buildReport() {
+  return volatilityStore.summary ? buildVolatilityReport(volatilityStore.summary) : null
+}
 
 onMounted(() => {
   volatilityStore.fetchSummary()
@@ -17,11 +23,14 @@ onMounted(() => {
   <AdminShell
     help-text="Statistics on where rounds have actually been crashing over the last 500 rounds — mean, median, spread, percentiles and a distribution histogram. Use this to sanity-check that the live game matches the configured house edge and to spot anomalies."
   >
-    <div class="flex items-center justify-between">
+    <div class="flex flex-wrap items-start justify-between gap-3">
       <h1 class="font-display text-2xl font-black uppercase tracking-[0.2em] text-ember text-glow-ember sm:text-3xl">
         Volatility
       </h1>
-      <ArcadeButton size="sm" variant="ghost" @click="volatilityStore.fetchSummary">Refresh</ArcadeButton>
+      <div class="flex items-start gap-2">
+        <ArcadeButton size="sm" variant="ghost" @click="volatilityStore.fetchSummary">Refresh</ArcadeButton>
+        <ExportPdfButton :build="buildReport" />
+      </div>
     </div>
 
     <p v-if="!volatilityStore.summary" class="mt-6 text-muted-foreground">Loading distribution…</p>

@@ -7,6 +7,8 @@ import NeonPanel from '@/components/sky/NeonPanel.vue'
 import ScoreDisplay from '@/components/sky/ScoreDisplay.vue'
 import ArcadeButton from '@/components/sky/ArcadeButton.vue'
 import HouseEdgeConfirmModal from '@/components/HouseEdgeConfirmModal.vue'
+import ExportPdfButton from '@/components/sky/ExportPdfButton.vue'
+import { buildRtpReport } from '@/lib/adminReports'
 
 const rtpStore = useRtpStore()
 const adminSettingsStore = useAdminSettingsStore()
@@ -14,6 +16,10 @@ const adminSettingsStore = useAdminSettingsStore()
 const houseEdgeInput = ref(1)
 const showConfirmModal = ref(false)
 const saveMessage = ref('')
+
+function buildReport() {
+  return rtpStore.summary ? buildRtpReport(rtpStore.summary, adminSettingsStore.settings) : null
+}
 
 onMounted(async () => {
   rtpStore.fetchSummary()
@@ -35,9 +41,12 @@ function handleSaved() {
   <AdminShell
     help-text="Theoretical RTP is derived directly from the configured house edge — it's the payout rate the math guarantees over the long run. All-Time / Last 24 Hours show the ACTUAL rate paid out to real players, for comparison. Changing the house edge affects every round from the moment it's saved onward, and requires re-entering your password to confirm — it never changes a round already in progress."
   >
-    <h1 class="font-display text-2xl font-black uppercase tracking-[0.2em] text-ember text-glow-ember sm:text-3xl">
-      RTP &amp; House Edge
-    </h1>
+    <div class="flex flex-wrap items-start justify-between gap-3">
+      <h1 class="font-display text-2xl font-black uppercase tracking-[0.2em] text-ember text-glow-ember sm:text-3xl">
+        RTP &amp; House Edge
+      </h1>
+      <ExportPdfButton :build="buildReport" />
+    </div>
 
     <NeonPanel class="mt-5" title="House Edge Setting" accent="magenta">
       <div v-if="adminSettingsStore.settings" class="flex flex-wrap items-end gap-4">

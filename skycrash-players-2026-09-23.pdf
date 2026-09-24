@@ -1,0 +1,698 @@
+%PDF-1.3
+%ºß¬à
+3 0 obj
+<</Type /Page
+/Parent 1 0 R
+/Resources 2 0 R
+/MediaBox [0 0 595.2799999999999727 841.8899999999999864]
+/Contents 4 0 R
+>>
+endobj
+4 0 obj
+<<
+/Length 7775
+>>
+stream
+0.200025 w
+0 G
+BT
+/F2 9 Tf
+10.3499999999999996 TL
+0.918 0.345 0.047 rg
+40. 792.8899999999999864 Td
+(SKYCRASH — ADMIN REPORT) Tj
+ET
+BT
+/F2 20 Tf
+23. TL
+0.118 0.118 0.157 rg
+40. 767.7400000000000091 Td
+(Player Management Report) Tj
+ET
+BT
+/F1 9 Tf
+10.3499999999999996 TL
+0.431 0.431 0.49 rg
+40. 751.7400000000000091 Td
+(Generated 23/09/2026, 19:24:40) Tj
+ET
+0.92 0.35 0.05 RG
+1.5 w
+40. 742.5899999999999181 m
+555.2799999999999727 742.5899999999999181 l
+S
+BT
+/F1 10 Tf
+11.5 TL
+0.118 0.118 0.157 rg
+40. 718.5899999999999181 Td
+(A snapshot of the player accounts that matched the filters on the Player Management page when this report was) Tj
+T* (exported. Use it to review account status, roles and credit balances.) Tj
+ET
+BT
+/F2 13 Tf
+14.9499999999999993 TL
+0.918 0.345 0.047 rg
+40. 678.5899999999999181 Td
+(Filters Applied) Tj
+ET
+BT
+/F1 9.5 Tf
+10.9249999999999989 TL
+0.431 0.431 0.49 rg
+40. 662.5399999999999636 Td
+(The search and filter settings in effect when the report was generated. Only accounts matching these appear below.) Tj
+ET
+0.92 0.35 0.05 RG
+1.5 w
+0.92 0.35 0.05 RG
+1.5 w
+0.92 0.35 0.05 RG
+1.5 w
+0.97 0.96 0.94 rg
+0.78 G
+0.1 w
+0.97 0.96 0.94 rg
+40. 653.2149999999999181 231.8760000000000048 -23.5 re
+B
+BT
+/F2 10 Tf
+11.5 TL
+0.118 0.118 0.157 rg
+46. 638.7149999999999181 Td
+(Search term) Tj
+ET
+1. g
+0.78 G
+0.1 w
+1. g
+271.8759999999999764 653.2149999999999181 283.4039999999999964 -23.5 re
+B
+BT
+/F1 10 Tf
+11.5 TL
+0.118 0.118 0.157 rg
+277.8759999999999764 638.7149999999999181 Td
+(None) Tj
+ET
+0.97 0.96 0.94 rg
+0.78 G
+0.1 w
+0.97 0.96 0.94 rg
+40. 629.7149999999999181 231.8760000000000048 -23.5 re
+B
+BT
+/F2 10 Tf
+11.5 TL
+0.118 0.118 0.157 rg
+46. 615.2149999999999181 Td
+(Account status) Tj
+ET
+1. g
+0.78 G
+0.1 w
+1. g
+271.8759999999999764 629.7149999999999181 283.4039999999999964 -23.5 re
+B
+BT
+/F1 10 Tf
+11.5 TL
+0.118 0.118 0.157 rg
+277.8759999999999764 615.2149999999999181 Td
+(All accounts) Tj
+ET
+0.97 0.96 0.94 rg
+0.78 G
+0.1 w
+0.97 0.96 0.94 rg
+40. 606.2149999999999181 231.8760000000000048 -23.5 re
+B
+BT
+/F2 10 Tf
+11.5 TL
+0.118 0.118 0.157 rg
+46. 591.7149999999999181 Td
+(Role) Tj
+ET
+1. g
+0.78 G
+0.1 w
+1. g
+271.8759999999999764 606.2149999999999181 283.4039999999999964 -23.5 re
+B
+BT
+/F1 10 Tf
+11.5 TL
+0.118 0.118 0.157 rg
+277.8759999999999764 591.7149999999999181 Td
+(All roles) Tj
+ET
+0.97 0.96 0.94 rg
+0.78 G
+0.1 w
+0.97 0.96 0.94 rg
+40. 582.7149999999999181 231.8760000000000048 -23.5 re
+B
+BT
+/F2 10 Tf
+11.5 TL
+0.118 0.118 0.157 rg
+46. 568.2149999999999181 Td
+(Sorted by) Tj
+ET
+1. g
+0.78 G
+0.1 w
+1. g
+271.8759999999999764 582.7149999999999181 283.4039999999999964 -23.5 re
+B
+BT
+/F1 10 Tf
+11.5 TL
+0.118 0.118 0.157 rg
+277.8759999999999764 568.2149999999999181 Td
+(username \(ascending\)) Tj
+ET
+0.92 0.35 0.05 RG
+1.5 w
+0.78 G
+0. w
+0.92 0.35 0.05 RG
+1.5 w
+0.92 0.35 0.05 RG
+1.5 w
+BT
+/F2 13 Tf
+14.9499999999999993 TL
+0.918 0.345 0.047 rg
+40. 528.2149999999999181 Td
+(Summary) Tj
+ET
+BT
+/F1 9.5 Tf
+10.9249999999999989 TL
+0.431 0.431 0.49 rg
+40. 512.1649999999999636 Td
+(Totals across the listed accounts. "Blocked" accounts cannot log in or play. "Total credit balance" is the combined credits) Tj
+T* (currently held by these players.) Tj
+ET
+0.92 0.35 0.05 RG
+1.5 w
+0.92 0.35 0.05 RG
+1.5 w
+0.92 0.35 0.05 RG
+1.5 w
+0.97 0.96 0.94 rg
+0.78 G
+0.1 w
+0.97 0.96 0.94 rg
+40. 490.0149999999999864 231.8760000000000048 -23.5 re
+B
+BT
+/F2 10 Tf
+11.5 TL
+0.118 0.118 0.157 rg
+46. 475.5149999999999864 Td
+(Accounts listed) Tj
+ET
+1. g
+0.78 G
+0.1 w
+1. g
+271.8759999999999764 490.0149999999999864 283.4039999999999964 -23.5 re
+B
+BT
+/F1 10 Tf
+11.5 TL
+0.118 0.118 0.157 rg
+277.8759999999999764 475.5149999999999864 Td
+(0) Tj
+ET
+0.97 0.96 0.94 rg
+0.78 G
+0.1 w
+0.97 0.96 0.94 rg
+40. 466.5149999999999864 231.8760000000000048 -23.5 re
+B
+BT
+/F2 10 Tf
+11.5 TL
+0.118 0.118 0.157 rg
+46. 452.0149999999999864 Td
+(Active accounts) Tj
+ET
+1. g
+0.78 G
+0.1 w
+1. g
+271.8759999999999764 466.5149999999999864 283.4039999999999964 -23.5 re
+B
+BT
+/F1 10 Tf
+11.5 TL
+0.118 0.118 0.157 rg
+277.8759999999999764 452.0149999999999864 Td
+(0) Tj
+ET
+0.97 0.96 0.94 rg
+0.78 G
+0.1 w
+0.97 0.96 0.94 rg
+40. 443.0149999999999864 231.8760000000000048 -23.5 re
+B
+BT
+/F2 10 Tf
+11.5 TL
+0.118 0.118 0.157 rg
+46. 428.5149999999999864 Td
+(Blocked accounts) Tj
+ET
+1. g
+0.78 G
+0.1 w
+1. g
+271.8759999999999764 443.0149999999999864 283.4039999999999964 -23.5 re
+B
+BT
+/F1 10 Tf
+11.5 TL
+0.118 0.118 0.157 rg
+277.8759999999999764 428.5149999999999864 Td
+(0) Tj
+ET
+0.97 0.96 0.94 rg
+0.78 G
+0.1 w
+0.97 0.96 0.94 rg
+40. 419.5149999999999864 231.8760000000000048 -23.5 re
+B
+BT
+/F2 10 Tf
+11.5 TL
+0.118 0.118 0.157 rg
+46. 405.0149999999999864 Td
+(Admins) Tj
+ET
+1. g
+0.78 G
+0.1 w
+1. g
+271.8759999999999764 419.5149999999999864 283.4039999999999964 -23.5 re
+B
+BT
+/F1 10 Tf
+11.5 TL
+0.118 0.118 0.157 rg
+277.8759999999999764 405.0149999999999864 Td
+(0) Tj
+ET
+0.97 0.96 0.94 rg
+0.78 G
+0.1 w
+0.97 0.96 0.94 rg
+40. 396.0149999999999864 231.8760000000000048 -23.5 re
+B
+BT
+/F2 10 Tf
+11.5 TL
+0.118 0.118 0.157 rg
+46. 381.5149999999999864 Td
+(Total credit balance) Tj
+ET
+1. g
+0.78 G
+0.1 w
+1. g
+271.8759999999999764 396.0149999999999864 283.4039999999999964 -23.5 re
+B
+BT
+/F1 10 Tf
+11.5 TL
+0.118 0.118 0.157 rg
+277.8759999999999764 381.5149999999999864 Td
+(0.00) Tj
+ET
+0.92 0.35 0.05 RG
+1.5 w
+0.78 G
+0. w
+0.92 0.35 0.05 RG
+1.5 w
+0.92 0.35 0.05 RG
+1.5 w
+BT
+/F2 13 Tf
+14.9499999999999993 TL
+0.918 0.345 0.047 rg
+40. 341.5149999999999864 Td
+(Accounts) Tj
+ET
+BT
+/F1 9.5 Tf
+10.9249999999999989 TL
+0.431 0.431 0.49 rg
+40. 325.4650000000000318 Td
+(Each row is one player account. "Balance" is the player's current credits; "Last Seen" is the last time the player was active) Tj
+T* (in the game.) Tj
+ET
+0.92 0.35 0.05 RG
+1.5 w
+0.92 0.35 0.05 RG
+1.5 w
+0.92 0.35 0.05 rg
+0.78 G
+0. w
+0.92 0.35 0.05 rg
+40. 303.3149999999999409 85.9019653179190641 -17.7749999999999986 re
+f
+BT
+/F2 8.5 Tf
+9.7749999999999986 TL
+1. g
+44. 292.0899999999999181 Td
+(Username) Tj
+ET
+0.92 0.35 0.05 rg
+0.78 G
+0. w
+0.92 0.35 0.05 rg
+125.9019653179190641 303.3149999999999409 53.7886705202312072 -17.7749999999999986 re
+f
+BT
+/F2 8.5 Tf
+9.7749999999999986 TL
+1. g
+129.9019653179190641 292.0899999999999181 Td
+(Email) Tj
+ET
+0.92 0.35 0.05 rg
+0.78 G
+0. w
+0.92 0.35 0.05 rg
+179.6906358381502855 303.3149999999999409 70.9655491329479702 -17.7749999999999986 re
+f
+BT
+/F2 8.5 Tf
+9.7749999999999986 TL
+1. g
+183.6906358381502855 292.0899999999999181 Td
+(Balance) Tj
+ET
+0.92 0.35 0.05 rg
+0.78 G
+0. w
+0.92 0.35 0.05 rg
+250.6561849710982415 303.3149999999999409 46.3204624277456531 -17.7749999999999986 re
+f
+BT
+/F2 8.5 Tf
+9.7749999999999986 TL
+1. g
+254.6561849710982415 292.0899999999999181 Td
+(Role) Tj
+ET
+0.92 0.35 0.05 rg
+0.78 G
+0. w
+0.92 0.35 0.05 rg
+296.9766473988439088 303.3149999999999409 59.3151445086705138 -17.7749999999999986 re
+f
+BT
+/F2 8.5 Tf
+9.7749999999999986 TL
+1. g
+300.9766473988439088 292.0899999999999181 Td
+(Status) Tj
+ET
+0.92 0.35 0.05 rg
+0.78 G
+0. w
+0.92 0.35 0.05 rg
+356.2917919075144368 303.3149999999999409 114.8786127167630013 -17.7749999999999986 re
+f
+BT
+/F2 8.5 Tf
+9.7749999999999986 TL
+1. g
+360.2917919075144368 292.0899999999999181 Td
+(Member Since) Tj
+ET
+0.92 0.35 0.05 rg
+0.78 G
+0. w
+0.92 0.35 0.05 rg
+471.1704046242774666 303.3149999999999409 84.1095953757225345 -17.7749999999999986 re
+f
+BT
+/F2 8.5 Tf
+9.7749999999999986 TL
+1. g
+475.1704046242774666 292.0899999999999181 Td
+(Last Seen) Tj
+ET
+0.92 0.35 0.05 RG
+1.5 w
+0.96 g
+0.78 G
+0. w
+0.96 g
+40. 285.5399999999999636 515.2799999999999727 -17.7749999999999986 re
+f
+BT
+/F1 8.5 Tf
+9.7749999999999986 TL
+0.118 0.118 0.157 rg
+237.2049999999999841 274.3149999999999409 Td
+(No accounts matched the filters.) Tj
+ET
+0.92 0.35 0.05 RG
+1.5 w
+0.78 G
+0. w
+0.92 0.35 0.05 RG
+1.5 w
+0.92 0.35 0.05 RG
+1.5 w
+BT
+/F1 8 Tf
+9.1999999999999993 TL
+0.431 0.431 0.49 rg
+225.3999999999999773 20. Td
+(Player Management Report · Page 1 of 1) Tj
+ET
+endstream
+endobj
+1 0 obj
+<</Type /Pages
+/Kids [3 0 R ]
+/Count 1
+>>
+endobj
+5 0 obj
+<<
+/Type /Font
+/BaseFont /Helvetica
+/Subtype /Type1
+/Encoding /WinAnsiEncoding
+/FirstChar 32
+/LastChar 255
+>>
+endobj
+6 0 obj
+<<
+/Type /Font
+/BaseFont /Helvetica-Bold
+/Subtype /Type1
+/Encoding /WinAnsiEncoding
+/FirstChar 32
+/LastChar 255
+>>
+endobj
+7 0 obj
+<<
+/Type /Font
+/BaseFont /Helvetica-Oblique
+/Subtype /Type1
+/Encoding /WinAnsiEncoding
+/FirstChar 32
+/LastChar 255
+>>
+endobj
+8 0 obj
+<<
+/Type /Font
+/BaseFont /Helvetica-BoldOblique
+/Subtype /Type1
+/Encoding /WinAnsiEncoding
+/FirstChar 32
+/LastChar 255
+>>
+endobj
+9 0 obj
+<<
+/Type /Font
+/BaseFont /Courier
+/Subtype /Type1
+/Encoding /WinAnsiEncoding
+/FirstChar 32
+/LastChar 255
+>>
+endobj
+10 0 obj
+<<
+/Type /Font
+/BaseFont /Courier-Bold
+/Subtype /Type1
+/Encoding /WinAnsiEncoding
+/FirstChar 32
+/LastChar 255
+>>
+endobj
+11 0 obj
+<<
+/Type /Font
+/BaseFont /Courier-Oblique
+/Subtype /Type1
+/Encoding /WinAnsiEncoding
+/FirstChar 32
+/LastChar 255
+>>
+endobj
+12 0 obj
+<<
+/Type /Font
+/BaseFont /Courier-BoldOblique
+/Subtype /Type1
+/Encoding /WinAnsiEncoding
+/FirstChar 32
+/LastChar 255
+>>
+endobj
+13 0 obj
+<<
+/Type /Font
+/BaseFont /Times-Roman
+/Subtype /Type1
+/Encoding /WinAnsiEncoding
+/FirstChar 32
+/LastChar 255
+>>
+endobj
+14 0 obj
+<<
+/Type /Font
+/BaseFont /Times-Bold
+/Subtype /Type1
+/Encoding /WinAnsiEncoding
+/FirstChar 32
+/LastChar 255
+>>
+endobj
+15 0 obj
+<<
+/Type /Font
+/BaseFont /Times-Italic
+/Subtype /Type1
+/Encoding /WinAnsiEncoding
+/FirstChar 32
+/LastChar 255
+>>
+endobj
+16 0 obj
+<<
+/Type /Font
+/BaseFont /Times-BoldItalic
+/Subtype /Type1
+/Encoding /WinAnsiEncoding
+/FirstChar 32
+/LastChar 255
+>>
+endobj
+17 0 obj
+<<
+/Type /Font
+/BaseFont /ZapfDingbats
+/Subtype /Type1
+/FirstChar 32
+/LastChar 255
+>>
+endobj
+18 0 obj
+<<
+/Type /Font
+/BaseFont /Symbol
+/Subtype /Type1
+/FirstChar 32
+/LastChar 255
+>>
+endobj
+2 0 obj
+<<
+/ProcSet [/PDF /Text /ImageB /ImageC /ImageI]
+/Font <<
+/F1 5 0 R
+/F2 6 0 R
+/F3 7 0 R
+/F4 8 0 R
+/F5 9 0 R
+/F6 10 0 R
+/F7 11 0 R
+/F8 12 0 R
+/F9 13 0 R
+/F10 14 0 R
+/F11 15 0 R
+/F12 16 0 R
+/F13 17 0 R
+/F14 18 0 R
+>>
+/XObject <<
+>>
+>>
+endobj
+19 0 obj
+<<
+/Producer (jsPDF 4.2.1)
+/CreationDate (D:20260923192440+02'00')
+>>
+endobj
+20 0 obj
+<<
+/Type /Catalog
+/Pages 1 0 R
+/OpenAction [3 0 R /FitH null]
+/PageLayout /OneColumn
+>>
+endobj
+xref
+0 21
+0000000000 65535 f 
+0000007979 00000 n 
+0000009796 00000 n 
+0000000015 00000 n 
+0000000152 00000 n 
+0000008036 00000 n 
+0000008161 00000 n 
+0000008291 00000 n 
+0000008424 00000 n 
+0000008561 00000 n 
+0000008684 00000 n 
+0000008813 00000 n 
+0000008945 00000 n 
+0000009081 00000 n 
+0000009209 00000 n 
+0000009336 00000 n 
+0000009465 00000 n 
+0000009598 00000 n 
+0000009700 00000 n 
+0000010044 00000 n 
+0000010130 00000 n 
+trailer
+<<
+/Size 21
+/Root 20 0 R
+/Info 19 0 R
+/ID [ <7298988C2CD8C53DD649E82CDA9CC0E9> <7298988C2CD8C53DD649E82CDA9CC0E9> ]
+>>
+startxref
+10234
+%%EOF

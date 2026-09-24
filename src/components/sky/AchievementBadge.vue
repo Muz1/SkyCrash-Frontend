@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { cn } from '@/lib/cn'
-import { badgeFor } from '@/lib/achievements'
+import { badgeInfoFor } from '@/lib/achievements'
+import { useBadgeViewerStore } from '@/stores/badgeViewerStore'
 
 const props = withDefaults(
   defineProps<{
@@ -17,7 +18,9 @@ const props = withDefaults(
   },
 )
 
-const src = computed(() => badgeFor(props.achievementKey))
+const badgeViewerStore = useBadgeViewerStore()
+const info = computed(() => badgeInfoFor(props.achievementKey))
+const label = computed(() => props.name ?? info.value?.name ?? 'Achievement badge')
 
 const sizeClass = computed(
   () =>
@@ -27,14 +30,26 @@ const sizeClass = computed(
       md: 'h-8 w-8',
     })[props.size],
 )
+
+function openViewer() {
+  if (props.achievementKey) badgeViewerStore.open(props.achievementKey)
+}
 </script>
 
 <template>
-  <img
-    v-if="src"
-    :src="src"
-    :alt="name ?? achievementKey ?? 'Achievement badge'"
-    :title="name ?? achievementKey ?? undefined"
-    :class="cn('inline-block shrink-0 object-contain drop-shadow-[0_0_4px_rgba(255,200,80,0.6)]', sizeClass, props.class)"
-  />
+  <button
+    v-if="info"
+    type="button"
+    :title="`${label} — click to view`"
+    :aria-label="`View ${label} badge`"
+    :class="cn('inline-flex shrink-0 cursor-zoom-in align-middle transition-transform duration-150 hover:scale-125', props.class)"
+    @click.stop.prevent="openViewer"
+  >
+    <img
+      :src="info.src"
+      :alt="label"
+      :class="cn('object-contain', sizeClass)"
+      :style="{ filter: `drop-shadow(0 0 3px ${info.color})` }"
+    />
+  </button>
 </template>
