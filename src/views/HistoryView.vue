@@ -27,6 +27,9 @@ function betStatus(status: string): 'CASHED OUT' | 'CRASHED' | 'LIVE' {
       <h1 class="text-center font-display text-2xl font-black uppercase tracking-[0.2em] text-electric text-glow-blue sm:text-3xl">
         Flight Log
       </h1>
+      <p class="mt-1 text-center text-xs uppercase tracking-[0.25em] text-muted-foreground">
+        Your bets, and how every round played out
+      </p>
 
       <div class="mt-6 flex justify-center gap-3">
         <ArcadeButton size="sm" :variant="activeTab === 'bets' ? 'blue' : 'ghost'" @click="activeTab = 'bets'">

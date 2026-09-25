@@ -75,6 +75,18 @@ export interface CreditTransactionRecord {
   createdAtUtc: string
 }
 
+export interface CreditPack {
+  id: string
+  displayName: string
+  priceZar: number
+  credits: number
+}
+
+export interface CheckoutResponse {
+  actionUrl: string
+  fields: Record<string, string>
+}
+
 export interface RoundHistoryEntry {
   roundId: string
   roundNumber: number

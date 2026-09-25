@@ -20,6 +20,12 @@ export interface Craft {
    * canonical 45° bottom-left → top-right flight vector.
    */
   rotate: number
+  /**
+   * Angle (degrees above horizontal) the nose actually points on screen once
+   * `rotate` is applied. The flight stage uses it to pitch the sprite so its
+   * fuselage follows the multiplier curve's tangent.
+   */
+  pitch: number
   /** Colour token used for the engine trail. */
   trail: string
 }
@@ -32,6 +38,7 @@ export const CRAFTS: Craft[] = [
     blurb: 'The original Sky Crash airliner, rebuilt for a brilliant arcade climb.',
     src: neonJet,
     rotate: 0,
+    pitch: 14,
     trail: 'var(--neon-magenta)',
   },
   {
@@ -41,6 +48,7 @@ export const CRAFTS: Craft[] = [
     blurb: 'The original underside interceptor: sharp wings, twin engines, pure takeoff energy.',
     src: ascender,
     rotate: 45,
+    pitch: 45,
     trail: 'var(--neon-magenta)',
   },
   {
@@ -50,6 +58,7 @@ export const CRAFTS: Craft[] = [
     blurb: 'A high-altitude interceptor designed for extreme climbs.',
     src: nighthawk,
     rotate: 0,
+    pitch: 45,
     trail: 'var(--neon-blue)',
   },
   {
@@ -59,6 +68,7 @@ export const CRAFTS: Craft[] = [
     blurb: 'A faithful animated rendition of the legendary freighter, packed with mechanical detail.',
     src: millenniumFalcon,
     rotate: 0,
+    pitch: 40,
     trail: 'var(--neon-blue)',
   },
   {
@@ -68,6 +78,7 @@ export const CRAFTS: Craft[] = [
     blurb: 'A faithful animated portal craft with its original pilots and unstable cartoon technology.',
     src: portalTraveler,
     rotate: -18,
+    pitch: 12,
     trail: 'var(--neon-lime)',
   },
 ]

@@ -3,7 +3,7 @@ defineProps<{ credits: number }>()
 </script>
 
 <template>
-  <div class="neon-panel clip-hud flex items-center gap-3 px-4 py-2">
+  <div class="neon-panel clip-hud flex items-center gap-2 px-2.5 py-2 sm:gap-3 sm:px-4">
     <span
       class="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-[image:var(--grad-sunset)] font-arcade text-[8px] text-void"
       aria-hidden

@@ -33,7 +33,8 @@ const hangarStore = useHangarStore()
     <PageTransition :craft="hangarStore.craftId" />
     <CRTOverlay />
     <HudHeader v-if="showHud" />
-    <main :class="cn('relative z-10 px-4 pb-40 sm:px-8', props.class)">
+    <!-- The dock auto-hides off Home, so pages only reserve room for its peek tab. -->
+    <main :class="cn('relative z-10 px-4 pb-16 sm:px-8', props.class)">
       <slot />
     </main>
     <NavDock />

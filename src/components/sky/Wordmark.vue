@@ -14,8 +14,8 @@ withDefaults(defineProps<{ compact?: boolean }>(), { compact: false })
       height="576"
       :class="
         cn(
-          'h-auto w-auto drop-shadow-[0_0_22px_color-mix(in_oklab,var(--neon-magenta)_55%,transparent)]',
-          compact ? 'max-h-11' : 'max-h-40 sm:max-h-56',
+          'h-auto w-auto max-w-full drop-shadow-[0_0_22px_color-mix(in_oklab,var(--neon-magenta)_55%,transparent)]',
+          compact ? 'max-h-9 sm:max-h-11' : 'max-h-[min(10rem,18dvh)] sm:max-h-[min(14rem,22dvh)]',
         )
       "
     />

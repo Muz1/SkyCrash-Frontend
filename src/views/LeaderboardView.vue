@@ -18,6 +18,9 @@ onMounted(() => {
       <h1 class="text-center font-display text-2xl font-black uppercase tracking-[0.2em] text-ember text-glow-ember sm:text-3xl">
         Leaderboard
       </h1>
+      <p class="mt-1 text-center text-xs uppercase tracking-[0.25em] text-muted-foreground">
+        Three ways to top the sky
+      </p>
 
       <p v-if="leaderboardStore.isLoading && !leaderboardStore.data" class="mt-6 text-center text-muted-foreground">Loading…</p>
 

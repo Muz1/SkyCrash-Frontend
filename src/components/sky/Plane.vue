@@ -13,6 +13,7 @@ withDefaults(
     trail?: boolean
     trailIntensity?: number
     crashing?: boolean
+    idle?: boolean
     class?: string
   }>(),
   {
@@ -21,10 +22,19 @@ withDefaults(
     trail: true,
     trailIntensity: 1,
     crashing: false,
+    idle: true,
   },
 )
 </script>
 
 <template>
-  <Aircraft :craft="craft" :size="size" :trail="trail" :trail-intensity="trailIntensity" :crashing="crashing" :class="$props.class" />
+  <Aircraft
+    :craft="craft"
+    :size="size"
+    :trail="trail"
+    :trail-intensity="trailIntensity"
+    :crashing="crashing"
+    :idle="idle"
+    :class="$props.class"
+  />
 </template>

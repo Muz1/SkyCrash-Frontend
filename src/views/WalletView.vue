@@ -1,18 +1,43 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { usePlayerStore } from '@/stores/playerStore'
 import { useWalletStore } from '@/stores/walletStore'
+import { usePaymentStore } from '@/stores/paymentStore'
 import Shell from '@/components/sky/Shell.vue'
 import NeonPanel from '@/components/sky/NeonPanel.vue'
 import ArcadeButton from '@/components/sky/ArcadeButton.vue'
+import BuyCreditsPanel from '@/components/sky/BuyCreditsPanel.vue'
 
+const route = useRoute()
+const router = useRouter()
 const playerStore = usePlayerStore()
 const walletStore = useWalletStore()
+const paymentStore = usePaymentStore()
 const isToppingUp = ref(false)
 const claimed = ref<number | null>(null)
 
-onMounted(() => {
+// Actual crediting happens once PayFast's ITN reaches our backend, which is
+// slightly delayed relative to this redirect - not confirmed yet, just "in progress".
+const purchaseStatus = ref<'success' | 'cancelled' | null>(null)
+const isAwaitingCredit = ref(false)
+const wasCredited = ref(false)
+
+onMounted(async () => {
   walletStore.fetchTransactions()
+
+  const payment = route.query.payment
+  if (payment === 'success' || payment === 'cancelled') {
+    purchaseStatus.value = payment
+    // Strip the query param so a page refresh doesn't re-trigger this.
+    router.replace({ query: {} })
+
+    if (payment === 'success') {
+      isAwaitingCredit.value = true
+      wasCredited.value = await paymentStore.refreshBalanceAfterPurchase()
+      isAwaitingCredit.value = false
+    }
+  }
 })
 
 async function handleTopUp() {
@@ -66,8 +91,25 @@ async function handleTopUp() {
       </NeonPanel>
 
       <p class="mt-6 text-xs uppercase tracking-[0.25em] text-muted-foreground">
-        Prototype interface — no real payments are processed.
+        The button above is a free test top-up. Real purchases use the panel below.
       </p>
+
+      <NeonPanel v-if="purchaseStatus" class="mt-6" :accent="purchaseStatus === 'success' ? 'lime' : 'ember'">
+        <p v-if="purchaseStatus === 'success' && isAwaitingCredit" class="font-arcade text-[10px] uppercase tracking-[0.2em] text-lime">
+          Payment received — waiting for credits to land…
+        </p>
+        <p v-else-if="purchaseStatus === 'success' && wasCredited" class="font-arcade text-[10px] uppercase tracking-[0.2em] text-lime">
+          Purchase complete! Your balance is updated above.
+        </p>
+        <p v-else-if="purchaseStatus === 'success'" class="font-arcade text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+          Payment is still processing — your credits will appear shortly. Refresh this page in a minute.
+        </p>
+        <p v-else class="font-arcade text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+          Checkout was cancelled — no charge was made.
+        </p>
+      </NeonPanel>
+
+      <BuyCreditsPanel class="mt-6 text-left" />
 
       <NeonPanel class="mt-6 text-left" title="Transaction History" accent="blue">
         <p v-if="walletStore.transactions.length === 0" class="text-sm text-muted-foreground">No transactions yet.</p>

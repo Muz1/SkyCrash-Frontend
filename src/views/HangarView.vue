@@ -60,7 +60,7 @@ function rarityBadgeClass(rarity: Rarity) {
 
     <HudHeader />
 
-    <main class="relative z-10 mx-auto w-full max-w-6xl px-4 pb-44 sm:px-6">
+    <main class="relative z-10 mx-auto w-full max-w-6xl px-4 pb-16 sm:px-6">
       <h1 class="font-display text-2xl font-black uppercase tracking-[0.3em] text-magenta text-glow-magenta sm:text-4xl">
         Hangar
       </h1>

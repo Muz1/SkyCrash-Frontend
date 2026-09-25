@@ -32,6 +32,9 @@ onMounted(() => {
         <ExportPdfButton :build="buildReport" />
       </div>
     </div>
+    <p class="mt-1 text-xs uppercase tracking-[0.25em] text-muted-foreground">
+      How unpredictable crash points are — not the same as RTP's average payback %
+    </p>
 
     <p v-if="!volatilityStore.summary" class="mt-6 text-muted-foreground">Loading distribution…</p>
 
