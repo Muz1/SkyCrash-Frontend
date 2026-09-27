@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
+import { computed, onBeforeUnmount, ref, watch } from 'vue'
 import { useHangarStore } from '@/stores/hangarStore'
 import { CRAFTS, RARITY_STYLE, getCraft, type CraftId, type Rarity } from '@/lib/craft'
 import { SKY_SKINS, type SkinId } from '@/lib/skins'
@@ -40,6 +40,29 @@ watch(outgoing, (value) => {
     outgoing.value = null
   }, 620)
 })
+
+/** Loops the "taking-off" ascent in the preview bay so the dynamic skin can be seen. */
+const ascentProgress = ref(0)
+let ascentFrame = 0
+function stopAscent() {
+  cancelAnimationFrame(ascentFrame)
+  ascentFrame = 0
+  ascentProgress.value = 0
+}
+watch(
+  () => tab.value === 'skies' && previewSky.value === 'taking-off',
+  (running) => {
+    stopAscent()
+    if (!running) return
+    const start = performance.now()
+    const loop = (now: number) => {
+      ascentProgress.value = ((now - start) % 7000) / 6000
+      ascentFrame = requestAnimationFrame(loop)
+    }
+    ascentFrame = requestAnimationFrame(loop)
+  },
+)
+onBeforeUnmount(stopAscent)
 
 function rarityBadgeClass(rarity: Rarity) {
   const s = RARITY_STYLE[rarity]
@@ -89,12 +112,22 @@ function rarityBadgeClass(rarity: Rarity) {
 
       <div class="mt-6 grid gap-5 lg:grid-cols-[minmax(0,1.25fr)_minmax(0,1fr)]">
         <section aria-label="Preview" class="neon-panel clip-hud relative min-h-[300px] overflow-hidden p-4 sm:min-h-[380px]">
+          <SkyEnvironment
+            v-if="tab === 'skies'"
+            :skin="previewSky"
+            :dim="0.1"
+            :show-grid="false"
+            :progress="Math.min(ascentProgress, 1)"
+            priority
+          />
           <div
+            v-else
             aria-hidden
             class="pointer-events-none absolute inset-0"
             style="background: radial-gradient(ellipse at 30% 80%, color-mix(in oklab, var(--neon-violet) 30%, transparent), transparent 65%)"
           />
-          <div class="relative grid h-full min-h-[260px] place-items-center sm:min-h-[330px]">
+          <div v-if="tab === 'skies'" class="relative min-h-[260px] sm:min-h-[330px]" />
+          <div v-else class="relative grid h-full min-h-[260px] place-items-center sm:min-h-[330px]">
             <div style="animation: camera-idle 6s ease-in-out infinite">
               <div
                 v-if="outgoing"

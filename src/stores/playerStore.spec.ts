@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { setActivePinia, createPinia } from 'pinia'
 import { usePlayerStore } from './playerStore'
 import * as playerService from '@/services/playerService'
+import type { PlayerProfile } from '@/types'
 
 vi.mock('@/services/playerService')
 
@@ -12,11 +13,11 @@ describe('playerStore', () => {
   })
 
   it('deduplicates concurrent fetchProfile calls into a single request', async () => {
-    let resolveRequest: (value: any) => void
-    const pending = new Promise((resolve) => {
+    let resolveRequest: (value: PlayerProfile) => void
+    const pending = new Promise<PlayerProfile>((resolve) => {
       resolveRequest = resolve
     })
-    vi.mocked(playerService.getMyProfile).mockReturnValue(pending as any)
+    vi.mocked(playerService.getMyProfile).mockReturnValue(pending)
 
     const store = usePlayerStore()
 
@@ -30,6 +31,7 @@ describe('playerStore', () => {
       creditBalance: 100,
       memberSinceUtc: '2026-01-01T00:00:00Z',
       isAdmin: false,
+      displayedAchievementKey: null,
     })
     await Promise.all([first, second])
 

@@ -22,6 +22,15 @@ export default defineConfigWithVueTs(
   vueTsConfigs.recommended,
 
   {
+    name: 'app/sky-components',
+    files: ['src/components/sky/**/*.vue'],
+    rules: {
+      // The sky/ design-system components use short single-word names by convention.
+      'vue/multi-word-component-names': 'off',
+    },
+  },
+
+  {
     ...pluginVitest.configs.recommended,
     files: ['src/**/__tests__/*'],
   },

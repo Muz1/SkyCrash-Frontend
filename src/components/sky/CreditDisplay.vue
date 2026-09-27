@@ -8,7 +8,7 @@ defineProps<{ credits: number }>()
       class="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-[image:var(--grad-sunset)] font-arcade text-[8px] text-void"
       aria-hidden
     >
-      $
+      R
     </span>
     <div class="min-w-0 leading-none">
       <p class="font-display text-[8px] uppercase tracking-[0.34em] text-muted-foreground">Credits</p>

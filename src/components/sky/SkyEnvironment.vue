@@ -39,7 +39,6 @@ const stars = Array.from({ length: 44 }, (_, i) => ({
 const starsOpacity = computed(() =>
   ascent.value ? 0.35 + layers.value.space * 0.65 : mood.value === 'ground' ? 0.35 : 1,
 )
-const cloudsOpacity = computed(() => (ascent.value ? 1 - layers.value.space : 1))
 const showClouds = computed(() => (ascent.value ? true : mood.value !== 'space'))
 const gridOpacity = computed(() =>
   ascent.value ? 1 - layers.value.cloud : mood.value === 'ground' ? 1 : 0.25,
