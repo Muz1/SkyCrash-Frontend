@@ -1,0 +1,13 @@
+node_modules
+dist
+coverage
+.git
+.github
+.vscode
+.claude
+.env
+.env.*
+*.log
+*.pdf
+.eslintcache
+*.tsbuildinfo

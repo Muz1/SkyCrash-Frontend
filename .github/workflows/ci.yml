@@ -36,3 +36,6 @@ jobs:
 
       - name: Type-check and build
         run: npm run build
+
+      - name: Build Docker image
+        run: docker build -t skycrash-frontend:ci .
