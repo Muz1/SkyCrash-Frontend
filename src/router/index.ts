@@ -22,7 +22,8 @@ import MissionsView from '../views/MissionsView.vue'
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
-    { path: '/', name: 'home', component: HomeView, meta: { requiresAuth: true } },
+    // Public landing page: everyone starts here; Play and the other player pages prompt a login.
+    { path: '/', name: 'home', component: HomeView },
     { path: '/login', name: 'login', component: LoginView },
     { path: '/register', name: 'register', component: RegisterView },
     { path: '/profile', name: 'profile', component: ProfileView, meta: { requiresAuth: true } },
@@ -80,10 +81,11 @@ const router = createRouter({
 router.beforeEach(async (to) => {
   const authStore = useAuthStore()
   if (to.meta.requiresAuth && !authStore.isAuthenticated) {
-    return { name: 'login' }
+    // Come back to where they were heading (e.g. Play) once they've signed in.
+    return { name: 'login', query: to.fullPath === '/' ? {} : { redirect: to.fullPath } }
   }
 
-  if (to.meta.requiresAuth && authStore.isAuthenticated) {
+  if (authStore.isAuthenticated) {
     const playerStore = usePlayerStore()
     // A fresh page load (deep link, reload) mounts a brand-new Pinia store,
     // so the profile (and its isAdmin flag) needs loading before any guard
@@ -98,11 +100,16 @@ router.beforeEach(async (to) => {
     }
   }
 
-  if (to.meta.requiresAdmin) {
-    const playerStore = usePlayerStore()
-    if (!playerStore.profile?.isAdmin) {
-      return { name: 'home' }
-    }
+  const isAdmin = authStore.isAuthenticated && !!usePlayerStore().profile?.isAdmin
+
+  if (to.meta.requiresAdmin && !isAdmin) {
+    return { name: 'home' }
+  }
+
+  // Admins operate the game but never play it: every player-facing page
+  // (including the landing page and the auth screens) sends them to the console.
+  if (isAdmin && !to.meta.requiresAdmin) {
+    return { name: 'admin' }
   }
 })
 

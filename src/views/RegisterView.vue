@@ -85,14 +85,14 @@ async function handleSubmit() {
 </script>
 
 <template>
-  <div class="relative grid min-h-screen place-items-center overflow-hidden bg-void px-4 py-12">
+  <div class="relative flex h-dvh flex-col items-center justify-center-safe overflow-y-auto bg-void px-4 py-6">
     <SkyEnvironment skin="cloud-city" :dim="0.55" />
     <CRTOverlay />
 
     <div class="relative z-10 w-full max-w-md">
-      <div class="mb-8 text-center">
+      <RouterLink to="/" class="mb-6 block text-center" aria-label="Back to the Sky Crash home page">
         <Wordmark compact />
-      </div>
+      </RouterLink>
 
       <form class="neon-panel clip-hud crt-scan p-6 sm:p-8" @submit.prevent="handleSubmit">
         <h1 class="text-center font-display text-xl font-black uppercase tracking-[0.18em] text-lime text-glow-lime">

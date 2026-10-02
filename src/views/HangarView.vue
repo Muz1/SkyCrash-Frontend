@@ -76,14 +76,14 @@ function rarityBadgeClass(rarity: Rarity) {
 </script>
 
 <template>
-  <div class="relative min-h-screen overflow-hidden bg-void">
+  <div class="relative flex h-dvh flex-col overflow-hidden bg-void">
     <SkyEnvironment :skin="previewSky" :dim="0.5" />
     <Ambient :skin="previewSky" />
     <CRTOverlay />
 
     <HudHeader />
 
-    <main class="relative z-10 mx-auto w-full max-w-6xl px-4 pb-16 sm:px-6">
+    <main class="relative z-10 mx-auto min-h-0 w-full max-w-6xl flex-1 overflow-y-auto px-4 pb-2 sm:px-6">
       <h1 class="font-display text-2xl font-black uppercase tracking-[0.3em] text-magenta text-glow-magenta sm:text-4xl">
         Hangar
       </h1>
@@ -128,7 +128,7 @@ function rarityBadgeClass(rarity: Rarity) {
           />
           <div v-if="tab === 'skies'" class="relative min-h-[260px] sm:min-h-[330px]" />
           <div v-else class="relative grid h-full min-h-[260px] place-items-center sm:min-h-[330px]">
-            <div style="animation: camera-idle 6s ease-in-out infinite">
+            <div>
               <div
                 v-if="outgoing"
                 class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"

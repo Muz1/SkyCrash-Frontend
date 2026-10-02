@@ -17,9 +17,22 @@ api.interceptors.request.use((config) => {
 
 api.interceptors.response.use(
   (response) => response,
-  (error) => {
-    if (error.response?.status === 401) {
-      localStorage.removeItem('skycrash_token')
+  async (error) => {
+    // A 401 on anything but the login/register calls means the session expired
+    // (or was revoked): end it properly instead of leaving the UI looking logged in.
+    const isAuthCall = String(error.config?.url ?? '').includes('/auth/')
+    if (error.response?.status === 401 && !isAuthCall) {
+      const [{ useAuthStore }, { usePlayerStore }, { default: router }] = await Promise.all([
+        import('@/stores/AuthStore'),
+        import('@/stores/playerStore'),
+        import('@/router'),
+      ])
+      useAuthStore().logout()
+      usePlayerStore().clear()
+      const current = router.currentRoute.value
+      if (current.meta.requiresAuth) {
+        router.push({ name: 'login', query: { redirect: current.fullPath, expired: '1' } })
+      }
     }
     return Promise.reject(error)
   }

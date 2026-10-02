@@ -1,9 +1,12 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted } from 'vue'
+import { Hash, Radio, TrendingUp, Users, Lock, TriangleAlert, ShieldCheck } from '@lucide/vue'
 import { useAdminRoundStore } from '@/stores/adminRoundStore'
 import AdminShell from '@/components/sky/AdminShell.vue'
-import NeonPanel from '@/components/sky/NeonPanel.vue'
-import ScoreDisplay from '@/components/sky/ScoreDisplay.vue'
+import AdminPage from '@/components/admin/AdminPage.vue'
+import AdminPanel from '@/components/admin/AdminPanel.vue'
+import AdminKpi from '@/components/admin/AdminKpi.vue'
+import AdminPill from '@/components/admin/AdminPill.vue'
 
 const adminRoundStore = useAdminRoundStore()
 
@@ -20,41 +23,75 @@ onUnmounted(() => {
   <AdminShell
     help-text="This page reveals the current round's already-determined crash multiplier before it happens — useful for oversight and auditing. There is deliberately no way to edit it anywhere in the system: the outcome is generated once at round start and locked in from then on."
   >
-    <h1 class="font-display text-2xl font-black uppercase tracking-[0.2em] text-ember text-glow-ember sm:text-3xl">
-      Current Round
-    </h1>
-
-    <div v-if="adminRoundStore.round" class="mt-5 space-y-4">
-      <NeonPanel accent="magenta" title="Live State">
-        <div class="grid grid-cols-2 gap-4 sm:grid-cols-4">
-          <ScoreDisplay label="Round" tone="magenta">#{{ adminRoundStore.round.roundNumber }}</ScoreDisplay>
-          <ScoreDisplay label="Status" tone="blue">{{ adminRoundStore.round.status }}</ScoreDisplay>
-          <ScoreDisplay label="Live Multiplier" tone="lime">{{ adminRoundStore.round.currentMultiplier.toFixed(2) }}x</ScoreDisplay>
-          <ScoreDisplay label="Active Bets" tone="blue">{{ adminRoundStore.round.activeBetCount }}</ScoreDisplay>
+    <AdminPage title="Current Round" eyebrow="Live oversight" subtitle="Real-time view of the round in progress. Refreshes automatically.">
+      <template v-if="adminRoundStore.round">
+        <div class="grid shrink-0 grid-cols-2 gap-4 lg:grid-cols-4">
+          <AdminKpi label="Round" :icon="Hash" tone="magenta">
+            <span class="adm-num">#{{ adminRoundStore.round.roundNumber }}</span>
+          </AdminKpi>
+          <AdminKpi label="Status" :icon="Radio" tone="blue">
+            <AdminPill :label="adminRoundStore.round.status" class="!h-8 !px-3 !text-[17px]" />
+          </AdminKpi>
+          <AdminKpi label="Live Multiplier" :icon="TrendingUp" tone="lime">
+            <span class="adm-num">{{ adminRoundStore.round.currentMultiplier.toFixed(2) }}x</span>
+          </AdminKpi>
+          <AdminKpi label="Active Bets" :icon="Users" tone="violet">
+            <span class="adm-num">{{ adminRoundStore.round.activeBetCount }}</span>
+          </AdminKpi>
         </div>
-      </NeonPanel>
 
-      <NeonPanel accent="ember" title="Predetermined Outcome (Admin-Only, Read-Only)">
-        <ScoreDisplay label="Locked Crash Multiplier" tone="ember">
-          {{ adminRoundStore.round.predeterminedCrashMultiplier.toFixed(2) }}x
-        </ScoreDisplay>
-        <p class="mt-3 text-center text-xs text-muted-foreground">
-          Generated once from the round's server seed the instant it started running — there is no admin action anywhere
-          that can change this value. Do not disclose this to players; it defeats the game.
-        </p>
-      </NeonPanel>
+        <div class="grid min-h-0 gap-4 lg:grid-cols-2">
+          <AdminPanel title="Predetermined Outcome (Admin-Only, Read-Only)" accent="ember">
+            <div class="flex h-full flex-col justify-between gap-4">
+              <div class="flex items-center gap-4">
+                <span
+                  class="grid h-14 w-14 shrink-0 place-items-center rounded-xl border border-[oklch(0.76_0.19_55/0.3)] bg-[oklch(0.76_0.19_55/0.1)] text-[var(--neon-orange)]"
+                  aria-hidden="true"
+                >
+                  <Lock class="h-6 w-6" />
+                </span>
+                <div>
+                  <p class="adm-kpi-label">Locked Crash Multiplier</p>
+                  <p class="adm-num text-[44px] font-bold leading-none text-[var(--neon-orange)]">
+                    {{ adminRoundStore.round.predeterminedCrashMultiplier.toFixed(2) }}x
+                  </p>
+                </div>
+              </div>
+              <p class="adm-callout">
+                <TriangleAlert aria-hidden="true" />
+                <span>
+                  Generated once from the round's server seed the instant it started running — there is no admin action
+                  anywhere that can change this value. Do not disclose this to players; it defeats the game.
+                </span>
+              </p>
+            </div>
+          </AdminPanel>
 
-      <NeonPanel accent="blue" title="Provably Fair Seed">
-        <p class="break-all text-center font-arcade text-[10px] text-muted-foreground">
-          {{ adminRoundStore.round.serverSeedHash }}
-        </p>
-        <p class="mt-2 text-center text-xs text-muted-foreground">
-          Server seed hash, published to players at round start. The seed itself is revealed to everyone once the round
-          crashes, letting anyone verify the outcome independently.
-        </p>
-      </NeonPanel>
-    </div>
+          <AdminPanel title="Provably Fair Seed" accent="blue">
+            <div class="flex h-full flex-col justify-between gap-4">
+              <div>
+                <p class="adm-label">Server seed hash</p>
+                <p
+                  class="adm-mono break-all rounded-lg border border-[var(--adm-border)] bg-[var(--adm-field)] px-4 py-3 leading-relaxed text-[var(--adm-text-2)]"
+                >
+                  {{ adminRoundStore.round.serverSeedHash }}
+                </p>
+              </div>
+              <p class="adm-callout adm-callout--info">
+                <ShieldCheck aria-hidden="true" />
+                <span>
+                  Server seed hash, published to players at round start. The seed itself is revealed to everyone once the
+                  round crashes, letting anyone verify the outcome independently.
+                </span>
+              </p>
+            </div>
+          </AdminPanel>
+        </div>
+      </template>
 
-    <p v-else class="mt-6 text-muted-foreground">No round is currently active.</p>
+      <AdminPanel v-else fill>
+        <div class="adm-state">No round is currently active.</div>
+      </AdminPanel>
+    </AdminPage>
   </AdminShell>
 </template>

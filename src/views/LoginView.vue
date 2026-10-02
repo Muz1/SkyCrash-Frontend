@@ -14,7 +14,13 @@ const route = useRoute()
 
 const email = ref('')
 const password = ref('')
-const errorMessage = ref(route.query.blocked ? 'Your account has been blocked. Contact support.' : '')
+const errorMessage = ref(
+  route.query.blocked
+    ? 'Your account has been blocked. Contact support.'
+    : route.query.expired
+      ? 'Your session expired — please log in again.'
+      : '',
+)
 const isSubmitting = ref(false)
 
 async function handleSubmit() {
@@ -22,7 +28,9 @@ async function handleSubmit() {
   isSubmitting.value = true
   try {
     await authStore.login({ email: email.value, password: password.value })
-    router.push('/')
+    // Back to the page that asked for a login (e.g. Play); the router sends admins to their console.
+    const redirect = typeof route.query.redirect === 'string' && route.query.redirect.startsWith('/') ? route.query.redirect : '/'
+    router.push(redirect)
   } catch (err: unknown) {
     if (err && typeof err === 'object' && 'response' in err) {
       const response = (err as { response?: { data?: { message?: string } } }).response
@@ -37,14 +45,14 @@ async function handleSubmit() {
 </script>
 
 <template>
-  <div class="relative grid min-h-screen place-items-center overflow-hidden bg-void px-4 py-12">
+  <div class="relative flex h-dvh flex-col items-center justify-center-safe overflow-y-auto bg-void px-4 py-6">
     <SkyEnvironment skin="sunset-runway" :dim="0.55" />
     <CRTOverlay />
 
     <div class="relative z-10 w-full max-w-md">
-      <div class="mb-8 text-center">
+      <RouterLink to="/" class="mb-6 block text-center" aria-label="Back to the Sky Crash home page">
         <Wordmark compact />
-      </div>
+      </RouterLink>
 
       <form class="neon-panel clip-hud crt-scan p-6 sm:p-8" @submit.prevent="handleSubmit">
         <h1 class="text-center font-display text-xl font-black uppercase tracking-[0.18em] text-magenta text-glow-magenta">

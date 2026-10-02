@@ -7,19 +7,22 @@ const open = ref(false)
 </script>
 
 <template>
-  <span class="relative inline-block align-middle">
+  <span class="relative inline-flex items-center">
     <button
       type="button"
       aria-label="What does this page do?"
-      class="grid h-5 w-5 shrink-0 place-items-center rounded-full border border-violet/50 text-muted-foreground transition-colors hover:border-electric hover:text-electric"
+      :aria-expanded="open"
+      class="adm-btn adm-btn--ghost adm-btn--sm"
       @click="open = !open"
       @blur="open = false"
     >
-      <HelpCircle class="h-3.5 w-3.5" aria-hidden="true" />
+      <HelpCircle aria-hidden="true" />
+      <span class="hidden md:inline">About this page</span>
     </button>
     <div
       v-if="open"
-      class="neon-panel clip-hud absolute left-0 top-7 z-30 w-72 p-3 text-left text-xs font-sans normal-case leading-relaxed tracking-normal text-foreground sm:left-auto sm:right-0"
+      role="tooltip"
+      class="absolute right-0 top-[calc(100%+8px)] z-30 w-80 rounded-lg border border-[var(--adm-border-strong)] bg-[oklch(0.18_0.045_290)] p-4 text-left text-[14px] leading-relaxed text-[var(--adm-text-2)] shadow-[0_16px_40px_-12px_oklch(0_0_0/0.8)]"
     >
       {{ text }}
     </div>

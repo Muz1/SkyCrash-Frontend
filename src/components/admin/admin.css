@@ -1,0 +1,882 @@
+/*
+ * Sky Crash admin console design system.
+ * Everything here is scoped under `.admin-console` (the AdminShell root) so none
+ * of it leaks into the player app. Colours come from the global Sky Crash
+ * palette (--neon-*, --bg-*) defined in src/style.css.
+ */
+
+.admin-console {
+  /* surfaces - deep navy (the old near-black read as harsh next to the neon accents) */
+  --adm-bg: oklch(0.17 0.06 265);
+  --adm-surface: oklch(0.225 0.06 260 / 0.8);
+  --adm-surface-2: oklch(0.25 0.06 258 / 0.72);
+  --adm-surface-3: oklch(0.3 0.065 258);
+  /* opaque equivalent of a panel, for sticky headers / popovers that must hide what's under them */
+  --adm-surface-solid: oklch(0.235 0.06 259);
+  --adm-field: oklch(0.185 0.05 262);
+  --adm-border: oklch(0.45 0.08 255 / 0.35);
+  --adm-border-strong: oklch(0.55 0.09 255 / 0.5);
+  /* ink (AA on every navy surface: text-3 is >= 4.5:1 on the lightest panel) */
+  --adm-text: oklch(0.97 0.01 260);
+  --adm-text-2: oklch(0.86 0.03 255);
+  --adm-text-3: oklch(0.73 0.04 255);
+  /* accents */
+  --adm-accent: var(--neon-magenta);
+  --adm-accent-2: var(--neon-violet);
+  --adm-radius: 10px;
+  --adm-radius-sm: 6px;
+  --adm-shadow: 0 1px 0 oklch(1 0 0 / 0.03) inset, 0 8px 24px -12px oklch(0 0 0 / 0.6);
+
+  font-family: var(--font-sans);
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 1.4;
+  color: var(--adm-text);
+  background:
+    radial-gradient(1200px 520px at 12% -10%, oklch(0.62 0.26 305 / 0.16), transparent 60%),
+    radial-gradient(900px 420px at 100% 0%, oklch(0.68 0.29 8 / 0.08), transparent 60%),
+    linear-gradient(160deg, oklch(0.22 0.07 255) 0%, oklch(0.17 0.06 265) 55%, oklch(0.14 0.05 280) 100%),
+    var(--adm-bg);
+}
+
+/* No visible scrollbars anywhere in the console; panels still wheel/touch scroll. */
+.admin-console,
+.admin-console * {
+  scrollbar-width: none;
+}
+.admin-console *::-webkit-scrollbar {
+  display: none;
+}
+
+.admin-console .adm-num,
+.admin-console .adm-num-inline {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- top bar & tabs ---------- */
+
+.admin-console .adm-topbar {
+  height: 60px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 0 24px;
+  border-bottom: 1px solid var(--adm-border);
+  background: oklch(0.16 0.055 262 / 0.82);
+  backdrop-filter: blur(8px);
+}
+.admin-console .adm-brand {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+}
+.admin-console .adm-brand img {
+  height: 34px;
+  width: auto;
+  image-rendering: auto;
+}
+.admin-console .adm-brand-divider {
+  width: 1px;
+  height: 24px;
+  background: var(--adm-border-strong);
+}
+.admin-console .adm-brand-label {
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--adm-text);
+}
+.admin-console .adm-env {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 2px 8px;
+  border-radius: 999px;
+  color: var(--neon-orange);
+  background: oklch(0.76 0.19 55 / 0.1);
+  border: 1px solid oklch(0.76 0.19 55 / 0.28);
+}
+.admin-console .adm-user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-right: 14px;
+  margin-right: 2px;
+  border-right: 1px solid var(--adm-border);
+}
+.admin-console .adm-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  font-weight: 700;
+  font-size: 14px;
+  color: white;
+  background: linear-gradient(135deg, var(--neon-violet), var(--neon-magenta));
+  box-shadow: 0 0 0 2px oklch(0.16 0.055 262), 0 0 0 3px oklch(0.68 0.29 8 / 0.35);
+}
+.admin-console .adm-user-name {
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.1;
+  color: var(--adm-text);
+}
+.admin-console .adm-user-role {
+  font-size: 12px;
+  line-height: 1.1;
+  color: var(--adm-text-3);
+}
+
+.admin-console .adm-tabbar {
+  height: 48px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: stretch;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 0 24px;
+  border-bottom: 1px solid var(--adm-border);
+  background: oklch(0.185 0.058 260 / 0.7);
+  position: relative;
+  z-index: 20;
+}
+.admin-console .adm-tabs {
+  display: flex;
+  align-items: stretch;
+  gap: 4px;
+  min-width: 0;
+  overflow-x: auto;
+}
+.admin-console .adm-tab {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 12px;
+  font-size: 14.5px;
+  font-weight: 600;
+  white-space: nowrap;
+  color: var(--adm-text-3);
+  transition: color 0.15s;
+}
+.admin-console .adm-tab svg {
+  width: 16px;
+  height: 16px;
+  opacity: 0.8;
+}
+.admin-console .adm-tab:hover {
+  color: var(--adm-text);
+}
+.admin-console .adm-tab::after {
+  content: '';
+  position: absolute;
+  left: 10px;
+  right: 10px;
+  bottom: -1px;
+  height: 2px;
+  border-radius: 2px 2px 0 0;
+  background: transparent;
+}
+.admin-console .adm-tab[aria-current='page'] {
+  color: var(--adm-text);
+}
+.admin-console .adm-tab[aria-current='page'] svg {
+  color: var(--neon-magenta);
+  opacity: 1;
+}
+.admin-console .adm-tab[aria-current='page']::after {
+  background: linear-gradient(90deg, var(--neon-violet), var(--neon-magenta));
+  box-shadow: 0 0 10px oklch(0.68 0.29 8 / 0.55);
+}
+
+/* ---------- page ---------- */
+
+.admin-console .adm-main {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 20px 24px;
+}
+.admin-console .adm-page {
+  flex: 1 1 auto;
+  min-height: 0;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.admin-console .adm-page-header {
+  flex-shrink: 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+}
+.admin-console .adm-eyebrow {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--neon-magenta);
+}
+.admin-console .adm-title {
+  margin: 2px 0 0;
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  line-height: 1.15;
+  text-transform: uppercase;
+  color: var(--adm-text);
+}
+.admin-console .adm-subtitle {
+  margin-top: 4px;
+  font-size: 14.5px;
+  color: var(--adm-text-3);
+}
+.admin-console .adm-page-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+.admin-console .adm-page-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* ---------- panel ---------- */
+
+.admin-console .adm-panel {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  min-width: 0;
+  background: linear-gradient(180deg, var(--adm-surface-2), var(--adm-surface));
+  border: 1px solid var(--adm-border);
+  border-radius: var(--adm-radius);
+  box-shadow: var(--adm-shadow);
+}
+.admin-console .adm-panel--fill {
+  flex: 1 1 0;
+}
+.admin-console .adm-panel-header {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 50px;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--adm-border);
+}
+.admin-console .adm-panel-title {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--adm-text);
+}
+.admin-console .adm-panel-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+.admin-console .adm-panel-caption {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--adm-text-3);
+}
+.admin-console .adm-panel-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.admin-console .adm-panel-body {
+  padding: 16px;
+  min-height: 0;
+}
+.admin-console .adm-panel-body--flush {
+  padding: 0;
+}
+.admin-console .adm-panel-body--scroll {
+  flex: 1 1 auto;
+  overflow: auto;
+}
+.admin-console .adm-panel-footer {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 16px;
+  border-top: 1px solid var(--adm-border);
+  font-size: 13.5px;
+  color: var(--adm-text-3);
+}
+
+.admin-console .adm-toolbar {
+  flex-shrink: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--adm-border);
+}
+
+/* ---------- KPI ---------- */
+
+.admin-console .adm-kpi {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+  padding: 16px 18px;
+  background: linear-gradient(180deg, var(--adm-surface-2), var(--adm-surface));
+  border: 1px solid var(--adm-border);
+  border-radius: var(--adm-radius);
+  box-shadow: var(--adm-shadow);
+  overflow: hidden;
+}
+.admin-console .adm-kpi::before {
+  content: '';
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 3px;
+  background: var(--adm-kpi-tone, var(--neon-violet));
+  opacity: 0.85;
+}
+.admin-console .adm-kpi-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.admin-console .adm-kpi-label {
+  font-size: 12.5px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--adm-text-3);
+}
+.admin-console .adm-kpi-icon {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  display: grid;
+  place-items: center;
+  color: var(--adm-kpi-tone, var(--neon-violet));
+  background: color-mix(in oklab, var(--adm-kpi-tone, var(--neon-violet)) 13%, transparent);
+  border: 1px solid color-mix(in oklab, var(--adm-kpi-tone, var(--neon-violet)) 25%, transparent);
+}
+.admin-console .adm-kpi-icon svg {
+  width: 16px;
+  height: 16px;
+}
+.admin-console .adm-kpi-value {
+  font-size: 30px;
+  font-weight: 700;
+  line-height: 1.05;
+  letter-spacing: 0.01em;
+  font-variant-numeric: tabular-nums;
+  color: var(--adm-text);
+}
+.admin-console .adm-kpi--lg .adm-kpi-value {
+  font-size: 40px;
+}
+/* Wallboard variant: card stretches to its grid cell, value scales with the viewport. */
+.admin-console .adm-kpi--fill {
+  justify-content: space-between;
+  padding: 20px 22px;
+}
+.admin-console .adm-kpi--fill .adm-kpi-value {
+  font-size: clamp(34px, 6.2vh, 64px);
+}
+.admin-console .adm-kpi-caption {
+  font-size: 13.5px;
+  color: var(--adm-text-3);
+}
+
+/* ---------- buttons ---------- */
+
+.admin-console .adm-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 34px;
+  padding: 0 14px;
+  border-radius: var(--adm-radius-sm);
+  border: 1px solid transparent;
+  font-family: var(--font-sans);
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  cursor: pointer;
+  user-select: none;
+  transition: background-color 0.15s, border-color 0.15s, color 0.15s, filter 0.15s;
+}
+.admin-console .adm-btn svg {
+  width: 15px;
+  height: 15px;
+}
+.admin-console .adm-btn--sm {
+  height: 28px;
+  padding: 0 10px;
+  font-size: 13px;
+}
+.admin-console .adm-btn:focus-visible {
+  outline: 2px solid oklch(0.68 0.29 8 / 0.7);
+  outline-offset: 2px;
+}
+.admin-console .adm-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.admin-console .adm-btn--primary {
+  color: white;
+  background: linear-gradient(180deg, oklch(0.66 0.25 355), oklch(0.58 0.25 340));
+  border-color: oklch(0.72 0.24 355 / 0.6);
+  box-shadow: 0 1px 0 oklch(1 0 0 / 0.18) inset, 0 4px 14px -6px oklch(0.68 0.29 8 / 0.7);
+}
+.admin-console .adm-btn--primary:not(:disabled):hover {
+  filter: brightness(1.1);
+}
+.admin-console .adm-btn--secondary {
+  color: var(--adm-text);
+  background: var(--adm-surface-3);
+  border-color: var(--adm-border-strong);
+}
+.admin-console .adm-btn--secondary:not(:disabled):hover {
+  background: oklch(0.34 0.07 258);
+  border-color: oklch(0.7 0.14 300 / 0.4);
+}
+.admin-console .adm-btn--ghost {
+  color: var(--adm-text-2);
+  background: transparent;
+}
+.admin-console .adm-btn--ghost:not(:disabled):hover {
+  color: var(--adm-text);
+  background: var(--adm-surface-3);
+}
+.admin-console .adm-btn--info {
+  color: var(--neon-blue);
+  background: oklch(0.75 0.17 231 / 0.08);
+  border-color: oklch(0.75 0.17 231 / 0.3);
+}
+.admin-console .adm-btn--info:not(:disabled):hover {
+  background: oklch(0.75 0.17 231 / 0.16);
+}
+.admin-console .adm-btn--success {
+  color: var(--neon-lime);
+  background: oklch(0.87 0.25 145 / 0.07);
+  border-color: oklch(0.87 0.25 145 / 0.28);
+}
+.admin-console .adm-btn--success:not(:disabled):hover {
+  background: oklch(0.87 0.25 145 / 0.15);
+}
+.admin-console .adm-btn--danger {
+  color: oklch(0.72 0.19 22);
+  background: oklch(0.62 0.25 25 / 0.07);
+  border-color: oklch(0.62 0.25 25 / 0.32);
+}
+.admin-console .adm-btn--danger:not(:disabled):hover {
+  color: oklch(0.8 0.15 22);
+  background: oklch(0.62 0.25 25 / 0.16);
+}
+.admin-console .adm-btn--danger-solid {
+  color: white;
+  background: oklch(0.56 0.21 25);
+  border-color: oklch(0.66 0.21 25 / 0.7);
+}
+.admin-console .adm-btn--danger-solid:not(:disabled):hover {
+  background: oklch(0.6 0.22 25);
+}
+
+/* ---------- form controls ---------- */
+
+.admin-console .adm-input,
+.admin-console .adm-select {
+  height: 34px;
+  padding: 0 12px;
+  border-radius: var(--adm-radius-sm);
+  border: 1px solid var(--adm-border-strong);
+  background-color: var(--adm-field);
+  color: var(--adm-text);
+  font-family: var(--font-sans);
+  font-size: 14.5px;
+  font-weight: 500;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.admin-console .adm-input[type='number'] {
+  appearance: textfield;
+  -moz-appearance: textfield;
+}
+.admin-console .adm-input[type='number']::-webkit-inner-spin-button,
+.admin-console .adm-input[type='number']::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+.admin-console .adm-input::placeholder {
+  color: var(--adm-text-3);
+  opacity: 0.8;
+}
+.admin-console .adm-input:hover,
+.admin-console .adm-select:hover {
+  border-color: oklch(0.7 0.14 300 / 0.38);
+}
+.admin-console .adm-input:focus,
+.admin-console .adm-select:focus {
+  outline: none;
+  border-color: oklch(0.68 0.29 8 / 0.75);
+  box-shadow: 0 0 0 3px oklch(0.68 0.29 8 / 0.18);
+}
+.admin-console .adm-select {
+  appearance: none;
+  padding-right: 32px;
+  cursor: pointer;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23a99cbf' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+}
+.admin-console .adm-select option {
+  background: var(--adm-surface-solid);
+  color: var(--adm-text);
+}
+.admin-console .adm-search {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.admin-console .adm-search > svg {
+  position: absolute;
+  left: 10px;
+  width: 15px;
+  height: 15px;
+  color: var(--adm-text-3);
+  pointer-events: none;
+}
+.admin-console .adm-search .adm-input {
+  width: 100%;
+  padding-left: 32px;
+}
+.admin-console .adm-label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 12.5px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--adm-text-3);
+}
+
+/* ---------- table ---------- */
+
+.admin-console .adm-table-wrap {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+}
+.admin-console .adm-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  text-align: left;
+  font-size: 14.5px;
+}
+.admin-console .adm-table th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  padding: 0 16px;
+  height: 38px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--adm-text-3);
+  background: var(--adm-surface-solid);
+  border-bottom: 1px solid var(--adm-border-strong);
+}
+.admin-console .adm-table td {
+  padding: 0 16px;
+  height: 44px;
+  white-space: nowrap;
+  color: var(--adm-text-2);
+  border-bottom: 1px solid var(--adm-border);
+}
+.admin-console .adm-table--dense th,
+.admin-console .adm-table--dense td {
+  padding: 0 12px;
+}
+.admin-console .adm-table--dense td {
+  height: 40px;
+}
+.admin-console .adm-table tbody tr {
+  transition: background-color 0.12s;
+}
+.admin-console .adm-table tbody tr:nth-child(even) td {
+  background: oklch(1 0 0 / 0.012);
+}
+.admin-console .adm-table tbody tr:hover td {
+  background: oklch(0.62 0.26 305 / 0.07);
+}
+.admin-console .adm-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+.admin-console .adm-table .adm-num,
+.admin-console .adm-table th.adm-num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.admin-console .adm-table .adm-strong {
+  color: var(--adm-text);
+  font-weight: 600;
+}
+.admin-console .adm-table .adm-muted {
+  color: var(--adm-text-3);
+}
+.admin-console .adm-table .adm-actions {
+  text-align: right;
+}
+.admin-console .adm-table .adm-actions > div {
+  display: inline-flex;
+  justify-content: flex-end;
+  gap: 6px;
+}
+.admin-console .adm-empty {
+  padding: 40px 16px;
+  text-align: center;
+  color: var(--adm-text-3);
+}
+
+/* ---------- pills ---------- */
+
+.admin-console .adm-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 22px;
+  padding: 0 9px;
+  border-radius: 999px;
+  font-size: 12.5px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  color: var(--adm-pill, var(--adm-text-2));
+  background: color-mix(in oklab, var(--adm-pill, var(--adm-text-3)) 12%, transparent);
+  border: 1px solid color-mix(in oklab, var(--adm-pill, var(--adm-text-3)) 28%, transparent);
+}
+.admin-console .adm-pill::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: currentColor;
+}
+.admin-console .adm-pill--plain::before {
+  display: none;
+}
+.admin-console .adm-pill--live::before {
+  animation: adm-pulse 1.4s ease-in-out infinite;
+}
+@keyframes adm-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.3;
+  }
+}
+
+/* ---------- misc ---------- */
+
+.admin-console .adm-mono {
+  font-family: ui-monospace, 'Cascadia Mono', 'Consolas', monospace;
+  font-size: 13px;
+  letter-spacing: 0.02em;
+}
+.admin-console .adm-note {
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--adm-text-3);
+}
+.admin-console .adm-callout {
+  display: flex;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: 8px;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--adm-text-2);
+  background: oklch(0.76 0.19 55 / 0.07);
+  border: 1px solid oklch(0.76 0.19 55 / 0.22);
+}
+.admin-console .adm-callout svg {
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  margin-top: 2px;
+  color: var(--neon-orange);
+}
+.admin-console .adm-callout--info {
+  background: oklch(0.75 0.17 231 / 0.06);
+  border-color: oklch(0.75 0.17 231 / 0.2);
+}
+.admin-console .adm-callout--info svg {
+  color: var(--neon-blue);
+}
+.admin-console .adm-state {
+  flex: 1 1 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 120px;
+  color: var(--adm-text-3);
+}
+.admin-console .adm-spinner {
+  width: 16px;
+  height: 16px;
+  border-radius: 999px;
+  border: 2px solid var(--adm-border-strong);
+  border-top-color: var(--neon-magenta);
+  animation: adm-spin 0.8s linear infinite;
+}
+@keyframes adm-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ---------- modal ---------- */
+
+.admin-console-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: oklch(0.1 0.04 265 / 0.7);
+  backdrop-filter: blur(4px);
+}
+.admin-console .adm-modal {
+  width: 100%;
+  max-width: 440px;
+  background: linear-gradient(180deg, oklch(0.28 0.065 258), oklch(0.235 0.06 260));
+  border: 1px solid var(--adm-border-strong);
+  border-radius: 12px;
+  box-shadow: 0 24px 60px -12px oklch(0 0 0 / 0.75), 0 0 0 1px oklch(0.62 0.26 305 / 0.12);
+}
+.admin-console .adm-modal-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 18px 20px 0;
+}
+.admin-console .adm-modal-icon {
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  border-radius: 9px;
+  display: grid;
+  place-items: center;
+  color: var(--adm-modal-tone, var(--neon-magenta));
+  background: color-mix(in oklab, var(--adm-modal-tone, var(--neon-magenta)) 14%, transparent);
+  border: 1px solid color-mix(in oklab, var(--adm-modal-tone, var(--neon-magenta)) 30%, transparent);
+}
+.admin-console .adm-modal-icon svg {
+  width: 18px;
+  height: 18px;
+}
+.admin-console .adm-modal-title {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  color: var(--adm-text);
+}
+.admin-console .adm-modal-sub {
+  margin-top: 2px;
+  font-size: 14px;
+  color: var(--adm-text-3);
+}
+.admin-console .adm-modal-body {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 18px 20px;
+}
+.admin-console .adm-modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 14px 20px;
+  border-top: 1px solid var(--adm-border);
+  background: oklch(0.2 0.055 262 / 0.7);
+  border-radius: 0 0 12px 12px;
+}
+.admin-console .adm-error {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  color: oklch(0.78 0.16 22);
+  background: oklch(0.62 0.25 25 / 0.1);
+  border: 1px solid oklch(0.62 0.25 25 / 0.3);
+}
+.admin-console .adm-success {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--neon-lime);
+}
+
+.admin-console .adm-live {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 34px;
+  padding: 0 12px;
+  border-radius: 999px;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--adm-text-2);
+  border: 1px solid var(--adm-border);
+  background: var(--adm-surface);
+}
+.admin-console .adm-live::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--neon-lime);
+  box-shadow: 0 0 8px var(--neon-lime);
+  animation: adm-pulse 1.6s ease-in-out infinite;
+}

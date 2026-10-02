@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { FileDown } from '@lucide/vue'
-import ArcadeButton from '@/components/sky/ArcadeButton.vue'
+import AdminButton from '@/components/admin/AdminButton.vue'
 import type { ReportDefinition } from '@/lib/pdfReport'
 
 const props = defineProps<{
@@ -29,11 +29,11 @@ async function exportPdf() {
 </script>
 
 <template>
-  <div class="flex flex-col items-end gap-1">
-    <ArcadeButton size="sm" variant="ghost" :disabled="isExporting" @click="exportPdf">
-      <FileDown class="h-3 w-3" aria-hidden="true" />
+  <div class="relative flex flex-col items-end">
+    <AdminButton variant="secondary" :disabled="isExporting" @click="exportPdf">
+      <FileDown aria-hidden="true" />
       {{ isExporting ? 'Exporting…' : 'Export PDF' }}
-    </ArcadeButton>
-    <p v-if="error" class="font-arcade text-[8px] uppercase tracking-[0.2em] text-danger">{{ error }}</p>
+    </AdminButton>
+    <p v-if="error" class="absolute top-full mt-1 whitespace-nowrap text-[13px] font-semibold text-[oklch(0.72_0.19_22)]">{{ error }}</p>
   </div>
 </template>

@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useAdminSettingsStore } from '@/stores/adminSettingsStore'
-import ArcadeField from '@/components/sky/ArcadeField.vue'
-import ArcadeButton from '@/components/sky/ArcadeButton.vue'
+import { KeyRound, CircleAlert } from '@lucide/vue'
+import AdminButton from '@/components/admin/AdminButton.vue'
+import '@/components/admin/admin.css'
 
 const props = defineProps<{ newHouseEdgePercentage: number }>()
 const emit = defineEmits<{ close: []; saved: [] }>()
@@ -34,25 +35,44 @@ async function submit() {
 </script>
 
 <template>
-  <div class="fixed inset-0 z-50 flex items-center justify-center bg-void/80 backdrop-blur-sm">
-    <div class="neon-panel clip-hud w-full max-w-sm space-y-4 p-6">
-      <h2 class="font-display text-sm font-black uppercase tracking-[0.2em] text-ember text-glow-ember">
-        Confirm House Edge Change
-      </h2>
-      <p class="text-xs text-muted-foreground">
-        You're about to set the house edge to <span class="text-ember">{{ newHouseEdgePercentage }}%</span>. Re-enter your
-        password to confirm this affects real payouts for every player going forward.
-      </p>
+  <div class="admin-console-modal" role="dialog" aria-modal="true" aria-labelledby="house-edge-title">
+    <div class="adm-modal" style="--adm-modal-tone: var(--neon-orange)">
+      <div class="adm-modal-header">
+        <span class="adm-modal-icon" aria-hidden="true"><KeyRound /></span>
+        <div class="min-w-0">
+          <h2 id="house-edge-title" class="adm-modal-title">Confirm House Edge Change</h2>
+          <p class="adm-modal-sub">This is a sensitive, audited setting.</p>
+        </div>
+      </div>
 
-      <ArcadeField v-model="password" type="password" label="Your Password" autocomplete="current-password" />
+      <div class="adm-modal-body">
+        <p class="adm-callout">
+          <span>
+            You're about to set the house edge to
+            <strong class="adm-num text-[var(--neon-orange)]">{{ newHouseEdgePercentage }}%</strong>. Re-enter your password
+            to confirm this affects real payouts for every player going forward.
+          </span>
+        </p>
 
-      <p v-if="error" class="font-arcade text-[8px] uppercase tracking-[0.2em] text-danger">{{ error }}</p>
+        <label class="block">
+          <span class="adm-label">Your Password</span>
+          <input
+            v-model="password"
+            type="password"
+            autocomplete="current-password"
+            class="adm-input w-full"
+            @keyup.enter="submit"
+          />
+        </label>
 
-      <div class="flex justify-end gap-2">
-        <ArcadeButton size="sm" variant="ghost" @click="emit('close')">Cancel</ArcadeButton>
-        <ArcadeButton size="sm" variant="danger" :disabled="isSubmitting" @click="submit">
+        <p v-if="error" class="adm-error"><CircleAlert class="h-4 w-4 shrink-0" aria-hidden="true" />{{ error }}</p>
+      </div>
+
+      <div class="adm-modal-footer">
+        <AdminButton variant="ghost" @click="emit('close')">Cancel</AdminButton>
+        <AdminButton variant="danger-solid" :disabled="isSubmitting" @click="submit">
           {{ isSubmitting ? 'Confirming…' : 'Confirm Change' }}
-        </ArcadeButton>
+        </AdminButton>
       </div>
     </div>
   </div>

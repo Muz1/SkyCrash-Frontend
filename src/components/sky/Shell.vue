@@ -27,14 +27,14 @@ const hangarStore = useHangarStore()
 </script>
 
 <template>
-  <div class="relative min-h-screen overflow-hidden bg-void">
+  <!-- Exactly one screen: header, content (flex-1), nav dock. Long content scrolls inside main, without a visible bar. -->
+  <div class="relative flex h-dvh flex-col overflow-hidden bg-void">
     <SkyEnvironment :skin="skin" :dim="dim" />
     <Ambient :skin="skin" />
     <PageTransition :craft="hangarStore.craftId" />
     <CRTOverlay />
     <HudHeader v-if="showHud" />
-    <!-- The dock auto-hides off Home, so pages only reserve room for its peek tab. -->
-    <main :class="cn('relative z-10 px-4 pb-16 sm:px-8', props.class)">
+    <main :class="cn('relative z-10 min-h-0 flex-1 overflow-y-auto px-4 pb-2 sm:px-8', props.class)">
       <slot />
     </main>
     <NavDock />

@@ -192,19 +192,9 @@ function crashChipClass(value: number) {
 </script>
 
 <template>
-  <!-- Fills exactly one screen: header, flight stage (flex), controls. Falls back to scrolling only on very short viewports. -->
-  <div class="relative flex min-h-[100dvh] flex-col overflow-x-hidden bg-void">
-    <div
-      class="absolute inset-0"
-      :style="{
-        animation: crashed
-          ? 'camera-impact 900ms cubic-bezier(0.3,0,0.2,1) both'
-          : flying
-            ? `camera-climb ${Math.max(0.9, 2.4 - climb * 1.4)}s ease-in-out infinite`
-            : 'camera-idle 7s ease-in-out infinite',
-        willChange: 'transform',
-      }"
-    >
+  <!-- Fills exactly one screen: header, flight stage (flex), controls, nav dock. Never scrolls. -->
+  <div class="relative flex h-dvh flex-col overflow-hidden bg-void">
+    <div class="absolute inset-0 overflow-hidden">
       <SkyEnvironment :skin="skin" :progress="flying || crashed ? climb : 0" :dim="crashed ? 0.5 : 0.34" />
       <Ambient :skin="skin" :progress="flying || crashed ? climb : 0" />
     </div>
@@ -212,7 +202,7 @@ function crashChipClass(value: number) {
 
     <HudHeader />
 
-    <main class="relative z-10 mx-auto flex w-full max-w-6xl flex-1 flex-col px-3 sm:px-4">
+    <main class="relative z-10 mx-auto flex min-h-0 w-full max-w-6xl flex-1 flex-col px-3 sm:px-4">
       <!-- round strip: number/phase, recent crash points, sound toggle -->
       <div class="flex items-center gap-2">
         <p class="shrink-0 text-[10px] uppercase tracking-[0.24em] text-muted-foreground sm:text-xs sm:tracking-[0.3em]">

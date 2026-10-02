@@ -1,17 +1,21 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useGameStore } from '@/stores/gameStore'
 import { useFlightClock, multiplierAt, secondsAt, GROWTH } from '@/composables/useFlightClock'
 import { getCraft, type CraftId } from '@/lib/craft'
 import Plane from './Plane.vue'
 import Explosion from './Explosion.vue'
+import { soundEngine } from '@/lib/soundEngine'
 
 /**
- * Crash-game flight graph. Time runs along x, multiplier up y, and the curve
+ * Crash-game flight. Time runs left to right, multiplier upwards, and the curve
  * is the same e^(GROWTH·t) the server uses, so the plane at its tip is always
- * exactly where the multiplier says it is. The axes start fixed (the plane
- * climbs up and to the right), then rescale once it reaches its cruising spot
+ * exactly where the multiplier says it is. The scale starts fixed (the plane
+ * climbs up and to the right), then rescales once it reaches its cruising spot
  * near the top-right so it holds position while the curve compresses behind.
+ * No axes or grid are drawn — just the sky, the trail and the plane. Neon
+ * checkpoint rings wait ahead at milestone multipliers (2x, 5x, 10x…); the plane
+ * flies through each one with a flash and a chime, and passed rings stay on the trail.
  */
 const props = defineProps<{ craft: CraftId }>()
 
@@ -53,8 +57,8 @@ const planeSize = computed(() => Math.round(Math.min(150, Math.max(72, Math.min(
 
 const plot = computed(() => {
   const s = planeSize.value
-  const left = 34
-  const bottom = height.value - 22
+  const left = Math.max(16, s * 0.25)
+  const bottom = height.value - 14
   const right = Math.max(left + 40, width.value - s * 0.55)
   const top = Math.min(bottom - 40, s * 0.5)
   return { left, right, top, bottom, w: right - left, h: bottom - top }
@@ -123,28 +127,6 @@ const planeTransform = computed(() => {
   return `translate3d(${(cx - s / 2).toFixed(1)}px, ${(cy - s / 2).toFixed(1)}px, 0) rotate(${rotate.toFixed(2)}deg)`
 })
 
-// ---------- axes ----------
-
-function pickStep(range: number, steps: number[], maxLines: number) {
-  return steps.find((st) => range / st <= maxLines) ?? steps[steps.length - 1]!
-}
-
-const yTicks = computed(() => {
-  const step = pickStep(yMax.value - 1, [0.2, 0.5, 1, 2, 5, 10, 25, 50, 100, 250, 500], 4)
-  const ticks: { v: number; y: number; label: string }[] = []
-  for (let v = 1 + step; v <= yMax.value; v += step) {
-    ticks.push({ v, y: toY(v), label: `${v < 10 ? v.toFixed(1) : v.toFixed(0)}x` })
-  }
-  return ticks
-})
-
-const xTicks = computed(() => {
-  const step = pickStep(xMax.value, [2, 5, 10, 15, 30, 60, 120], 5)
-  const ticks: { s: number; x: number }[] = []
-  for (let s = step; s <= xMax.value; s += step) ticks.push({ s, x: toX(s) })
-  return ticks
-})
-
 // ---------- markers ----------
 
 const myCashOut = computed(() => {
@@ -160,6 +142,93 @@ const otherCashOuts = computed(() =>
         .map((b, i) => ({ key: `${b.playerId}-${i}`, x: toX(secondsAt(b.cashOutMultiplier!)), y: toY(b.cashOutMultiplier!) }))
     : [],
 )
+
+// ---------- checkpoint rings ----------
+
+/** Milestone multipliers the plane flies through. */
+const CHECKPOINTS = [2, 3, 5, 10, 25, 50, 100, 250, 500, 1000]
+/** The next ring comes into view this many seconds of flight before the plane reaches it. */
+const RING_LOOKAHEAD_S = 4
+const BURST_MS = 900
+
+function ringTone(cp: number) {
+  if (cp < 3) return 'var(--neon-blue)'
+  if (cp < 10) return 'var(--neon-lime)'
+  if (cp < 50) return 'var(--neon-magenta)'
+  return 'var(--neon-orange)'
+}
+
+const ringRadius = computed(() => planeSize.value * 0.55)
+
+/** Where the plane's centre sits: just ahead of the curve tip, along its heading. */
+function planeCentre() {
+  const rad = (heading.value * Math.PI) / 180
+  const ahead = planeSize.value * 0.2
+  return { x: tip.value.x + Math.cos(rad) * ahead, y: tip.value.y - Math.sin(rad) * ahead }
+}
+
+const upcomingRing = computed(() => {
+  if (!flying.value) return null
+  const cp = CHECKPOINTS.find((c) => c > m.value)
+  if (cp === undefined) return null
+  const away = secondsAt(cp) - t.value
+  if (away > RING_LOOKAHEAD_S) return null
+  // 0 when it first appears far ahead, 1 when the plane reaches it.
+  const progress = 1 - away / RING_LOOKAHEAD_S
+  const rad = (heading.value * Math.PI) / 180
+  const centre = planeCentre()
+  const room = Math.max(planeSize.value, width.value - centre.x - ringRadius.value * 0.4)
+  const dist = (1 - progress) * room
+  return {
+    cp,
+    x: centre.x + Math.cos(rad) * dist,
+    y: centre.y - Math.sin(rad) * dist,
+    scale: 0.55 + 0.45 * progress,
+    opacity: Math.min(1, progress * 3),
+    tone: ringTone(cp),
+  }
+})
+
+/** Rings already flown through, pinned to the trail at their multiplier. */
+const passedRings = computed(() =>
+  airborne.value
+    ? CHECKPOINTS.filter((c) => c <= m.value).map((cp) => ({ cp, x: toX(secondsAt(cp)), y: toY(cp), tone: ringTone(cp) }))
+    : [],
+)
+
+const bursts = ref<{ id: number; cp: number; x: number; y: number; tone: string }[]>([])
+let burstId = 0
+// Start from whatever's already been passed, so joining mid-round doesn't replay old rings.
+let lastPassed = Math.max(0, ...CHECKPOINTS.filter((c) => c <= m.value))
+
+watch(m, (value) => {
+  if (!flying.value) return
+  const passed = CHECKPOINTS.filter((c) => c <= value && c > lastPassed)
+  if (passed.length === 0) return
+  lastPassed = passed[passed.length - 1]!
+  const centre = planeCentre()
+  for (const cp of passed) {
+    const id = ++burstId
+    bursts.value.push({ id, cp, x: centre.x, y: centre.y, tone: ringTone(cp) })
+    setTimeout(() => (bursts.value = bursts.value.filter((b) => b.id !== id)), BURST_MS)
+    soundEngine.checkpoint(CHECKPOINTS.indexOf(cp))
+  }
+})
+
+watch(
+  () => gameStore.phase,
+  (phase) => {
+    if (phase === 'Running') lastPassed = 0
+    else bursts.value = []
+  },
+)
+
+/** One half of a ring seen side-on; the plane flies between the two halves. */
+function ringArc(side: 'back' | 'front') {
+  const ry = ringRadius.value
+  const rx = ry * 0.32
+  return `M0,${-ry} A${rx},${ry} 0 0 ${side === 'back' ? 0 : 1} 0,${ry}`
+}
 
 // ---------- waiting countdown ----------
 
@@ -189,19 +258,6 @@ const multiplierClass = computed(() =>
         </linearGradient>
       </defs>
 
-      <!-- grid + axis labels -->
-      <g class="font-arcade" style="font-size: 7px">
-        <g v-for="tk in yTicks" :key="`y${tk.v}`">
-          <line :x1="plot.left" :x2="width" :y1="tk.y" :y2="tk.y" style="stroke: var(--neon-violet); stroke-opacity: 0.18" stroke-dasharray="3 6" />
-          <text :x="plot.left - 6" :y="tk.y + 3" text-anchor="end" style="fill: var(--muted-foreground)">{{ tk.label }}</text>
-        </g>
-        <g v-for="tk in xTicks" :key="`x${tk.s}`">
-          <text :x="tk.x" :y="height - 6" text-anchor="middle" style="fill: var(--muted-foreground)">{{ tk.s }}s</text>
-        </g>
-      </g>
-      <line :x1="plot.left" :x2="width" :y1="plot.bottom" :y2="plot.bottom" style="stroke: var(--neon-blue); stroke-opacity: 0.45" stroke-width="2" />
-      <line :x1="plot.left" :x2="plot.left" :y1="0" :y2="plot.bottom" style="stroke: var(--neon-blue); stroke-opacity: 0.25" />
-
       <!-- the flight curve -->
       <template v-if="curve.line">
         <path :d="curve.fill" fill="url(#flight-fill)" />
@@ -215,6 +271,21 @@ const multiplierClass = computed(() =>
           :style="{ filter: `drop-shadow(0 0 6px ${crashed ? 'var(--neon-red)' : 'var(--neon-magenta)'})` }"
         />
       </template>
+
+      <!-- checkpoint rings already flown through -->
+      <g v-for="r in passedRings" :key="`passed-${r.cp}`">
+        <circle :cx="r.x" :cy="r.y" r="7" fill="none" stroke-width="2" :style="{ stroke: r.tone, filter: `drop-shadow(0 0 4px ${r.tone})` }" />
+        <text :x="r.x" :y="r.y + 20" text-anchor="middle" class="font-arcade" :style="{ fontSize: '8px', fill: r.tone }">{{ r.cp }}x</text>
+      </g>
+
+      <!-- far half of the next ring (drawn behind the plane) -->
+      <g
+        v-if="upcomingRing"
+        :transform="`translate(${upcomingRing.x.toFixed(1)} ${upcomingRing.y.toFixed(1)}) rotate(${-heading}) scale(${upcomingRing.scale.toFixed(3)})`"
+        :style="{ opacity: upcomingRing.opacity }"
+      >
+        <path :d="ringArc('back')" fill="none" stroke-width="7" stroke-linecap="round" :style="{ stroke: upcomingRing.tone, strokeOpacity: 0.55 }" />
+      </g>
 
       <!-- other pilots' cash-outs -->
       <circle v-for="c in otherCashOuts" :key="c.key" :cx="c.x" :cy="c.y" r="3.5" style="fill: var(--neon-violet); stroke: var(--background)" />
@@ -236,6 +307,38 @@ const multiplierClass = computed(() =>
     >
       <!-- The curve is the exhaust trail here, so the sprite's own generic trail is off. -->
       <Plane :craft="props.craft" :size="planeSize" :idle="waiting" :crashing="crashed" :trail="false" />
+    </div>
+    <!-- near half of the next ring + pass-through flashes (drawn in front of the plane) -->
+    <svg v-if="width > 0" class="pointer-events-none absolute inset-0 h-full w-full" :viewBox="`0 0 ${width} ${height}`" aria-hidden="true">
+      <g v-if="upcomingRing" :style="{ opacity: upcomingRing.opacity }">
+        <g :transform="`translate(${upcomingRing.x.toFixed(1)} ${upcomingRing.y.toFixed(1)}) rotate(${-heading}) scale(${upcomingRing.scale.toFixed(3)})`">
+          <path
+            :d="ringArc('front')"
+            fill="none"
+            stroke-width="7"
+            stroke-linecap="round"
+            :style="{ stroke: upcomingRing.tone, filter: `drop-shadow(0 0 8px ${upcomingRing.tone})` }"
+          />
+        </g>
+        <text
+          :x="upcomingRing.x"
+          :y="upcomingRing.y - ringRadius * upcomingRing.scale - 10"
+          text-anchor="middle"
+          class="font-arcade"
+          :style="{ fontSize: '11px', fill: upcomingRing.tone, filter: `drop-shadow(0 0 6px ${upcomingRing.tone})` }"
+        >
+          {{ upcomingRing.cp }}x
+        </text>
+      </g>
+    </svg>
+    <div
+      v-for="b in bursts"
+      :key="b.id"
+      class="checkpoint-burst pointer-events-none absolute left-0 top-0"
+      :style="{ transform: `translate3d(${b.x}px, ${b.y}px, 0)`, '--tone': b.tone, '--size': `${Math.round(ringRadius * 2)}px` }"
+    >
+      <span class="checkpoint-burst__ring" />
+      <span class="checkpoint-burst__label font-arcade">{{ b.cp }}x</span>
     </div>
     <div
       v-if="crashed && width > 0"
@@ -269,3 +372,58 @@ const multiplierClass = computed(() =>
     <slot />
   </div>
 </template>
+
+<style scoped>
+.checkpoint-burst__ring {
+  position: absolute;
+  left: calc(var(--size) / -2);
+  top: calc(var(--size) / -2);
+  width: var(--size);
+  height: var(--size);
+  border: 4px solid var(--tone);
+  border-radius: 9999px;
+  box-shadow: 0 0 18px var(--tone), inset 0 0 18px var(--tone);
+  animation: checkpoint-ring 900ms ease-out forwards;
+}
+.checkpoint-burst__label {
+  position: absolute;
+  left: 0;
+  top: calc(var(--size) / -2);
+  transform: translate(-50%, -100%);
+  font-size: 18px;
+  color: var(--tone);
+  text-shadow: 0 0 12px var(--tone);
+  white-space: nowrap;
+  animation: checkpoint-label 900ms ease-out forwards;
+}
+@keyframes checkpoint-ring {
+  from {
+    transform: scale(0.6);
+    opacity: 1;
+  }
+  to {
+    transform: scale(1.9);
+    opacity: 0;
+  }
+}
+@keyframes checkpoint-label {
+  0% {
+    transform: translate(-50%, -100%) scale(0.6);
+    opacity: 0;
+  }
+  25% {
+    transform: translate(-50%, -110%) scale(1.15);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, -190%) scale(1);
+    opacity: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .checkpoint-burst__ring,
+  .checkpoint-burst__label {
+    animation-duration: 1ms;
+  }
+}
+</style>

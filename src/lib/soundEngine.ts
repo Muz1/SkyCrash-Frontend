@@ -105,6 +105,15 @@ class SoundEngine {
     this.duck(0.5, 0.2)
   }
 
+  /** Flying through a checkpoint ring: a quick rising arpeggio, pitched up for higher tiers. */
+  checkpoint(tier = 0) {
+    const ctx = this.sfxCtx()
+    if (!ctx) return
+    const t = ctx.currentTime
+    const base = 660 * Math.pow(2, Math.min(tier, 4) / 6)
+    ;[1, 1.25, 1.5, 2].forEach((ratio, i) => this.blip(ctx, t + i * 0.05, base * ratio, 0.08, 0.12, 'triangle'))
+  }
+
   takeoff() {
     const ctx = this.sfxCtx()
     if (!ctx) return

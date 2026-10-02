@@ -1,10 +1,13 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
+import { Search, ArrowUp, ArrowDown } from '@lucide/vue'
 import { useAdminStore } from '@/stores/adminStore'
 import { useAuthStore } from '@/stores/AuthStore'
 import AdminShell from '@/components/sky/AdminShell.vue'
-import NeonPanel from '@/components/sky/NeonPanel.vue'
-import ArcadeButton from '@/components/sky/ArcadeButton.vue'
+import AdminPage from '@/components/admin/AdminPage.vue'
+import AdminPanel from '@/components/admin/AdminPanel.vue'
+import AdminButton from '@/components/admin/AdminButton.vue'
+import AdminPill from '@/components/admin/AdminPill.vue'
 import AdjustBalanceModal from '@/components/AdjustBalanceModal.vue'
 import ExportPdfButton from '@/components/sky/ExportPdfButton.vue'
 import { buildPlayersReport } from '@/lib/adminReports'
@@ -26,6 +29,11 @@ function buildReport() {
   })
 }
 
+// Display-only summaries of the list already loaded.
+const blockedCount = computed(() => adminStore.players.filter((p) => p.isBlocked).length)
+const adminCount = computed(() => adminStore.players.filter((p) => p.isAdmin).length)
+const balanceFormat = new Intl.NumberFormat(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+
 onMounted(() => {
   adminStore.fetchPlayers()
 })
@@ -35,124 +43,141 @@ onMounted(() => {
   <AdminShell
     help-text="Search, filter and sort every player account. Promote/demote grants or removes admin access. Block immediately prevents that player from logging in or playing, and disconnects any live session — unblock restores access. Adjust changes a player's credit balance directly, for support or correction purposes, and is logged."
   >
-    <div class="flex flex-wrap items-start justify-between gap-3">
-      <h1 class="font-display text-2xl font-black uppercase tracking-[0.2em] text-ember text-glow-ember sm:text-3xl">
-        Player Management
-      </h1>
-      <ExportPdfButton :build="buildReport" />
-    </div>
+    <AdminPage title="Player Management" eyebrow="Accounts" subtitle="Search, filter and manage every player account.">
+      <template #actions>
+        <ExportPdfButton :build="buildReport" />
+      </template>
 
-    <NeonPanel class="mt-5" title="Players" accent="ember">
-      <div class="flex flex-wrap items-center gap-2">
-        <input
-          v-model="adminStore.searchTerm"
-          type="text"
-          placeholder="Search by username or email…"
-          class="clip-hud min-w-[220px] flex-1 border-2 border-violet/50 bg-void/70 px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground/60 focus:border-magenta focus:outline-none"
-          @keyup.enter="adminStore.fetchPlayers"
-        />
-        <select
-          v-model="adminStore.blockedFilter"
-          class="clip-hud border-2 border-violet/50 bg-void/70 px-2 py-2 text-xs uppercase tracking-[0.15em] text-foreground focus:border-magenta focus:outline-none"
-          @change="adminStore.fetchPlayers"
-        >
-          <option value="all">All Accounts</option>
-          <option value="active">Active Only</option>
-          <option value="blocked">Blocked Only</option>
-        </select>
-        <select
-          v-model="adminStore.adminFilter"
-          class="clip-hud border-2 border-violet/50 bg-void/70 px-2 py-2 text-xs uppercase tracking-[0.15em] text-foreground focus:border-magenta focus:outline-none"
-          @change="adminStore.fetchPlayers"
-        >
-          <option value="all">All Roles</option>
-          <option value="admin">Admins Only</option>
-          <option value="player">Players Only</option>
-        </select>
-        <select
-          v-model="adminStore.sortBy"
-          class="clip-hud border-2 border-violet/50 bg-void/70 px-2 py-2 text-xs uppercase tracking-[0.15em] text-foreground focus:border-magenta focus:outline-none"
-          @change="adminStore.fetchPlayers"
-        >
-          <option value="username">Sort: Username</option>
-          <option value="email">Sort: Email</option>
-          <option value="balance">Sort: Balance</option>
-          <option value="membersince">Sort: Member Since</option>
-          <option value="lastseen">Sort: Last Seen</option>
-        </select>
-        <ArcadeButton
-          size="sm"
-          variant="ghost"
-          @click="
-            () => {
-              adminStore.toggleSortDir()
-              adminStore.fetchPlayers()
-            }
-          "
-        >
-          {{ adminStore.sortDir === 'asc' ? '↑ Asc' : '↓ Desc' }}
-        </ArcadeButton>
-        <ArcadeButton size="sm" variant="blue" @click="adminStore.fetchPlayers">Search</ArcadeButton>
-      </div>
+      <AdminPanel title="Players" accent="magenta" fill flush>
+        <template #actions>
+          <span class="adm-panel-caption adm-num">
+            {{ adminStore.players.length }} accounts · {{ adminCount }} admins · {{ blockedCount }} blocked
+          </span>
+        </template>
 
-      <div class="mt-4 overflow-x-auto">
-        <table class="w-full min-w-[760px] text-left text-sm">
-          <thead class="whitespace-nowrap font-arcade text-[8px] uppercase tracking-[0.2em] text-muted-foreground">
-            <tr>
-              <th class="py-2 pr-4">Username</th>
-              <th class="pr-4">Email</th>
-              <th class="pr-4">Balance</th>
-              <th class="pr-4">Role</th>
-              <th class="pr-4">Status</th>
-              <th class="pr-4">Last Seen</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-border/60">
-            <tr v-for="player in adminStore.players" :key="player.playerId" class="whitespace-nowrap">
-              <td class="py-2 pr-4 text-foreground">{{ player.username }}</td>
-              <td class="pr-4 text-muted-foreground">{{ player.email }}</td>
-              <td class="pr-4 text-ember">{{ player.creditBalance }}</td>
-              <td class="pr-4">{{ player.isAdmin ? 'Admin' : 'Player' }}</td>
-              <td class="pr-4">
-                <span :class="player.isBlocked ? 'text-danger' : 'text-lime'">
-                  {{ player.isBlocked ? 'Blocked' : 'Active' }}
-                </span>
-              </td>
-              <td class="pr-4 text-muted-foreground">{{ new Date(player.lastSeenUtc).toLocaleString() }}</td>
-              <td class="space-x-2 text-right">
-                <ArcadeButton v-if="!player.isAdmin" size="sm" variant="blue" @click="adminStore.promote(player.playerId)">
-                  Promote
-                </ArcadeButton>
-                <ArcadeButton
-                  v-else-if="player.playerId !== authStore.playerId"
-                  size="sm"
-                  variant="ghost"
-                  @click="adminStore.demote(player.playerId)"
-                >
-                  Demote
-                </ArcadeButton>
-                <ArcadeButton
-                  v-if="!player.isBlocked"
-                  size="sm"
-                  variant="danger"
-                  :disabled="player.playerId === authStore.playerId"
-                  @click="adminStore.block(player.playerId)"
-                >
-                  Block
-                </ArcadeButton>
-                <ArcadeButton v-else size="sm" variant="cash" @click="adminStore.unblock(player.playerId)">
-                  Unblock
-                </ArcadeButton>
-                <ArcadeButton size="sm" variant="magenta" @click="modalTarget = { playerId: player.playerId, username: player.username }">
-                  Adjust
-                </ArcadeButton>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </NeonPanel>
+        <template #toolbar>
+          <div class="adm-toolbar">
+            <div class="adm-search min-w-[240px] flex-1">
+              <Search aria-hidden="true" />
+              <input
+                v-model="adminStore.searchTerm"
+                type="text"
+                placeholder="Search by username or email…"
+                class="adm-input"
+                @keyup.enter="adminStore.fetchPlayers"
+              />
+            </div>
+            <select
+              v-model="adminStore.blockedFilter"
+              class="adm-select"
+              aria-label="Account status"
+              @change="adminStore.fetchPlayers"
+            >
+              <option value="all">All Accounts</option>
+              <option value="active">Active Only</option>
+              <option value="blocked">Blocked Only</option>
+            </select>
+            <select v-model="adminStore.adminFilter" class="adm-select" aria-label="Role" @change="adminStore.fetchPlayers">
+              <option value="all">All Roles</option>
+              <option value="admin">Admins Only</option>
+              <option value="player">Players Only</option>
+            </select>
+            <select v-model="adminStore.sortBy" class="adm-select" aria-label="Sort by" @change="adminStore.fetchPlayers">
+              <option value="username">Sort: Username</option>
+              <option value="email">Sort: Email</option>
+              <option value="balance">Sort: Balance</option>
+              <option value="membersince">Sort: Member Since</option>
+              <option value="lastseen">Sort: Last Seen</option>
+            </select>
+            <AdminButton
+              variant="secondary"
+              :title="adminStore.sortDir === 'asc' ? 'Ascending' : 'Descending'"
+              @click="
+                () => {
+                  adminStore.toggleSortDir()
+                  adminStore.fetchPlayers()
+                }
+              "
+            >
+              <ArrowUp v-if="adminStore.sortDir === 'asc'" aria-hidden="true" />
+              <ArrowDown v-else aria-hidden="true" />
+              {{ adminStore.sortDir === 'asc' ? 'Asc' : 'Desc' }}
+            </AdminButton>
+            <AdminButton variant="primary" @click="adminStore.fetchPlayers">Search</AdminButton>
+          </div>
+        </template>
+
+        <div class="adm-table-wrap">
+          <table class="adm-table min-w-[1000px]">
+            <thead>
+              <tr>
+                <th>Username</th>
+                <th>Email</th>
+                <th class="adm-num">Balance</th>
+                <th>Role</th>
+                <th>Status</th>
+                <th>Last Seen</th>
+                <th class="adm-num">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="player in adminStore.players" :key="player.playerId">
+                <td class="adm-strong">
+                  {{ player.username }}
+                  <span v-if="player.playerId === authStore.playerId" class="adm-muted ml-1 text-[12.5px] font-medium">
+                    (you)
+                  </span>
+                </td>
+                <td class="adm-muted">{{ player.email }}</td>
+                <td class="adm-num adm-strong">{{ balanceFormat.format(player.creditBalance) }}</td>
+                <td><AdminPill :label="player.isAdmin ? 'Admin' : 'Player'" :dot="false" /></td>
+                <td><AdminPill :label="player.isBlocked ? 'Blocked' : 'Active'" /></td>
+                <td class="adm-muted adm-num-inline">{{ new Date(player.lastSeenUtc).toLocaleString() }}</td>
+                <td class="adm-actions">
+                  <div>
+                    <AdminButton v-if="!player.isAdmin" size="sm" variant="info" @click="adminStore.promote(player.playerId)">
+                      Promote
+                    </AdminButton>
+                    <AdminButton
+                      v-else-if="player.playerId !== authStore.playerId"
+                      size="sm"
+                      variant="danger"
+                      @click="adminStore.demote(player.playerId)"
+                    >
+                      Demote
+                    </AdminButton>
+                    <AdminButton
+                      v-if="!player.isBlocked"
+                      size="sm"
+                      variant="danger"
+                      :disabled="player.playerId === authStore.playerId"
+                      @click="adminStore.block(player.playerId)"
+                    >
+                      Block
+                    </AdminButton>
+                    <AdminButton v-else size="sm" variant="success" @click="adminStore.unblock(player.playerId)">
+                      Unblock
+                    </AdminButton>
+                    <AdminButton
+                      size="sm"
+                      variant="secondary"
+                      @click="modalTarget = { playerId: player.playerId, username: player.username }"
+                    >
+                      Adjust
+                    </AdminButton>
+                  </div>
+                </td>
+              </tr>
+              <tr v-if="adminStore.players.length === 0">
+                <td colspan="7" class="adm-empty">
+                  {{ adminStore.isLoading ? 'Loading players…' : 'No players match these filters.' }}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </AdminPanel>
+    </AdminPage>
 
     <AdjustBalanceModal
       v-if="modalTarget"
