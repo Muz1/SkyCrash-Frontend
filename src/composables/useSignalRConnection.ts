@@ -10,6 +10,7 @@ import { useToastStore } from '@/stores/toastStore'
 import { useAchievementStore } from '@/stores/achievementStore'
 import { useChallengeStore } from '@/stores/challengeStore'
 import { badgeFor } from '@/lib/achievements'
+import { challengeBadgeFor } from '@/lib/challengeBadges'
 
 
 type RoundSnapshot = {
@@ -102,6 +103,8 @@ type ChallengeCompletedPayload = {
   description: string
   rewardCredits: number
   newBalance: number
+  badgeKey?: string
+  badgeTimesEarned?: number
 }
 
 type DisplayedAchievementChangedPayload = {
@@ -217,12 +220,21 @@ connection.on('PlayerCashedOut', (payload: PlayerCashedOutPayload) => {
     })
     connection.on('ChallengeCompleted', (payload: ChallengeCompletedPayload) => {
       challengeStore.fetchTodayChallenges()
+      challengeStore.fetchBadges().catch(() => undefined)
       usePlayerStore().fetchProfile()
-      toastStore.push({
-        title: 'Challenge Complete',
-        message: `${payload.description} — +${payload.rewardCredits.toLocaleString()} credits`,
-        accent: 'lime',
-      })
+      const badge = challengeBadgeFor(payload.badgeKey)
+      const badgeText = badge
+        ? ` · ${badge.name} badge${payload.badgeTimesEarned && payload.badgeTimesEarned > 1 ? ` x${payload.badgeTimesEarned}` : ''}`
+        : ''
+      toastStore.push(
+        {
+          title: 'Challenge Complete',
+          message: `${payload.description} +${payload.rewardCredits.toLocaleString()} credits${badgeText}`,
+          accent: 'lime',
+          imageSrc: badge?.src ?? null,
+        },
+        7000,
+      )
     })
   }
 

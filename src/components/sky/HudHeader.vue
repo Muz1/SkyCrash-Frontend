@@ -1,14 +1,26 @@
 <script setup lang="ts">
-import { ShieldCheck, Users, Music, VolumeX } from '@lucide/vue'
+import { nextTick, ref } from 'vue'
+import { ShieldCheck, Users, Music, VolumeX, SlidersHorizontal } from '@lucide/vue'
 import { usePlayerStore } from '@/stores/playerStore'
 import { useAuthStore } from '@/stores/AuthStore'
 import { useAudioStore } from '@/stores/audioStore'
 import CreditDisplay from './CreditDisplay.vue'
 import Wordmark from './Wordmark.vue'
+import SoundSettings from './SoundSettings.vue'
 
 const playerStore = usePlayerStore()
 const authStore = useAuthStore()
 const audioStore = useAudioStore()
+
+const soundOpen = ref(false)
+const soundTrigger = ref<HTMLButtonElement | null>(null)
+
+async function closeSound() {
+  soundOpen.value = false
+  // Hand focus back to the button that opened the mixer.
+  await nextTick()
+  soundTrigger.value?.focus()
+}
 </script>
 
 <template>
@@ -32,6 +44,25 @@ const audioStore = useAudioStore()
       >
         <Music v-if="audioStore.musicEnabled" class="h-4 w-4" aria-hidden="true" />
         <VolumeX v-else class="h-4 w-4" aria-hidden="true" />
+      </button>
+      <button
+        ref="soundTrigger"
+        type="button"
+        data-sound-settings-trigger
+        aria-label="Sound settings"
+        title="Sound settings"
+        aria-haspopup="dialog"
+        :aria-expanded="soundOpen"
+        aria-controls="sound-settings"
+        :class="[
+          'grid h-9 w-9 shrink-0 place-items-center border-2 bg-void/70 clip-hud transition-all',
+          soundOpen
+            ? 'border-electric text-electric [box-shadow:var(--glow-blue)]'
+            : 'border-electric/70 text-electric hover:[box-shadow:var(--glow-blue)]',
+        ]"
+        @click="soundOpen ? closeSound() : (soundOpen = true)"
+      >
+        <SlidersHorizontal class="h-4 w-4" aria-hidden="true" />
       </button>
       <template v-if="!authStore.isAuthenticated">
         <RouterLink
@@ -68,5 +99,11 @@ const audioStore = useAudioStore()
       </RouterLink>
       </template>
     </div>
+    <SoundSettings
+      v-if="soundOpen"
+      id="sound-settings"
+      class="absolute right-4 top-full z-40 sm:right-8"
+      @close="closeSound"
+    />
   </header>
 </template>

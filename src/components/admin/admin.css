@@ -19,7 +19,7 @@
   /* ink (AA on every navy surface: text-3 is >= 4.5:1 on the lightest panel) */
   --adm-text: oklch(0.97 0.01 260);
   --adm-text-2: oklch(0.86 0.03 255);
-  --adm-text-3: oklch(0.73 0.04 255);
+  --adm-text-3: oklch(0.78 0.04 255);
   /* accents */
   --adm-accent: var(--neon-magenta);
   --adm-accent-2: var(--neon-violet);
@@ -30,7 +30,7 @@
   font-family: var(--font-sans);
   font-size: 15px;
   font-weight: 500;
-  line-height: 1.4;
+  line-height: 1.5;
   color: var(--adm-text);
   background:
     radial-gradient(1200px 520px at 12% -10%, oklch(0.62 0.26 305 / 0.16), transparent 60%),
@@ -239,7 +239,8 @@
 }
 .admin-console .adm-subtitle {
   margin-top: 4px;
-  font-size: 14.5px;
+  font-size: 15px;
+  line-height: 1.5;
   color: var(--adm-text-3);
 }
 .admin-console .adm-page-actions {
@@ -287,7 +288,7 @@
   gap: 9px;
   margin: 0;
   font-family: var(--font-sans);
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 700;
   letter-spacing: 0.02em;
   color: var(--adm-text);
@@ -299,7 +300,9 @@
   flex-shrink: 0;
 }
 .admin-console .adm-panel-caption {
-  font-size: 13px;
+  margin-top: 2px;
+  font-size: 14px;
+  line-height: 1.45;
   font-weight: 500;
   color: var(--adm-text-3);
 }
@@ -371,7 +374,8 @@
   gap: 8px;
 }
 .admin-console .adm-kpi-label {
-  font-size: 12.5px;
+  font-size: 13px;
+  line-height: 1.35;
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -411,7 +415,8 @@
   font-size: clamp(34px, 6.2vh, 64px);
 }
 .admin-console .adm-kpi-caption {
-  font-size: 13.5px;
+  font-size: 14px;
+  line-height: 1.5;
   color: var(--adm-text-3);
 }
 
@@ -608,13 +613,13 @@
   top: 0;
   z-index: 1;
   padding: 0 16px;
-  height: 38px;
-  font-size: 12px;
+  height: 40px;
+  font-size: 12.5px;
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   white-space: nowrap;
-  color: var(--adm-text-3);
+  color: var(--adm-text-2);
   background: var(--adm-surface-solid);
   border-bottom: 1px solid var(--adm-border-strong);
 }
@@ -879,4 +884,502 @@
   background: var(--neon-lime);
   box-shadow: 0 0 8px var(--neon-lime);
   animation: adm-pulse 1.6s ease-in-out infinite;
+}
+
+/* ---------- analytics charts ----------
+ * Series colours are validated (OKLCH lightness band, CVD separation, 3:1 vs the
+ * panel) separately for dark and light; the light theme re-steps them below rather
+ * than flipping. Text never wears a series colour - it stays in ink tokens.
+ */
+
+.admin-console {
+  --adm-chart-1: oklch(0.66 0.15 231);
+  --adm-chart-2: oklch(0.66 0.17 52);
+  --adm-grid: oklch(0.6 0.05 255 / 0.22);
+}
+.admin-console .adm-chart {
+  position: relative;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.admin-console .adm-chart-tools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+}
+.admin-console .adm-chart-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 30px;
+  padding: 0 10px;
+  border-radius: var(--adm-radius-sm);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--adm-text-2);
+  background: var(--adm-field);
+  border: 1px solid var(--adm-border-strong);
+}
+.admin-console .adm-chart-toggle svg {
+  width: 15px;
+  height: 15px;
+}
+.admin-console .adm-chart-toggle:hover,
+.admin-console .adm-chart-toggle[aria-pressed='true'] {
+  color: var(--adm-text);
+  border-color: var(--neon-blue);
+}
+.admin-console .adm-chart-toggle:focus-visible,
+.admin-console .adm-vchart-col:focus-visible,
+.admin-console .adm-trend-hit:focus-visible {
+  outline: 2px solid var(--neon-blue);
+  outline-offset: 2px;
+}
+.admin-console .adm-chart-empty {
+  padding: 28px 12px;
+  text-align: center;
+  font-size: 14.5px;
+  color: var(--adm-text-3);
+}
+.admin-console .adm-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin: 0 auto 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--adm-text-2);
+}
+.admin-console .adm-legend li {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+.admin-console .adm-legend-swatch {
+  width: 14px;
+  height: 4px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+/* vertical bars (and the shared y-axis grid used by trend lines) */
+.admin-console .adm-vchart,
+.admin-console .adm-trend {
+  position: relative;
+  margin-top: 22px;
+  margin-left: 52px;
+}
+.admin-console .adm-vchart-grid {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.admin-console .adm-vchart-tick {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 0;
+  border-top: 1px solid var(--adm-grid);
+}
+.admin-console .adm-vchart-tick span {
+  position: absolute;
+  right: calc(100% + 8px);
+  top: -9px;
+  font-size: 12.5px;
+  line-height: 18px;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+  color: var(--adm-text-3);
+}
+.admin-console .adm-vchart-bars {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+}
+.admin-console .adm-vchart-col {
+  position: relative;
+  flex: 1;
+  height: 100%;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  border-radius: 4px;
+  cursor: default;
+}
+.admin-console .adm-vchart-bar {
+  position: relative;
+  width: min(100%, 44px);
+  min-height: 2px;
+  border-radius: 4px 4px 0 0;
+  background: var(--adm-series, var(--adm-chart-1));
+  transition: filter 0.12s;
+}
+.admin-console .adm-vchart-bar.is-active {
+  filter: brightness(1.18);
+}
+.admin-console .adm-vchart-peak {
+  position: absolute;
+  bottom: calc(100% + 4px);
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
+  color: var(--adm-text);
+}
+.admin-console .adm-vchart-xlabels {
+  display: flex;
+  gap: 2px;
+  margin-left: 52px;
+}
+.admin-console .adm-vchart-xlabels span {
+  flex: 1;
+  min-width: 0;
+  text-align: center;
+  font-size: 12.5px;
+  line-height: 1.3;
+  color: var(--adm-text-2);
+  overflow-wrap: anywhere;
+}
+
+/* horizontal bars */
+.admin-console .adm-hbars {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.admin-console .adm-hbar-row {
+  display: grid;
+  grid-template-columns: minmax(84px, 9rem) minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+}
+.admin-console .adm-hbar-label {
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--adm-text);
+  overflow-wrap: anywhere;
+}
+.admin-console .adm-hbar-track {
+  height: 10px;
+  border-radius: 5px;
+  background: var(--adm-grid);
+  overflow: hidden;
+}
+.admin-console .adm-hbar-fill {
+  display: block;
+  height: 100%;
+  min-width: 2px;
+  border-radius: 0 4px 4px 0;
+  background: var(--adm-series, var(--adm-chart-1));
+}
+.admin-console .adm-hbar-value {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--adm-text);
+  white-space: nowrap;
+}
+
+/* trend lines */
+.admin-console .adm-trend-plot {
+  position: absolute;
+  inset: 0;
+}
+.admin-console .adm-trend-plot svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+.admin-console .adm-trend-crosshair {
+  stroke: var(--adm-text-3);
+  stroke-width: 1;
+}
+.admin-console .adm-trend-dot {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 0 0 2px var(--adm-surface-solid);
+  pointer-events: none;
+}
+.admin-console .adm-trend-end {
+  position: absolute;
+  transform: translate(-100%, -130%);
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-size: 12.5px;
+  font-weight: 700;
+  white-space: nowrap;
+  color: var(--adm-text);
+  background: var(--adm-surface-solid);
+  pointer-events: none;
+}
+.admin-console .adm-trend-hits {
+  position: absolute;
+  inset: 0;
+  display: flex;
+}
+.admin-console .adm-trend-hit {
+  flex: 1;
+  height: 100%;
+}
+.admin-console .adm-trend-xlabels {
+  position: relative;
+  height: 20px;
+  margin-left: 52px;
+}
+.admin-console .adm-trend-xlabels span {
+  position: absolute;
+  top: 2px;
+  transform: translateX(-50%);
+  font-size: 12.5px;
+  white-space: nowrap;
+  color: var(--adm-text-2);
+}
+
+/* tooltip (bars + trends) */
+.admin-console .adm-tooltip {
+  position: absolute;
+  z-index: 5;
+  left: 50%;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: max-content;
+  padding: 8px 10px;
+  border-radius: 8px;
+  font-size: 13.5px;
+  line-height: 1.4;
+  color: var(--adm-text-2);
+  background: var(--adm-surface-solid);
+  border: 1px solid var(--adm-border-strong);
+  box-shadow: var(--adm-shadow);
+  pointer-events: none;
+}
+.admin-console .adm-tooltip strong {
+  color: var(--adm-text);
+}
+.admin-console .adm-vchart-col .adm-tooltip {
+  top: 0;
+  transform: translate(-50%, calc(-100% - 6px));
+}
+.admin-console .adm-tooltip--trend {
+  top: 4px;
+  transform: translateX(12px);
+}
+.admin-console .adm-tooltip--trend.is-flipped {
+  transform: translateX(calc(-100% - 12px));
+}
+.admin-console .adm-tooltip-row {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.admin-console .adm-tooltip-row b {
+  margin-left: auto;
+  padding-left: 12px;
+  color: var(--adm-text);
+}
+
+/* ---------- "what does this measure?" disclosure ---------- */
+
+.admin-console .adm-explain {
+  border-radius: 8px;
+  border: 1px solid var(--adm-border);
+  background: var(--adm-surface-2);
+}
+.admin-console .adm-explain summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  list-style: none;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--adm-text-2);
+}
+.admin-console .adm-explain summary::-webkit-details-marker {
+  display: none;
+}
+.admin-console .adm-explain summary:hover {
+  color: var(--adm-text);
+}
+.admin-console .adm-explain summary:focus-visible {
+  outline: 2px solid var(--neon-blue);
+  outline-offset: -2px;
+  border-radius: 8px;
+}
+.admin-console .adm-explain summary svg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+.admin-console .adm-explain-chevron {
+  margin-left: auto;
+  transition: transform 0.15s;
+}
+.admin-console .adm-explain[open] .adm-explain-chevron {
+  transform: rotate(180deg);
+}
+.admin-console .adm-explain dl {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 2px 14px 14px 36px;
+}
+.admin-console .adm-explain dt {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--adm-text);
+}
+.admin-console .adm-explain dd {
+  margin: 2px 0 0;
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--adm-text-2);
+}
+
+/* section headings + segmented controls on the analytics page */
+.admin-console .adm-section-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 6px 0 0;
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--adm-text);
+}
+.admin-console .adm-section-title svg {
+  width: 18px;
+  height: 18px;
+  color: var(--neon-magenta);
+}
+.admin-console .adm-segmented {
+  display: inline-flex;
+  padding: 3px;
+  gap: 2px;
+  border-radius: 8px;
+  background: var(--adm-field);
+  border: 1px solid var(--adm-border-strong);
+}
+.admin-console .adm-segmented button {
+  height: 30px;
+  padding: 0 12px;
+  border-radius: 6px;
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--adm-text-2);
+}
+.admin-console .adm-segmented button[aria-pressed='true'] {
+  color: var(--adm-text);
+  background: var(--adm-surface-3);
+  box-shadow: inset 0 0 0 1px var(--neon-blue);
+}
+.admin-console .adm-segmented button:focus-visible {
+  outline: 2px solid var(--neon-blue);
+  outline-offset: 1px;
+}
+
+/* ---------- light theme ----------
+ * Same structure, re-stepped tokens: light surfaces, dark ink, and the neon accents
+ * darkened so accent-coloured text still reads at >= 4.5:1 on white panels.
+ */
+
+.admin-console[data-theme='light'] {
+  color-scheme: light;
+  --adm-bg: oklch(0.97 0.008 260);
+  --adm-surface: oklch(1 0 0 / 0.92);
+  --adm-surface-2: oklch(0.975 0.008 260);
+  --adm-surface-3: oklch(0.93 0.015 260);
+  --adm-surface-solid: oklch(1 0 0);
+  --adm-field: oklch(0.985 0.005 260);
+  --adm-border: oklch(0.55 0.04 260 / 0.25);
+  --adm-border-strong: oklch(0.5 0.05 260 / 0.42);
+  --adm-text: oklch(0.2 0.03 265);
+  --adm-text-2: oklch(0.33 0.035 262);
+  --adm-text-3: oklch(0.44 0.035 260);
+  --adm-shadow: 0 1px 2px oklch(0.3 0.03 260 / 0.08), 0 8px 24px -14px oklch(0.3 0.04 260 / 0.35);
+  --adm-chart-1: oklch(0.5 0.15 245);
+  --adm-chart-2: oklch(0.58 0.17 50);
+  --adm-grid: oklch(0.5 0.03 260 / 0.18);
+  --neon-magenta: oklch(0.52 0.22 8);
+  --neon-violet: oklch(0.48 0.22 300);
+  --neon-blue: oklch(0.5 0.15 245);
+  --neon-orange: oklch(0.55 0.16 50);
+  --neon-lime: oklch(0.5 0.15 150);
+  --neon-red: oklch(0.52 0.2 25);
+  background: linear-gradient(170deg, oklch(0.985 0.006 260) 0%, oklch(0.955 0.012 265) 100%), var(--adm-bg);
+}
+.admin-console[data-theme='light'] .adm-topbar,
+.admin-console[data-theme='light'] .adm-tabbar {
+  background: oklch(1 0 0 / 0.85);
+}
+.admin-console[data-theme='light'] .adm-modal {
+  background: var(--adm-surface-solid);
+  box-shadow: 0 24px 60px -16px oklch(0.25 0.04 260 / 0.45);
+}
+.admin-console[data-theme='light'] .admin-console-modal {
+  background: oklch(0.3 0.03 260 / 0.45);
+}
+.admin-console[data-theme='light'] .adm-modal-footer {
+  background: var(--adm-surface-2);
+}
+.admin-console[data-theme='light'] .adm-pill {
+  color: color-mix(in oklab, var(--adm-pill) 55%, black);
+}
+.admin-console[data-theme='light'] .adm-btn--danger {
+  color: oklch(0.48 0.19 25);
+}
+
+/* theme toggle in the top bar */
+.admin-console .adm-theme-toggle {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--adm-radius-sm);
+  color: var(--adm-text-2);
+  border: 1px solid var(--adm-border-strong);
+  background: var(--adm-field);
+}
+.admin-console .adm-theme-toggle:hover {
+  color: var(--adm-text);
+  border-color: var(--neon-blue);
+}
+.admin-console .adm-theme-toggle:focus-visible {
+  outline: 2px solid var(--neon-blue);
+  outline-offset: 2px;
+}
+.admin-console .adm-theme-toggle svg {
+  width: 17px;
+  height: 17px;
+}
+
+/* Narrow screens: the logo alone identifies the console; keep room for the user controls. */
+@media (max-width: 639px) {
+  .admin-console .adm-brand-label,
+  .admin-console .adm-brand-divider {
+    display: none;
+  }
+  .admin-console .adm-topbar {
+    padding: 0 16px;
+  }
 }

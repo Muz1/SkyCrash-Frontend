@@ -16,6 +16,9 @@ export type SkinId =
   | 'midnight'
   | 'taking-off'
 
+/** The sky every pilot starts with. */
+export const DEFAULT_SKIN: SkinId = 'sunset-runway'
+
 export interface SkySkin {
   id: SkinId
   name: string

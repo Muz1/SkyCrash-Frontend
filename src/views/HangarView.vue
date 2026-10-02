@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, ref, watch } from 'vue'
 import { useHangarStore } from '@/stores/hangarStore'
+import { useLobbyMates } from '@/composables/useLobbyMates'
 import { CRAFTS, RARITY_STYLE, getCraft, type CraftId, type Rarity } from '@/lib/craft'
 import { SKY_SKINS, type SkinId } from '@/lib/skins'
 import { cn } from '@/lib/cn'
@@ -11,8 +12,11 @@ import HudHeader from '@/components/sky/HudHeader.vue'
 import NavDock from '@/components/sky/NavDock.vue'
 import Aircraft from '@/components/sky/Aircraft.vue'
 import ArcadeButton from '@/components/sky/ArcadeButton.vue'
+import LobbyFleet from '@/components/sky/LobbyFleet.vue'
 
 const hangarStore = useHangarStore()
+// Lobby-mates cruise past behind the hangar too.
+const { mates } = useLobbyMates({ fetch: true })
 
 type Tab = 'aircraft' | 'skies'
 const tab = ref<Tab>('aircraft')
@@ -79,6 +83,7 @@ function rarityBadgeClass(rarity: Rarity) {
   <div class="relative flex h-dvh flex-col overflow-hidden bg-void">
     <SkyEnvironment :skin="previewSky" :dim="0.5" />
     <Ambient :skin="previewSky" />
+    <LobbyFleet :mates="mates" />
     <CRTOverlay />
 
     <HudHeader />

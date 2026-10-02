@@ -3,6 +3,7 @@ import { computed, onMounted, ref } from 'vue'
 import { Search, ArrowUp, ArrowDown } from '@lucide/vue'
 import { useAdminStore } from '@/stores/adminStore'
 import { useAuthStore } from '@/stores/AuthStore'
+import { usePlayerStore } from '@/stores/playerStore'
 import AdminShell from '@/components/sky/AdminShell.vue'
 import AdminPage from '@/components/admin/AdminPage.vue'
 import AdminPanel from '@/components/admin/AdminPanel.vue'
@@ -31,6 +32,8 @@ function buildReport() {
 
 // Display-only summaries of the list already loaded.
 const blockedCount = computed(() => adminStore.players.filter((p) => p.isBlocked).length)
+// Only managers can change who is an admin (the API enforces this too).
+const isManager = computed(() => !!usePlayerStore().profile?.isManager)
 const adminCount = computed(() => adminStore.players.filter((p) => p.isAdmin).length)
 const balanceFormat = new Intl.NumberFormat(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
 
@@ -41,7 +44,7 @@ onMounted(() => {
 
 <template>
   <AdminShell
-    help-text="Search, filter and sort every player account. Promote/demote grants or removes admin access. Block immediately prevents that player from logging in or playing, and disconnects any live session — unblock restores access. Adjust changes a player's credit balance directly, for support or correction purposes, and is logged."
+    help-text="Search, filter and sort every player account. Promote/demote grants or removes admin access (managers only; see the Admin Roles tab). Block immediately prevents that player from logging in or playing, and disconnects any live session — unblock restores access. Adjust changes a player's credit balance directly, for support or correction purposes, and is logged."
   >
     <AdminPage title="Player Management" eyebrow="Accounts" subtitle="Search, filter and manage every player account.">
       <template #actions>
@@ -130,16 +133,16 @@ onMounted(() => {
                 </td>
                 <td class="adm-muted">{{ player.email }}</td>
                 <td class="adm-num adm-strong">{{ balanceFormat.format(player.creditBalance) }}</td>
-                <td><AdminPill :label="player.isAdmin ? 'Admin' : 'Player'" :dot="false" /></td>
+                <td><AdminPill :label="player.isManager ? 'Manager' : player.isAdmin ? 'Admin' : 'Player'" :dot="false" /></td>
                 <td><AdminPill :label="player.isBlocked ? 'Blocked' : 'Active'" /></td>
                 <td class="adm-muted adm-num-inline">{{ new Date(player.lastSeenUtc).toLocaleString() }}</td>
                 <td class="adm-actions">
                   <div>
-                    <AdminButton v-if="!player.isAdmin" size="sm" variant="info" @click="adminStore.promote(player.playerId)">
+                    <AdminButton v-if="isManager && !player.isAdmin" size="sm" variant="info" @click="adminStore.promote(player.playerId)">
                       Promote
                     </AdminButton>
                     <AdminButton
-                      v-else-if="player.playerId !== authStore.playerId"
+                      v-else-if="isManager && player.isAdmin && player.playerId !== authStore.playerId"
                       size="sm"
                       variant="danger"
                       @click="adminStore.demote(player.playerId)"

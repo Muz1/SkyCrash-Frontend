@@ -1,12 +1,25 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import * as lobbyService from '@/services/lobbyService'
+import { LOBBY_CAPACITY } from '@/lib/lobby'
 import type { LobbyDetails } from '@/types'
+
+const FULL_MESSAGE = `That lobby is full (${LOBBY_CAPACITY}/${LOBBY_CAPACITY} pilots).`
+
+function normalizeCode(code: string) {
+  return code.trim().toUpperCase()
+}
 
 export const usePrivateLobbyStore = defineStore('privateLobby', () => {
   const lobby = ref<LobbyDetails | null>(null)
   const isLoading = ref(false)
   const errorMessage = ref<string | null>(null)
+  /** Invite codes we already found full this session, so the join button can stay disabled for them. */
+  const fullInviteCodes = ref<string[]>([])
+
+  function isKnownFull(inviteCode: string) {
+    return fullInviteCodes.value.includes(normalizeCode(inviteCode))
+  }
 
   async function fetchMyLobby() {
     isLoading.value = true
@@ -29,12 +42,31 @@ export const usePrivateLobbyStore = defineStore('privateLobby', () => {
 
   async function join(inviteCode: string) {
     errorMessage.value = null
+    const code = normalizeCode(inviteCode)
+    if (isKnownFull(code)) {
+      errorMessage.value = FULL_MESSAGE
+      throw new Error(FULL_MESSAGE)
+    }
+
+    let joined: LobbyDetails
     try {
-      lobby.value = await lobbyService.joinPrivateLobby(inviteCode)
+      joined = await lobbyService.joinPrivateLobby(code)
     } catch (err) {
       errorMessage.value = extractMessage(err)
       throw err
     }
+
+    // The backend doesn't cap lobby size, and there's no way to peek at a lobby
+    // before joining it, so the cap is enforced here: if we'd be pilot #9, step
+    // straight back out and report the lobby as full.
+    if (joined.members.length > LOBBY_CAPACITY) {
+      await lobbyService.leavePrivateLobby().catch(() => undefined)
+      lobby.value = null
+      fullInviteCodes.value = [...fullInviteCodes.value, code]
+      errorMessage.value = FULL_MESSAGE
+      throw new Error(FULL_MESSAGE)
+    }
+    lobby.value = joined
   }
 
   async function leave() {
@@ -95,6 +127,7 @@ export const usePrivateLobbyStore = defineStore('privateLobby', () => {
     lobby,
     isLoading,
     errorMessage,
+    isKnownFull,
     fetchMyLobby,
     create,
     join,

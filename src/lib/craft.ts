@@ -6,6 +6,9 @@ import portalTraveler from '@/assets/craft-portal-traveler.png'
 
 export type CraftId = 'jet' | 'ascender' | 'nighthawk' | 'millennium-falcon' | 'portal-traveler'
 
+/** The craft every pilot starts with. */
+export const DEFAULT_CRAFT: CraftId = 'jet'
+
 export type Rarity = 'COMMON' | 'RARE' | 'EPIC' | 'LEGENDARY' | 'SPECIAL'
 
 export interface Craft {

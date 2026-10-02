@@ -563,7 +563,32 @@
   }
 }
 
+/* ---------- Hangar navigation: lit while a custom loadout is equipped ---------- */
+/* drop-shadow (not box-shadow) so the glow follows clip-hud shapes instead of being clipped. */
+@keyframes hangar-glow {
+  0%,
+  100% {
+    filter: drop-shadow(0 0 3px color-mix(in oklab, var(--neon-lime) 70%, transparent));
+  }
+  50% {
+    filter: drop-shadow(0 0 9px var(--neon-lime)) drop-shadow(0 0 20px color-mix(in oklab, var(--neon-lime) 55%, transparent));
+  }
+}
+@utility hangar-glow {
+  animation: hangar-glow 2.4s ease-in-out infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
+  /* Steady glow instead of a pulse. */
+  .hangar-glow {
+    animation: none !important;
+    filter: drop-shadow(0 0 7px var(--neon-lime));
+  }
+  /* Lobby-mates park in place instead of cruising across (and off) the screen. */
+  .lobby-fleet-lane {
+    animation: none !important;
+    transform: translateX(var(--fleet-rest-x, 10vw));
+  }
   *,
   *::before,
   *::after {

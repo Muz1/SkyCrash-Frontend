@@ -59,10 +59,15 @@ onMounted(() => {
         <RouterLink to="/game">
           <ArcadeButton size="xl" variant="primary">Play Sky Crash</ArcadeButton>
         </RouterLink>
+        <!-- Secondary to Play: beside it on desktop, directly beneath it on phones. -->
+        <RouterLink to="/lobby">
+          <ArcadeButton size="md" variant="blue" class="sm:px-8 sm:py-4 sm:text-lg">Join Lobby</ArcadeButton>
+        </RouterLink>
         <RouterLink v-if="!authStore.isAuthenticated" to="/register">
           <ArcadeButton size="md" variant="ghost" class="sm:px-8 sm:py-4 sm:text-lg">Create Account</ArcadeButton>
         </RouterLink>
-        <RouterLink v-else to="/lobby">
+        <!-- Same destination as Join Lobby, so phones skip it to keep the hero on one screen. -->
+        <RouterLink v-else to="/lobby" class="hidden sm:block">
           <ArcadeButton size="md" variant="ghost" class="sm:px-8 sm:py-4 sm:text-lg">
             {{ lobbyStore.onlinePlayers.length }} Pilots Online
           </ArcadeButton>

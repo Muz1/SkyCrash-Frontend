@@ -8,12 +8,15 @@ import Shell from '@/components/sky/Shell.vue'
 import NeonPanel from '@/components/sky/NeonPanel.vue'
 import ArcadeButton from '@/components/sky/ArcadeButton.vue'
 import BuyCreditsPanel from '@/components/sky/BuyCreditsPanel.vue'
+import SpinWheel from '@/components/sky/SpinWheel.vue'
+import { BET_STEPS } from '@/lib/betSteps'
 
 const route = useRoute()
 const router = useRouter()
 const playerStore = usePlayerStore()
 const walletStore = useWalletStore()
 const paymentStore = usePaymentStore()
+const wheelOpen = ref(false)
 const isToppingUp = ref(false)
 const claimed = ref<number | null>(null)
 
@@ -77,6 +80,21 @@ async function handleTopUp() {
             {{ isToppingUp ? 'Refuelling…' : 'Add Demo Credits' }}
           </span>
         </button>
+
+        <button
+          class="clip-hud mt-3 w-full border-2 border-violet/60 bg-void/60 p-4 transition-all hover:border-ember hover:[box-shadow:var(--glow-ember)]"
+          @click="wheelOpen = true"
+        >
+          <span class="block font-arcade text-base text-ember">Spin to win</span>
+          <span class="mt-1 block font-display text-[10px] uppercase tracking-[0.24em] text-muted-foreground">
+            Free credits wheel · up to 2,000
+          </span>
+        </button>
+        <SpinWheel
+          v-if="wheelOpen"
+          :out-of-credits="(playerStore.profile?.creditBalance ?? 0) < BET_STEPS[0]"
+          @close="wheelOpen = false"
+        />
 
         <p role="status" class="mt-5 min-h-5 font-arcade text-[8px] uppercase tracking-[0.28em] text-lime">
           {{ claimed ? `Insert coin — ${claimed.toLocaleString()} credits loaded` : '' }}

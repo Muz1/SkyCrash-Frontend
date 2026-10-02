@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
+import { useRouter } from 'vue-router'
+import { Plane } from '@lucide/vue'
 import { useLobbyStore } from '@/stores/lobbyStore'
 import { usePlayerStore } from '@/stores/playerStore'
 import { usePrivateLobbyStore } from '@/stores/privateLobbyStore'
@@ -10,11 +12,17 @@ import StatusBadge from '@/components/sky/StatusBadge.vue'
 import ArcadeButton from '@/components/sky/ArcadeButton.vue'
 import ArcadeField from '@/components/sky/ArcadeField.vue'
 import AchievementBadge from '@/components/sky/AchievementBadge.vue'
+import LobbyFleet from '@/components/sky/LobbyFleet.vue'
+import { useLobbyMates } from '@/composables/useLobbyMates'
+import { LOBBY_CAPACITY, isLobbyFull } from '@/lib/lobby'
 
 const lobbyStore = useLobbyStore()
 const playerStore = usePlayerStore()
 const privateLobbyStore = usePrivateLobbyStore()
 const gameStore = useGameStore()
+const router = useRouter()
+// Everyone else in your lobby flies past in the background.
+const { mates } = useLobbyMates()
 
 const newLobbyName = ref('')
 const joinCode = ref('')
@@ -46,8 +54,17 @@ async function handleCreate() {
   }
 }
 
+const memberCount = computed(() => privateLobbyStore.lobby?.members.length ?? 0)
+const lobbyFull = computed(() => isLobbyFull(memberCount.value))
+const joinCodeFull = computed(() => !!joinCode.value.trim() && privateLobbyStore.isKnownFull(joinCode.value))
+
+/** Private lobbies share the global round, so "ready" simply means: go fly it. */
+function readyUp() {
+  router.push('/game')
+}
+
 async function handleJoin() {
-  if (!joinCode.value.trim()) return
+  if (!joinCode.value.trim() || joinCodeFull.value) return
   isBusy.value = true
   try {
     await privateLobbyStore.join(joinCode.value.trim())
@@ -81,6 +98,9 @@ async function copyInviteCode() {
 
 <template>
   <Shell skin="midnight" :dim="0.55">
+    <template #backdrop>
+      <LobbyFleet :mates="mates" />
+    </template>
     <div class="mx-auto w-full max-w-md space-y-5">
       <div>
         <h1 class="text-center font-display text-2xl font-black uppercase tracking-[0.2em] text-electric text-glow-blue sm:text-3xl">
@@ -131,9 +151,19 @@ async function copyInviteCode() {
 
         <form class="space-y-2" @submit.prevent="handleJoin">
           <ArcadeField v-model="joinCode" label="Invite code" placeholder="ABC123" />
-          <ArcadeButton type="submit" size="md" variant="blue" class="w-full" :disabled="isBusy || !joinCode.trim()">
-            Join Lobby
+          <ArcadeButton
+            type="submit"
+            size="md"
+            variant="blue"
+            class="w-full"
+            :disabled="isBusy || !joinCode.trim() || joinCodeFull"
+            :aria-describedby="joinCodeFull ? 'join-full-hint' : undefined"
+          >
+            {{ joinCodeFull ? 'Lobby Full' : 'Join Lobby' }}
           </ArcadeButton>
+          <p id="join-full-hint" class="text-[11px] text-muted-foreground">
+            Up to {{ LOBBY_CAPACITY }} pilots per lobby.
+          </p>
         </form>
 
         <p v-if="privateLobbyStore.errorMessage" class="mt-3 text-xs uppercase tracking-[0.2em] text-danger">
@@ -142,6 +172,10 @@ async function copyInviteCode() {
       </NeonPanel>
 
       <NeonPanel v-else :title="privateLobbyStore.lobby.name" accent="magenta">
+        <ArcadeButton type="button" size="lg" variant="primary" class="mb-4 w-full" @click="readyUp">
+          <Plane class="h-5 w-5" aria-hidden="true" /> Ready Up
+        </ArcadeButton>
+
         <div class="flex items-center justify-between gap-2">
           <p class="text-xs uppercase tracking-[0.2em] text-muted-foreground">
             Host: <span class="text-foreground">{{ privateLobbyStore.lobby.hostUsername }}</span>
@@ -155,7 +189,14 @@ async function copyInviteCode() {
           </button>
         </div>
 
-        <ul class="mt-4 divide-y divide-border/60">
+        <div class="mt-4 flex items-center justify-between gap-2">
+          <p class="font-arcade text-[8px] uppercase tracking-[0.3em] text-muted-foreground">Pilots</p>
+          <p :class="['font-arcade text-[10px]', lobbyFull ? 'text-ember text-glow-ember' : 'text-lime']">
+            {{ memberCount }}/{{ LOBBY_CAPACITY }}<span class="sr-only"> pilots</span><span v-if="lobbyFull"> · Full</span>
+          </p>
+        </div>
+
+        <ul class="mt-2 divide-y divide-border/60">
           <li
             v-for="member in privateLobbyStore.lobby.members"
             :key="member.playerId"

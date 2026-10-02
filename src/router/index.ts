@@ -16,6 +16,8 @@ import VolatilityView from '../views/VolatilityView.vue'
 import AdminView from '../views/AdminView.vue'
 import AdminCurrentRoundView from '../views/AdminCurrentRoundView.vue'
 import AdminReportsView from '../views/AdminReportsView.vue'
+import AdminAnalyticsView from '../views/AdminAnalyticsView.vue'
+import AdminRolesView from '../views/AdminRolesView.vue'
 import HangarView from '../views/HangarView.vue'
 import MissionsView from '../views/MissionsView.vue'
 
@@ -75,6 +77,19 @@ const router = createRouter({
       component: AdminReportsView,
       meta: { requiresAuth: true, requiresAdmin: true },
     },
+    {
+      path: '/admin/analytics',
+      name: 'admin-analytics',
+      component: AdminAnalyticsView,
+      meta: { requiresAuth: true, requiresAdmin: true },
+    },
+    {
+      // Grant/revoke admin access and appoint managers. Managers only (also enforced server-side).
+      path: '/admin/roles',
+      name: 'admin-roles',
+      component: AdminRolesView,
+      meta: { requiresAuth: true, requiresAdmin: true, requiresManager: true },
+    },
   ],
 })
 
@@ -104,6 +119,10 @@ router.beforeEach(async (to) => {
 
   if (to.meta.requiresAdmin && !isAdmin) {
     return { name: 'home' }
+  }
+
+  if (to.meta.requiresManager && !usePlayerStore().profile?.isManager) {
+    return { name: 'admin' }
   }
 
   // Admins operate the game but never play it: every player-facing page

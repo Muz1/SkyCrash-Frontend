@@ -11,10 +11,14 @@ import bgmTrack2 from '@/assets/audio/bgm-2.m4a'
  * "duck" the music bus so a cash-out chime or a crash is never masked by the
  * soundtrack. Nothing plays until `unlock()` is called from a user gesture,
  * which keeps browsers' autoplay policies happy.
+ *
+ * Each bus has a player-set volume (0–1) layered on top of its base level, so
+ * the effective output is master × channel and changes apply live.
  */
 
 const PLAYLIST = [bgmTrack1, bgmTrack2]
 
+const MASTER_LEVEL = 0.9
 const MUSIC_LEVEL = 0.35
 const SFX_LEVEL = 0.8
 
@@ -38,6 +42,8 @@ class SoundEngine {
 
   private musicWanted = false
   private sfxEnabled = true
+  private masterEnabled = true
+  private volume = { master: 1, music: 1, sfx: 1 }
 
   private engine: { osc: OscillatorNode; sub: OscillatorNode; filter: BiquadFilterNode; gain: GainNode } | null = null
 
@@ -76,7 +82,7 @@ class SoundEngine {
     if (!this.ctx) return
     const now = this.ctx.currentTime
     this.musicGain.gain.cancelScheduledValues(now)
-    this.musicGain.gain.setTargetAtTime(on ? MUSIC_LEVEL : 0, now, on ? 0.6 : 0.15)
+    this.musicGain.gain.setTargetAtTime(this.musicLevel(), now, on ? 0.6 : 0.15)
     if (on) this.playMusic()
     else setTimeout(() => !this.musicWanted && this.music?.pause(), 800)
   }
@@ -85,7 +91,24 @@ class SoundEngine {
     this.sfxEnabled = on
     if (!on) this.stopEngine()
     if (!this.ctx) return
-    this.sfxGain.gain.setTargetAtTime(on ? SFX_LEVEL : 0, this.ctx.currentTime, 0.05)
+    this.sfxGain.gain.setTargetAtTime(this.sfxLevel(), this.ctx.currentTime, 0.05)
+  }
+
+  setMasterEnabled(on: boolean) {
+    this.masterEnabled = on
+    if (!this.ctx) return
+    this.master.gain.setTargetAtTime(this.masterLevel(), this.ctx.currentTime, 0.05)
+  }
+
+  /** Player volumes, each 0–1. Applied live on top of the bus base levels. */
+  setVolumes(v: { master: number; music: number; sfx: number }) {
+    const clamp = (n: number) => (Number.isFinite(n) ? Math.max(0, Math.min(1, n)) : 1)
+    this.volume = { master: clamp(v.master), music: clamp(v.music), sfx: clamp(v.sfx) }
+    if (!this.ctx) return
+    const t = this.ctx.currentTime
+    this.master.gain.setTargetAtTime(this.masterLevel(), t, 0.05)
+    this.musicGain.gain.setTargetAtTime(this.musicLevel(), t, 0.05)
+    this.sfxGain.gain.setTargetAtTime(this.sfxLevel(), t, 0.05)
   }
 
   // ---------- game sounds ----------
@@ -135,6 +158,11 @@ class SoundEngine {
     this.startEngine()
   }
 
+  /** Engine drone only, for joining a round already in flight (no take-off whoosh). */
+  engineOn() {
+    this.startEngine()
+  }
+
   /** Engine pitch follows the multiplier, like a jet spooling up. */
   updateEngine(multiplier: number) {
     if (!this.ctx || !this.engine) return
@@ -146,6 +174,7 @@ class SoundEngine {
     this.engine.filter.frequency.setTargetAtTime(380 + climb * 520, t, 0.2)
   }
 
+  /** The win chime: the current player banked credits before the crash. */
   cashOut() {
     const ctx = this.sfxCtx()
     if (!ctx) return
@@ -204,9 +233,21 @@ class SoundEngine {
     return this.ctx && this.sfxEnabled && this.ctx.state === 'running' ? this.ctx : null
   }
 
+  private masterLevel() {
+    return this.masterEnabled ? MASTER_LEVEL * this.volume.master : 0
+  }
+
+  private musicLevel() {
+    return this.musicWanted ? MUSIC_LEVEL * this.volume.music : 0
+  }
+
+  private sfxLevel() {
+    return this.sfxEnabled ? SFX_LEVEL * this.volume.sfx : 0
+  }
+
   private buildGraph(ctx: AudioContext) {
     this.master = ctx.createGain()
-    this.master.gain.value = 0.9
+    this.master.gain.value = this.masterLevel()
     this.master.connect(ctx.destination)
 
     this.musicGain = ctx.createGain()
@@ -226,7 +267,7 @@ class SoundEngine {
     ctx.createMediaElementSource(this.music).connect(this.musicDuck)
 
     this.sfxGain = ctx.createGain()
-    this.sfxGain.gain.value = this.sfxEnabled ? SFX_LEVEL : 0
+    this.sfxGain.gain.value = this.sfxLevel()
     this.sfxGain.connect(this.master)
 
     const length = ctx.sampleRate * 2
@@ -235,7 +276,7 @@ class SoundEngine {
     for (let i = 0; i < length; i++) data[i] = Math.random() * 2 - 1
 
     if (this.musicWanted) {
-      this.musicGain.gain.setTargetAtTime(MUSIC_LEVEL, ctx.currentTime, 0.8)
+      this.musicGain.gain.setTargetAtTime(this.musicLevel(), ctx.currentTime, 0.8)
     }
   }
 

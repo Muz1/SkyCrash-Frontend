@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
-import { Volume2, VolumeX, Users, Warehouse } from '@lucide/vue'
+import { Volume2, VolumeX, Users, Warehouse, RotateCw } from '@lucide/vue'
 import { useGameStore } from '@/stores/gameStore'
 import { usePlayerStore } from '@/stores/playerStore'
 import { useHangarStore } from '@/stores/hangarStore'
@@ -18,6 +18,12 @@ import NeonPanel from '@/components/sky/NeonPanel.vue'
 import ArcadeButton from '@/components/sky/ArcadeButton.vue'
 import StatusBadge from '@/components/sky/StatusBadge.vue'
 import AchievementBadge from '@/components/sky/AchievementBadge.vue'
+import FeedbackPrompt from '@/components/sky/FeedbackPrompt.vue'
+import { useFeedbackPrompt } from '@/composables/useFeedbackPrompt'
+import DailyChallengesPopup from '@/components/sky/DailyChallengesPopup.vue'
+import SpinWheel from '@/components/sky/SpinWheel.vue'
+import { useGameScreenPrompts } from '@/composables/useGameScreenPrompts'
+import { useChallengeStore } from '@/stores/challengeStore'
 
 const gameStore = useGameStore()
 const playerStore = usePlayerStore()
@@ -25,6 +31,9 @@ const hangarStore = useHangarStore()
 const audioStore = useAudioStore()
 
 useGameAudio()
+const prompts = useGameScreenPrompts()
+const challengeStore = useChallengeStore()
+const feedback = useFeedbackPrompt({ isBlocked: () => prompts.anyOpen.value })
 
 const skin = computed(() => (hangarStore.skinId === 'taking-off' ? 'taking-off' : hangarStore.skinId))
 const craft = computed(() => hangarStore.craftId)
@@ -300,10 +309,22 @@ function crashChipClass(value: number) {
               </p>
               <RouterLink
                 to="/hangar"
-                class="ml-auto hidden items-center gap-1 font-arcade text-[7px] uppercase tracking-[0.2em] text-electric hover:text-foreground sm:flex"
+                :aria-label="hangarStore.isCustomized ? 'Hangar (custom loadout equipped)' : 'Hangar'"
+                :class="[
+                  'ml-auto hidden items-center gap-1 font-arcade text-[7px] uppercase tracking-[0.2em] hover:text-foreground sm:flex',
+                  hangarStore.isCustomized ? 'hangar-glow text-lime' : 'text-electric',
+                ]"
               >
                 <Warehouse class="h-3 w-3" aria-hidden="true" /> Hangar
               </RouterLink>
+              <button
+                v-if="prompts.outOfCredits.value"
+                type="button"
+                class="ml-auto flex items-center gap-1.5 border-2 border-ember px-2 py-1 font-arcade text-[8px] uppercase tracking-[0.15em] text-foreground [box-shadow:var(--glow-ember)] hover:bg-ember/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ember sm:ml-2"
+                @click="prompts.openWheel"
+              >
+                <RotateCw class="h-3 w-3" aria-hidden="true" /> Free spin
+              </button>
             </div>
 
             <!-- quick amounts: single scrollable row so it never wraps onto extra lines -->
@@ -429,5 +450,21 @@ function crashChipClass(value: number) {
     </div>
 
     <NavDock />
+
+    <DailyChallengesPopup
+      v-if="prompts.briefingOpen.value"
+      :challenges="challengeStore.challenges"
+      @close="prompts.closeBriefing"
+    />
+    <SpinWheel v-if="prompts.wheelOpen.value" :out-of-credits="prompts.outOfCredits.value" @close="prompts.closeWheel" />
+
+    <FeedbackPrompt
+      v-if="feedback.isOpen.value && !prompts.anyOpen.value"
+      :reward-credits="feedback.status.value?.rewardCredits ?? 0"
+      :submitting="feedback.submitting.value"
+      :error="feedback.error.value"
+      @submit="feedback.submit"
+      @dismiss="feedback.dismiss"
+    />
   </div>
 </template>

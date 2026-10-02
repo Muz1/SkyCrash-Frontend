@@ -31,6 +31,8 @@ const hangarStore = useHangarStore()
   <div class="relative flex h-dvh flex-col overflow-hidden bg-void">
     <SkyEnvironment :skin="skin" :dim="dim" />
     <Ambient :skin="skin" />
+    <!-- Optional extra sky layer (e.g. lobby-mates' aircraft), drawn under the page content. -->
+    <slot name="backdrop" />
     <PageTransition :craft="hangarStore.craftId" />
     <CRTOverlay />
     <HudHeader v-if="showHud" />

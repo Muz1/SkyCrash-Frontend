@@ -1,10 +1,11 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import * as challengeService from '@/services/challengeService'
-import type { Challenge } from '@/types'
+import type { Challenge, ChallengeBadge } from '@/types'
 
 export const useChallengeStore = defineStore('challenge', () => {
   const challenges = ref<Challenge[]>([])
+  const badges = ref<ChallengeBadge[]>([])
   const isLoading = ref(false)
 
   async function fetchTodayChallenges() {
@@ -16,9 +17,14 @@ export const useChallengeStore = defineStore('challenge', () => {
     }
   }
 
-  function clear() {
-    challenges.value = []
+  async function fetchBadges() {
+    badges.value = await challengeService.getBadges()
   }
 
-  return { challenges, isLoading, fetchTodayChallenges, clear }
+  function clear() {
+    challenges.value = []
+    badges.value = []
+  }
+
+  return { challenges, badges, isLoading, fetchTodayChallenges, fetchBadges, clear }
 })

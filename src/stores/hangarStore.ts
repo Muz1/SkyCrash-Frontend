@@ -1,8 +1,8 @@
 import { defineStore } from 'pinia'
-import { ref, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useAuthStore } from '@/stores/AuthStore'
-import type { CraftId } from '@/lib/craft'
-import type { SkinId } from '@/lib/skins'
+import { DEFAULT_CRAFT, type CraftId } from '@/lib/craft'
+import { DEFAULT_SKIN, type SkinId } from '@/lib/skins'
 
 interface StoredLoadout {
   craftId?: CraftId
@@ -11,8 +11,10 @@ interface StoredLoadout {
 
 export const useHangarStore = defineStore('hangar', () => {
   const authStore = useAuthStore()
-  const craftId = ref<CraftId>('jet')
-  const skinId = ref<SkinId>('sunset-runway')
+  const craftId = ref<CraftId>(DEFAULT_CRAFT)
+  const skinId = ref<SkinId>(DEFAULT_SKIN)
+  /** A non-default plane or sky (see DEFAULT_CRAFT / DEFAULT_SKIN) is equipped: hangar navigation glows to show it. */
+  const isCustomized = computed(() => craftId.value !== DEFAULT_CRAFT || skinId.value !== DEFAULT_SKIN)
 
   function storageKey() {
     return `skycrash_hangar_${authStore.playerId ?? 'guest'}`
@@ -46,5 +48,5 @@ export const useHangarStore = defineStore('hangar', () => {
 
   watch(() => authStore.playerId, load, { immediate: true })
 
-  return { craftId, skinId, setCraft, setSkin }
+  return { craftId, skinId, isCustomized, setCraft, setSkin }
 })

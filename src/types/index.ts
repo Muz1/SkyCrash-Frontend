@@ -35,6 +35,8 @@ export interface PlayerProfile {
   creditBalance: number
   memberSinceUtc: string
   isAdmin: boolean
+  /** Admins with manager status can grant/revoke admin access and appoint managers. */
+  isManager?: boolean
   displayedAchievementKey: string | null
 }
 
@@ -179,6 +181,7 @@ export interface AdminPlayerSummary {
   email: string
   creditBalance: number
   isAdmin: boolean
+  isManager?: boolean
   isBlocked: boolean
   memberSinceUtc: string
   lastSeenUtc: string
@@ -258,6 +261,35 @@ export interface Challenge {
   rewardCredits: number
   isCompleted: boolean
   completedAtUtc: string | null
+  /** Badge earned on completion; see lib/challengeBadges.ts. */
+  badgeKey: string
+  /** Rotation track: Endurance, Skill or Wallet & Wingmen. */
+  track: string
+  /** Next UTC midnight, when the daily rotation moves on. */
+  resetsAtUtc: string
+}
+
+export interface ChallengeBadge {
+  badgeKey: string
+  timesEarned: number
+  firstEarnedAtUtc: string
+  lastEarnedAtUtc: string
+}
+
+export interface SpinStatus {
+  canSpin: boolean
+  nextSpinAtUtc: string
+  secondsUntilNextSpin: number
+  cooldownSeconds: number
+  /** Prize per wheel segment, in drawing order. */
+  segments: number[]
+}
+
+export interface SpinResult {
+  segmentIndex: number
+  amount: number
+  newBalance: number
+  nextSpinAtUtc: string
 }
 
 export interface LobbyMemberInfo {
