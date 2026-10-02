@@ -49,8 +49,8 @@ async function closeSound() {
         ref="soundTrigger"
         type="button"
         data-sound-settings-trigger
-        aria-label="Sound settings"
-        title="Sound settings"
+        aria-label="Audio settings"
+        title="Audio settings"
         aria-haspopup="dialog"
         :aria-expanded="soundOpen"
         aria-controls="sound-settings"

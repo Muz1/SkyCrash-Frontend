@@ -19,6 +19,7 @@ import ArcadeButton from '@/components/sky/ArcadeButton.vue'
 import StatusBadge from '@/components/sky/StatusBadge.vue'
 import AchievementBadge from '@/components/sky/AchievementBadge.vue'
 import FeedbackPrompt from '@/components/sky/FeedbackPrompt.vue'
+import HowToPlay from '@/components/sky/HowToPlay.vue'
 import { useFeedbackPrompt } from '@/composables/useFeedbackPrompt'
 import DailyChallengesPopup from '@/components/sky/DailyChallengesPopup.vue'
 import SpinWheel from '@/components/sky/SpinWheel.vue'
@@ -228,16 +229,18 @@ function crashChipClass(value: number) {
         </ul>
         <button
           type="button"
-          :aria-label="audioStore.sfxEnabled ? 'Mute game sounds' : 'Unmute game sounds'"
-          :aria-pressed="audioStore.sfxEnabled"
-          :title="audioStore.sfxEnabled ? 'Mute game sounds' : 'Unmute game sounds'"
+          :aria-label="audioStore.effectsEnabled ? 'Mute plane and game sounds' : 'Unmute plane and game sounds'"
+          :aria-pressed="!audioStore.effectsEnabled"
+          :title="audioStore.effectsEnabled ? 'Mute plane and game sounds' : 'Unmute plane and game sounds'"
           class="grid h-8 w-8 shrink-0 place-items-center border-2 border-violet/50 bg-void/70 text-muted-foreground clip-hud transition-colors hover:border-electric hover:text-electric"
-          @click="audioStore.toggleSfx()"
+          @click="audioStore.toggleEffects()"
         >
-          <Volume2 v-if="audioStore.sfxEnabled" class="h-3.5 w-3.5" aria-hidden="true" />
+          <Volume2 v-if="audioStore.effectsEnabled" class="h-3.5 w-3.5" aria-hidden="true" />
           <VolumeX v-else class="h-3.5 w-3.5" aria-hidden="true" />
         </button>
       </div>
+
+      <HowToPlay compact class="mt-1.5" />
 
       <FlightStage :craft="craft" class="mt-1 min-h-[180px] flex-1">
         <template #readout>
@@ -309,13 +312,17 @@ function crashChipClass(value: number) {
               </p>
               <RouterLink
                 to="/hangar"
-                :aria-label="hangarStore.isCustomized ? 'Hangar (custom loadout equipped)' : 'Hangar'"
+                :aria-label="`Hangar: change plane and sky${hangarStore.isCustomized ? ' (custom loadout equipped)' : ''}`"
                 :class="[
-                  'ml-auto hidden items-center gap-1 font-arcade text-[7px] uppercase tracking-[0.2em] hover:text-foreground sm:flex',
-                  hangarStore.isCustomized ? 'hangar-glow text-lime' : 'text-electric',
+                  'clip-hud ml-auto flex items-center gap-1.5 border-2 bg-void/70 px-2.5 py-1.5 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-electric',
+                  hangarStore.isCustomized
+                    ? 'border-lime bg-lime/10 text-lime hover:[box-shadow:var(--glow-lime)]'
+                    : 'border-electric text-electric hover:[box-shadow:var(--glow-blue)]',
                 ]"
               >
-                <Warehouse class="h-3 w-3" aria-hidden="true" /> Hangar
+                <Warehouse class="h-4 w-4" aria-hidden="true" />
+                <span class="font-arcade text-[8px] uppercase tracking-[0.15em]">Hangar</span>
+                <span class="hidden text-sm font-bold text-foreground sm:inline">· Change plane &amp; sky</span>
               </RouterLink>
               <button
                 v-if="prompts.outOfCredits.value"
@@ -460,11 +467,7 @@ function crashChipClass(value: number) {
 
     <FeedbackPrompt
       v-if="feedback.isOpen.value && !prompts.anyOpen.value"
-      :reward-credits="feedback.status.value?.rewardCredits ?? 0"
-      :submitting="feedback.submitting.value"
-      :error="feedback.error.value"
-      @submit="feedback.submit"
-      @dismiss="feedback.dismiss"
+      :controller="feedback"
     />
   </div>
 </template>

@@ -2,15 +2,18 @@ import bgmTrack1 from '@/assets/audio/bgm.m4a'
 import bgmTrack2 from '@/assets/audio/bgm-2.m4a'
 
 /**
- * Audio for Sky Crash. Two independent buses feed the master output:
+ * Audio for Sky Crash. Three independent buses feed the master output:
  *
- *   music (bgm playlist) → musicDuck → musicGain ─┐
- *   sfx (synthesized)    ──────────→ sfxGain  ────┴→ master → destination
+ *   music (bgm playlist)      → musicDuck → musicGain ─┐
+ *   plane (engine drone)      → planeDuck → planeGain ─┼→ master → destination
+ *   game (take-off, win, ...) → cue gain  → gameGain  ─┘
  *
  * The background tracks play back-to-back and loop. Game sounds momentarily
- * "duck" the music bus so a cash-out chime or a crash is never masked by the
- * soundtrack. Nothing plays until `unlock()` is called from a user gesture,
- * which keeps browsers' autoplay policies happy.
+ * "duck" the music (and the engine) so a cash-out chime or a crash is never
+ * masked. The big one-shot cues (take-off, win, crash) each get their own gain
+ * node, and starting one fades out the previous one, so they never pile up.
+ * Nothing plays until `unlock()` is called from a user gesture, which keeps
+ * browsers' autoplay policies happy.
  *
  * Each bus has a player-set volume (0–1) layered on top of its base level, so
  * the effective output is master × channel and changes apply live.
@@ -20,7 +23,10 @@ const PLAYLIST = [bgmTrack1, bgmTrack2]
 
 const MASTER_LEVEL = 0.9
 const MUSIC_LEVEL = 0.35
-const SFX_LEVEL = 0.8
+const PLANE_LEVEL = 0.8
+const GAME_LEVEL = 0.8
+
+export type AudioChannel = 'master' | 'music' | 'plane' | 'game'
 
 type AudioContextCtor = typeof AudioContext
 
@@ -35,15 +41,22 @@ class SoundEngine {
   private master!: GainNode
   private musicDuck!: GainNode
   private musicGain!: GainNode
-  private sfxGain!: GainNode
+  private planeDuck!: GainNode
+  private planeGain!: GainNode
+  private gameGain!: GainNode
+  /** Gain node of the take-off / win / crash cue currently sounding, if any. */
+  private cue: GainNode | null = null
   private noise!: AudioBuffer
   private music: HTMLAudioElement | null = null
   private trackIndex = 0
 
   private musicWanted = false
-  private sfxEnabled = true
+  /** A round is in the air (so the engine should hum if plane sounds are on). */
+  private flying = false
+  private planeEnabled = true
+  private gameEnabled = true
   private masterEnabled = true
-  private volume = { master: 1, music: 1, sfx: 1 }
+  private volume: Record<AudioChannel, number> = { master: 1, music: 1, plane: 1, game: 1 }
 
   private engine: { osc: OscillatorNode; sub: OscillatorNode; filter: BiquadFilterNode; gain: GainNode } | null = null
 
@@ -87,11 +100,22 @@ class SoundEngine {
     else setTimeout(() => !this.musicWanted && this.music?.pause(), 800)
   }
 
-  setSfxEnabled(on: boolean) {
-    this.sfxEnabled = on
+  /** Plane sounds: the engine / flight hum. */
+  setPlaneEnabled(on: boolean) {
+    const wasOn = this.planeEnabled
+    this.planeEnabled = on
     if (!on) this.stopEngine()
     if (!this.ctx) return
-    this.sfxGain.gain.setTargetAtTime(this.sfxLevel(), this.ctx.currentTime, 0.05)
+    this.planeGain.gain.setTargetAtTime(this.planeLevel(), this.ctx.currentTime, 0.05)
+    // Unmuting mid-flight brings the drone straight back.
+    if (on && !wasOn && this.flying) this.startEngine()
+  }
+
+  /** Game sounds: countdown, bet, take-off cue, checkpoints, win chime, crash. */
+  setGameEnabled(on: boolean) {
+    this.gameEnabled = on
+    if (!this.ctx) return
+    this.gameGain.gain.setTargetAtTime(this.gameLevel(), this.ctx.currentTime, 0.05)
   }
 
   setMasterEnabled(on: boolean) {
@@ -101,26 +125,27 @@ class SoundEngine {
   }
 
   /** Player volumes, each 0–1. Applied live on top of the bus base levels. */
-  setVolumes(v: { master: number; music: number; sfx: number }) {
+  setVolumes(v: Record<AudioChannel, number>) {
     const clamp = (n: number) => (Number.isFinite(n) ? Math.max(0, Math.min(1, n)) : 1)
-    this.volume = { master: clamp(v.master), music: clamp(v.music), sfx: clamp(v.sfx) }
+    this.volume = { master: clamp(v.master), music: clamp(v.music), plane: clamp(v.plane), game: clamp(v.game) }
     if (!this.ctx) return
     const t = this.ctx.currentTime
     this.master.gain.setTargetAtTime(this.masterLevel(), t, 0.05)
     this.musicGain.gain.setTargetAtTime(this.musicLevel(), t, 0.05)
-    this.sfxGain.gain.setTargetAtTime(this.sfxLevel(), t, 0.05)
+    this.planeGain.gain.setTargetAtTime(this.planeLevel(), t, 0.05)
+    this.gameGain.gain.setTargetAtTime(this.gameLevel(), t, 0.05)
   }
 
   // ---------- game sounds ----------
 
   countdownTick(final = false) {
-    const ctx = this.sfxCtx()
+    const ctx = this.gameCtx()
     if (!ctx) return
     this.blip(ctx, ctx.currentTime, final ? 1320 : 880, 0.07, 0.12, 'square')
   }
 
   betPlaced() {
-    const ctx = this.sfxCtx()
+    const ctx = this.gameCtx()
     if (!ctx) return
     const t = ctx.currentTime
     this.blip(ctx, t, 660, 0.07, 0.16, 'square')
@@ -130,7 +155,7 @@ class SoundEngine {
 
   /** Flying through a checkpoint ring: a quick rising arpeggio, pitched up for higher tiers. */
   checkpoint(tier = 0) {
-    const ctx = this.sfxCtx()
+    const ctx = this.gameCtx()
     if (!ctx) return
     const t = ctx.currentTime
     const base = 660 * Math.pow(2, Math.min(tier, 4) / 6)
@@ -138,9 +163,12 @@ class SoundEngine {
   }
 
   takeoff() {
-    const ctx = this.sfxCtx()
+    this.flying = true
+    this.startEngine()
+    const ctx = this.gameCtx()
     if (!ctx) return
     const t = ctx.currentTime
+    const out = this.claimCue(ctx)
     const src = this.noiseSource(ctx)
     const bp = ctx.createBiquadFilter()
     bp.type = 'bandpass'
@@ -151,15 +179,15 @@ class SoundEngine {
     g.gain.setValueAtTime(0.0001, t)
     g.gain.exponentialRampToValueAtTime(0.35, t + 0.35)
     g.gain.exponentialRampToValueAtTime(0.0001, t + 1.5)
-    src.connect(bp).connect(g).connect(this.sfxGain)
+    src.connect(bp).connect(g).connect(out)
     src.start(t)
     src.stop(t + 1.6)
     this.duck(0.55, 0.8)
-    this.startEngine()
   }
 
   /** Engine drone only, for joining a round already in flight (no take-off whoosh). */
   engineOn() {
+    this.flying = true
     this.startEngine()
   }
 
@@ -176,19 +204,25 @@ class SoundEngine {
 
   /** The win chime: the current player banked credits before the crash. */
   cashOut() {
-    const ctx = this.sfxCtx()
+    const ctx = this.gameCtx()
     if (!ctx) return
     const t = ctx.currentTime
-    ;[1047, 1319, 1568, 2093].forEach((f, i) => this.blip(ctx, t + i * 0.065, f, 0.16, 0.14, 'square'))
-    this.blip(ctx, t + 0.26, 2637, 0.35, 0.08, 'triangle')
+    const out = this.claimCue(ctx)
+    ;[1047, 1319, 1568, 2093].forEach((f, i) => this.blip(ctx, t + i * 0.065, f, 0.16, 0.14, 'square', out))
+    this.blip(ctx, t + 0.26, 2637, 0.35, 0.08, 'triangle', out)
     this.duck(0.3, 0.7)
+    // The plane keeps flying for everyone else; dip its hum so the chime is clear.
+    this.duckPlane(0.35, 0.9)
   }
 
+  /** The round ended: stop the engine, boom, and pull the music right down. */
   crash() {
-    const ctx = this.sfxCtx()
+    this.flying = false
     this.stopEngine()
+    const ctx = this.gameCtx()
     if (!ctx) return
     const t = ctx.currentTime
+    const out = this.claimCue(ctx)
 
     const src = this.noiseSource(ctx)
     const lp = ctx.createBiquadFilter()
@@ -198,7 +232,7 @@ class SoundEngine {
     const g = ctx.createGain()
     g.gain.setValueAtTime(0.7, t)
     g.gain.exponentialRampToValueAtTime(0.0001, t + 1.3)
-    src.connect(lp).connect(g).connect(this.sfxGain)
+    src.connect(lp).connect(g).connect(out)
     src.start(t)
     src.stop(t + 1.4)
 
@@ -209,11 +243,17 @@ class SoundEngine {
     const bg = ctx.createGain()
     bg.gain.setValueAtTime(0.8, t)
     bg.gain.exponentialRampToValueAtTime(0.0001, t + 0.9)
-    boom.connect(bg).connect(this.sfxGain)
+    boom.connect(bg).connect(out)
     boom.start(t)
     boom.stop(t + 1)
 
     this.duck(0.2, 1.4)
+  }
+
+  /** The round is over without a watched crash (snapshot, leaving the screen): just silence the drone. */
+  landed() {
+    this.flying = false
+    this.stopEngine()
   }
 
   stopEngine() {
@@ -229,8 +269,12 @@ class SoundEngine {
 
   // ---------- internals ----------
 
-  private sfxCtx(): AudioContext | null {
-    return this.ctx && this.sfxEnabled && this.ctx.state === 'running' ? this.ctx : null
+  private gameCtx(): AudioContext | null {
+    return this.ctx && this.gameEnabled && this.ctx.state === 'running' ? this.ctx : null
+  }
+
+  private planeCtx(): AudioContext | null {
+    return this.ctx && this.planeEnabled && this.ctx.state === 'running' ? this.ctx : null
   }
 
   private masterLevel() {
@@ -241,8 +285,12 @@ class SoundEngine {
     return this.musicWanted ? MUSIC_LEVEL * this.volume.music : 0
   }
 
-  private sfxLevel() {
-    return this.sfxEnabled ? SFX_LEVEL * this.volume.sfx : 0
+  private planeLevel() {
+    return this.planeEnabled ? PLANE_LEVEL * this.volume.plane : 0
+  }
+
+  private gameLevel() {
+    return this.gameEnabled ? GAME_LEVEL * this.volume.game : 0
   }
 
   private buildGraph(ctx: AudioContext) {
@@ -266,9 +314,14 @@ class SoundEngine {
     })
     ctx.createMediaElementSource(this.music).connect(this.musicDuck)
 
-    this.sfxGain = ctx.createGain()
-    this.sfxGain.gain.value = this.sfxLevel()
-    this.sfxGain.connect(this.master)
+    this.planeGain = ctx.createGain()
+    this.planeGain.gain.value = this.planeLevel()
+    this.planeDuck = ctx.createGain()
+    this.planeDuck.connect(this.planeGain).connect(this.master)
+
+    this.gameGain = ctx.createGain()
+    this.gameGain.gain.value = this.gameLevel()
+    this.gameGain.connect(this.master)
 
     const length = ctx.sampleRate * 2
     this.noise = ctx.createBuffer(1, length, ctx.sampleRate)
@@ -286,14 +339,22 @@ class SoundEngine {
     this.music.play().catch(() => undefined)
   }
 
-  private blip(ctx: AudioContext, t: number, freq: number, dur: number, level: number, type: OscillatorType) {
+  private blip(
+    ctx: AudioContext,
+    t: number,
+    freq: number,
+    dur: number,
+    level: number,
+    type: OscillatorType,
+    out: AudioNode = this.gameGain,
+  ) {
     const osc = ctx.createOscillator()
     osc.type = type
     osc.frequency.value = freq
     const g = ctx.createGain()
     g.gain.setValueAtTime(level, t)
     g.gain.exponentialRampToValueAtTime(0.0001, t + dur)
-    osc.connect(g).connect(this.sfxGain)
+    osc.connect(g).connect(out)
     osc.start(t)
     osc.stop(t + dur + 0.02)
   }
@@ -305,7 +366,7 @@ class SoundEngine {
   }
 
   private startEngine() {
-    const ctx = this.sfxCtx()
+    const ctx = this.planeCtx()
     if (!ctx || this.engine) return
     const t = ctx.currentTime
     const osc = ctx.createOscillator()
@@ -322,10 +383,37 @@ class SoundEngine {
     gain.gain.exponentialRampToValueAtTime(0.07, t + 0.6)
     osc.connect(filter)
     sub.connect(filter)
-    filter.connect(gain).connect(this.sfxGain)
+    filter.connect(gain).connect(this.planeDuck)
     osc.start(t)
     sub.start(t)
     this.engine = { osc, sub, filter, gain }
+  }
+
+  /**
+   * A fresh output node for a one-shot cue. Whatever cue is still ringing is
+   * faded out quickly first, so take-off, win and crash never overlap.
+   */
+  private claimCue(ctx: AudioContext) {
+    const t = ctx.currentTime
+    if (this.cue) {
+      const old = this.cue
+      old.gain.cancelScheduledValues(t)
+      old.gain.setTargetAtTime(0, t, 0.04)
+      setTimeout(() => old.disconnect(), 400)
+    }
+    const cue = ctx.createGain()
+    cue.connect(this.gameGain)
+    this.cue = cue
+    return cue
+  }
+
+  private duckPlane(level: number, hold: number) {
+    if (!this.ctx) return
+    const g = this.planeDuck.gain
+    const t = this.ctx.currentTime
+    g.cancelScheduledValues(t)
+    g.setTargetAtTime(level, t, 0.03)
+    g.setTargetAtTime(1, t + hold, 0.3)
   }
 
   /** Dip the music to `level` (0–1) for `hold` seconds, then recover. */

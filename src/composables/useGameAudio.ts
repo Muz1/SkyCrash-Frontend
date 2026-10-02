@@ -20,7 +20,12 @@ function once(cue: keyof typeof played, roundId: string | null) {
 /**
  * Plays the round's sound effects (countdown, take-off, engine, cash-out,
  * crash) while the game screen is open. Effects duck the background music
- * automatically inside soundEngine.
+ * automatically inside soundEngine, and the engine fades one big cue out
+ * before starting the next.
+ *
+ * A player hears either the win chime or the crash for a round, never both:
+ * once they've cashed out the crash only stops the engine, and a late
+ * cash-out confirmation after the crash stays silent.
  */
 export function useGameAudio() {
   const gameStore = useGameStore()
@@ -34,11 +39,13 @@ export function useGameAudio() {
         if (previous === 'Waiting' && once('takeoff', gameStore.roundId)) soundEngine.takeoff()
         else soundEngine.engineOn()
       } else if (phase === 'Crashed') {
-        // Only boom for a crash we actually watched, not a snapshot on page load.
-        if (previous === 'Running' && once('crash', gameStore.roundId)) soundEngine.crash()
-        else soundEngine.stopEngine()
+        // Only boom for a crash we actually watched, not a snapshot on page load,
+        // and not for a player who already banked this round (they heard the win).
+        const won = played.win === (gameStore.roundId ?? 'unknown')
+        if (previous === 'Running' && !won && once('crash', gameStore.roundId)) soundEngine.crash()
+        else soundEngine.landed()
       } else {
-        soundEngine.stopEngine()
+        soundEngine.landed()
       }
     },
   )
@@ -70,12 +77,15 @@ export function useGameAudio() {
   watch(
     () => gameStore.cashOutStatus,
     (status) => {
-      // Win chime: our own confirmed cash-out (the server only confirms before the crash).
-      if (status === 'CashedOut' && once('win', gameStore.roundId)) soundEngine.cashOut()
+      // Win chime: our own confirmed cash-out. The server only confirms before the
+      // crash, but the events can arrive out of order, so a crash already heard wins.
+      if (status !== 'CashedOut') return
+      if (played.crash === (gameStore.roundId ?? 'unknown')) return
+      if (once('win', gameStore.roundId)) soundEngine.cashOut()
     },
   )
 
   onBeforeUnmount(() => {
-    soundEngine.stopEngine()
+    soundEngine.landed()
   })
 }

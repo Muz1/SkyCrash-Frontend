@@ -1,13 +1,14 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue'
-import { Volume2, VolumeX, X } from '@lucide/vue'
+import { X } from '@lucide/vue'
 import { useAudioStore } from '@/stores/audioStore'
-import { soundEngine } from '@/lib/soundEngine'
+import { soundEngine, type AudioChannel } from '@/lib/soundEngine'
 import { cn } from '@/lib/cn'
 
 /**
- * Mixer popover: master, background music and aircraft/SFX channels, each
- * with its own mute toggle and 0–100 slider. Changes apply live and persist
+ * Audio mixer popover: master, music, plane sounds (engine hum) and game
+ * sounds (take-off, win, crash), each with its own mute toggle and 0–100
+ * slider. Effective volume is master × channel; changes apply live and persist
  * through audioStore. Escape or a click outside closes it.
  */
 const emit = defineEmits<{ close: [] }>()
@@ -15,36 +16,42 @@ const emit = defineEmits<{ close: [] }>()
 const audioStore = useAudioStore()
 const root = ref<HTMLElement | null>(null)
 
-type Channel = 'master' | 'music' | 'sfx'
-
 const channels = computed(() => [
   {
-    id: 'master' as Channel,
+    id: 'master' as AudioChannel,
     label: 'Master',
     hint: 'Everything',
+    muteLabel: 'Mute All',
     enabled: audioStore.masterEnabled,
     volume: audioStore.masterVolume,
-    toggle: audioStore.toggleMaster,
   },
   {
-    id: 'music' as Channel,
+    id: 'music' as AudioChannel,
     label: 'Music',
     hint: 'Background soundtrack',
+    muteLabel: 'Mute Music',
     enabled: audioStore.musicEnabled,
     volume: audioStore.musicVolume,
-    toggle: audioStore.toggleMusic,
   },
   {
-    id: 'sfx' as Channel,
-    label: 'Aircraft & SFX',
-    hint: 'Engine, take-off, cash-out, crash',
-    enabled: audioStore.sfxEnabled,
-    volume: audioStore.sfxVolume,
-    toggle: audioStore.toggleSfx,
+    id: 'plane' as AudioChannel,
+    label: 'Plane Sounds',
+    hint: 'Engine and flight hum',
+    muteLabel: 'Mute Plane Sounds',
+    enabled: audioStore.planeEnabled,
+    volume: audioStore.planeVolume,
+  },
+  {
+    id: 'game' as AudioChannel,
+    label: 'Game Sounds',
+    hint: 'Take-off, cash-out win, crash',
+    muteLabel: 'Mute Game Sounds',
+    enabled: audioStore.gameEnabled,
+    volume: audioStore.gameVolume,
   },
 ])
 
-function onInput(channel: Channel, e: Event) {
+function onInput(channel: AudioChannel, e: Event) {
   // Any slider drag is a user gesture, so it's a safe moment to unlock audio too.
   soundEngine.unlock()
   audioStore.setVolume(channel, Number((e.target as HTMLInputElement).value))
@@ -79,15 +86,15 @@ onBeforeUnmount(() => {
     role="dialog"
     aria-modal="false"
     aria-labelledby="sound-settings-title"
-    class="clip-hud w-[min(20rem,calc(100vw-2rem))] border-2 border-electric bg-void p-4 text-foreground [box-shadow:inset_0_0_24px_color-mix(in_oklab,var(--neon-blue)_18%,transparent)]"
+    class="clip-hud w-[min(22rem,calc(100vw-2rem))] border-2 border-electric bg-void p-4 text-foreground [box-shadow:inset_0_0_24px_color-mix(in_oklab,var(--neon-blue)_18%,transparent)]"
   >
     <div class="flex items-center justify-between gap-2">
       <h2 id="sound-settings-title" class="font-display text-xs font-black uppercase tracking-[0.3em] text-electric">
-        Sound
+        Audio
       </h2>
       <button
         type="button"
-        aria-label="Close sound settings"
+        aria-label="Close audio settings"
         class="grid h-8 w-8 place-items-center border-2 border-violet/60 text-foreground transition-colors hover:border-electric hover:text-electric focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-electric"
         @click="emit('close')"
       >
@@ -102,24 +109,22 @@ onBeforeUnmount(() => {
             <span class="block font-arcade text-[9px] uppercase leading-tight text-foreground">{{ ch.label }}</span>
             <span class="mt-1 block text-xs leading-tight text-muted-foreground">{{ ch.hint }}</span>
           </label>
-          <button
-            type="button"
-            :aria-pressed="!ch.enabled"
-            :aria-label="`${ch.enabled ? 'Mute' : 'Unmute'} ${ch.label}`"
+          <label
             :class="
               cn(
-                'flex h-8 shrink-0 items-center gap-1 border-2 px-2 font-arcade text-[8px] uppercase transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-electric',
-                ch.enabled
-                  ? 'border-electric text-electric hover:bg-electric/15'
-                  : 'border-danger bg-danger/15 text-foreground hover:bg-danger/25',
+                'flex min-h-8 shrink-0 cursor-pointer items-center gap-2 border-2 px-2 py-1 font-arcade text-[8px] uppercase leading-tight transition-colors focus-within:ring-2 focus-within:ring-electric',
+                ch.enabled ? 'border-violet/60 text-foreground hover:border-electric' : 'border-danger bg-danger/15 text-foreground',
               )
             "
-            @click="ch.toggle()"
           >
-            <Volume2 v-if="ch.enabled" class="h-3.5 w-3.5" aria-hidden="true" />
-            <VolumeX v-else class="h-3.5 w-3.5" aria-hidden="true" />
-            {{ ch.enabled ? 'On' : 'Muted' }}
-          </button>
+            <input
+              type="checkbox"
+              class="h-4 w-4 cursor-pointer accent-[var(--neon-red)] focus-visible:outline-none"
+              :checked="!ch.enabled"
+              @change="audioStore.toggle(ch.id)"
+            />
+            {{ ch.muteLabel }}
+          </label>
         </div>
         <div class="mt-2 flex items-center gap-3">
           <input

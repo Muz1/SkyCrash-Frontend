@@ -31,7 +31,9 @@ describe('App', () => {
     await router.isReady()
 
     expect(router.currentRoute.value.name).toBe('home')
-    expect(wrapper.text()).toContain('Play Sky Crash')
+    expect(wrapper.text()).toContain('Play Now')
+    expect(wrapper.text()).toContain('Join Lobby')
+    expect(wrapper.text()).toContain('Give Us Feedback')
     expect(wrapper.text()).toContain('Create Account')
   })
 
