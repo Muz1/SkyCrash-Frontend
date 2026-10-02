@@ -7,6 +7,7 @@ import { useAuthStore } from '@/stores/AuthStore'
 import { useLobbyStore } from '@/stores/lobbyStore'
 import { useAchievementStore } from '@/stores/achievementStore'
 import { useChallengeStore } from '@/stores/challengeStore'
+import { useSpinStore } from '@/stores/spinStore'
 import { usePrivateLobbyStore } from '@/stores/privateLobbyStore'
 import * as authService from '@/services/AuthService'
 import Shell from '@/components/sky/Shell.vue'
@@ -83,6 +84,7 @@ function handleLogout() {
   useLobbyStore().clear()
   useAchievementStore().clear()
   useChallengeStore().clear()
+  useSpinStore().clear()
   usePrivateLobbyStore().clear()
   router.push('/login')
 }

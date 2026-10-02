@@ -24,5 +24,11 @@ export const usePublicSettingsStore = defineStore('publicSettings', () => {
     return request
   }
 
-  return { settings, load }
+  /** Fetch again (e.g. on each page visit) so admin changes such as the payments switch show up. */
+  function refresh() {
+    request = null
+    return load()
+  }
+
+  return { settings, load, refresh }
 })

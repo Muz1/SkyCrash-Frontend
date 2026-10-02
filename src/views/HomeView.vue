@@ -93,11 +93,17 @@ onMounted(() => {
         </RouterLink>
         <!-- Same destination as Join Lobby, so phones skip it to keep the hero on one screen. -->
         <RouterLink v-else to="/lobby" class="hidden sm:block">
-          <ArcadeButton size="md" variant="ghost">{{ lobbyStore.onlinePlayers.length }} Pilots Online</ArcadeButton>
+          <ArcadeButton size="md" variant="ghost">{{ lobbyStore.onlinePlayers.length }} {{ lobbyStore.onlinePlayers.length === 1 ? 'Pilot' : 'Pilots' }} Online</ArcadeButton>
         </RouterLink>
       </div>
 
       <HowToPlay class="mt-[clamp(0.75rem,3dvh,1.5rem)]" />
+      <RouterLink
+        to="/game?tutorial=1"
+        class="mt-2 font-arcade text-[9px] uppercase tracking-[0.2em] text-electric underline-offset-4 hover:text-foreground hover:underline"
+      >
+        Watch the full tutorial
+      </RouterLink>
 
       <p class="mt-4 font-arcade text-[8px] uppercase tracking-[0.3em] text-violet [@media(max-height:900px)]:hidden">
         High risk. High thrill. Beat the sky.

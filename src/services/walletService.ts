@@ -11,10 +11,6 @@ export async function getTransactions(): Promise<CreditTransactionRecord[]> {
   return response.data
 }
 
-export async function demoTopUp(): Promise<WalletBalance> {
-  const response = await api.post<WalletBalance>('/wallet/demo-topup')
-  return response.data
-}
 
 export async function getSpinStatus(): Promise<SpinStatus> {
   const response = await api.get<SpinStatus>('/wallet/spin')

@@ -16,10 +16,13 @@ import VolatilityView from '../views/VolatilityView.vue'
 import AdminView from '../views/AdminView.vue'
 import AdminCurrentRoundView from '../views/AdminCurrentRoundView.vue'
 import AdminReportsView from '../views/AdminReportsView.vue'
-import AdminAnalyticsView from '../views/AdminAnalyticsView.vue'
-import AdminRolesView from '../views/AdminRolesView.vue'
+import InviteView from '../views/InviteView.vue'
+import SpinWheelView from '../views/SpinWheelView.vue'
 import HangarView from '../views/HangarView.vue'
 import MissionsView from '../views/MissionsView.vue'
+import TermsView from '../views/TermsView.vue'
+
+const admin = { requiresAuth: true, requiresAdmin: true }
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -28,6 +31,8 @@ const router = createRouter({
     { path: '/', name: 'home', component: HomeView },
     { path: '/login', name: 'login', component: LoginView },
     { path: '/register', name: 'register', component: RegisterView },
+    // Readable by anyone; players who haven't agreed to the current version are sent here.
+    { path: '/terms', name: 'terms', component: TermsView, meta: { anyRole: true } },
     { path: '/profile', name: 'profile', component: ProfileView, meta: { requiresAuth: true } },
     { path: '/lobby', name: 'lobby', component: LobbyView, meta: { requiresAuth: true } },
     { path: '/wallet', name: 'wallet', component: WalletView, meta: { requiresAuth: true } },
@@ -59,37 +64,38 @@ const router = createRouter({
       component: RtpView,
       meta: { requiresAuth: true, requiresAdmin: true },
     },
+    // Admin invite links: open to anyone (the invitee may not have an account yet), and to
+    // admins too (an admin can be invited to become a manager).
+    { path: '/invite/:token', name: 'invite', component: InviteView, meta: { anyRole: true } },
+    // The free-credits wheel: the only way to top up without buying credits.
+    { path: '/spin', name: 'spin', component: SpinWheelView, meta: { requiresAuth: true } },
+
+    // ---- admin dashboard (see AdminTabs.vue for the navigation) ----
+    { path: '/admin', name: 'admin', component: () => import('../views/admin/AdminOverviewView.vue'), meta: admin },
+    { path: '/admin/game-performance', name: 'admin-game-performance', component: () => import('../views/admin/AdminGamePerformanceView.vue'), meta: admin },
+    { path: '/admin/player-activity', name: 'admin-player-activity', component: () => import('../views/admin/AdminPlayerActivityView.vue'), meta: admin },
+    { path: '/admin/lobby-analytics', name: 'admin-lobby-analytics', component: () => import('../views/admin/AdminLobbyAnalyticsView.vue'), meta: admin },
+    { path: '/admin/revenue', name: 'admin-revenue', component: () => import('../views/admin/AdminRevenueView.vue'), meta: admin },
+    { path: '/admin/feedback', name: 'admin-feedback', component: () => import('../views/admin/AdminFeedbackAnalyticsView.vue'), meta: admin },
+    { path: '/admin/feedback/submissions', name: 'admin-feedback-submissions', component: () => import('../views/admin/AdminFeedbackSubmissionsView.vue'), meta: admin },
+    { path: '/admin/feedback/keywords', name: 'admin-feedback-keywords', component: () => import('../views/admin/AdminFeedbackKeywordsView.vue'), meta: admin },
+    { path: '/admin/advisor', name: 'admin-advisor', component: () => import('../views/admin/AdminAdvisorView.vue'), meta: admin },
+    { path: '/admin/feedback/insights', name: 'admin-feedback-insights', component: () => import('../views/admin/AdminAiInsightsView.vue'), meta: admin },
+    { path: '/admin/players', name: 'admin-players', component: AdminView, meta: admin },
+    { path: '/admin/rounds', name: 'admin-rounds', component: AdminCurrentRoundView, meta: admin },
+    { path: '/admin/lobbies', name: 'admin-lobbies', component: () => import('../views/admin/AdminLobbiesView.vue'), meta: admin },
+    { path: '/admin/payments', name: 'admin-payments', component: () => import('../views/admin/AdminPaymentsView.vue'), meta: admin },
+    { path: '/admin/audio', name: 'admin-audio', component: () => import('../views/admin/AdminAudioView.vue'), meta: admin },
+    { path: '/admin/skins', name: 'admin-skins', component: () => import('../views/admin/AdminSkinUsageView.vue'), meta: admin },
     {
-      path: '/admin',
-      name: 'admin',
-      component: AdminView,
-      meta: { requiresAuth: true, requiresAdmin: true },
+      // Invite admins, change roles, remove access. Managers only (also enforced server-side).
+      path: '/admin/management',
+      name: 'admin-management',
+      component: () => import('../views/admin/AdminManagementView.vue'),
+      meta: { ...admin, requiresManager: true },
     },
-    {
-      path: '/admin/rounds',
-      name: 'admin-rounds',
-      component: AdminCurrentRoundView,
-      meta: { requiresAuth: true, requiresAdmin: true },
-    },
-    {
-      path: '/admin/reports',
-      name: 'admin-reports',
-      component: AdminReportsView,
-      meta: { requiresAuth: true, requiresAdmin: true },
-    },
-    {
-      path: '/admin/analytics',
-      name: 'admin-analytics',
-      component: AdminAnalyticsView,
-      meta: { requiresAuth: true, requiresAdmin: true },
-    },
-    {
-      // Grant/revoke admin access and appoint managers. Managers only (also enforced server-side).
-      path: '/admin/roles',
-      name: 'admin-roles',
-      component: AdminRolesView,
-      meta: { requiresAuth: true, requiresAdmin: true, requiresManager: true },
-    },
+    // Older reports kept reachable by URL but no longer in the navigation.
+    { path: '/admin/reports', name: 'admin-reports', component: AdminReportsView, meta: admin },
   ],
 })
 
@@ -127,8 +133,14 @@ router.beforeEach(async (to) => {
 
   // Admins operate the game but never play it: every player-facing page
   // (including the landing page and the auth screens) sends them to the console.
-  if (isAdmin && !to.meta.requiresAdmin) {
+  if (isAdmin && !to.meta.requiresAdmin && !to.meta.anyRole) {
     return { name: 'admin' }
+  }
+
+  // Players agree to the current Terms of Service before using the game (the server also
+  // refuses their bets until they have).
+  if (to.meta.requiresAuth && usePlayerStore().profile?.hasAcceptedTerms === false) {
+    return { name: 'terms', query: { redirect: to.fullPath } }
   }
 })
 

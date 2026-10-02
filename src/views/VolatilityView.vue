@@ -31,7 +31,7 @@ onMounted(() => {
   <AdminShell
     help-text="Statistics on where rounds have actually been crashing over the last 500 rounds — mean, median, spread, percentiles and a distribution histogram. Use this to sanity-check that the live game matches the configured house edge and to spot anomalies."
   >
-    <AdminPage
+    <AdminPage :page-export="false"
       title="Volatility"
       eyebrow="Risk analytics"
       subtitle="How unpredictable crash points are — not the same as RTP's average payback %"

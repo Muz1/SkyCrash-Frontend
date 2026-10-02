@@ -1,23 +1,20 @@
-// Types for the feedback loop, the admin Analytics suite and Admin Role Management.
-// Mirrors the backend DTOs in SkyCrash.Application/DTOs (FeedbackDtos, AnalyticsDtos, AdminRoleDtos).
+// Types for the feedback loop, the admin reports and Admin Management.
+// Mirrors the backend DTOs in SkyCrash.Application/DTOs (FeedbackDtos, AnalyticsDtos, AdminRoleDtos,
+// GameManagementDtos).
 
-export const FEEDBACK_TAGS = ['Gameplay', 'Graphics/UI', 'Sound', 'Performance'] as const
-export type FeedbackTag = (typeof FEEDBACK_TAGS)[number]
+// ---------- player feedback ----------
 
 export interface FeedbackStatus {
   isDue: boolean
+  /** A submission right now would earn rewardCredits. */
+  rewardAvailable?: boolean
   roundsPlayed: number
+  cashOuts?: number
+  nextPromptAtCashOut?: number
   nextPromptAtRound: number
   intervalRounds: number
   rewardCredits: number
   lastSubmittedAtUtc: string | null
-}
-
-export interface SubmitFeedbackPayload {
-  rating: number
-  tags: FeedbackTag[]
-  improveText?: string
-  likedText?: string
 }
 
 export interface SubmitFeedbackResult {
@@ -26,15 +23,177 @@ export interface SubmitFeedbackResult {
   nextPromptAtRound: number
 }
 
-export interface FeedbackSettings {
-  firstPromptAfterRounds: number
-  promptIntervalRounds: number
-  rewardCredits: number
+// ---------- shared report pieces ----------
+
+export type RangePreset = 'today' | 'week' | 'month' | 'custom'
+
+export interface ReportQuery {
+  range: RangePreset
+  from?: string
+  to?: string
+}
+
+export interface ReportRangeInfo {
+  from: string
+  to: string
+  days: number
+}
+
+export interface DailyValue {
+  date: string
+  value: number
+}
+
+export interface LabelledCount {
+  label: string
+  count: number
+  percentage: number
 }
 
 export interface CountBucket {
   label: string
   count: number
+}
+
+// ---------- game reports ----------
+
+export interface OverviewReport {
+  range: ReportRangeInfo
+  totalPlayers: number
+  activePlayers: number
+  gamesPlayed: number
+  activeGames: number
+  totalWagered: number
+  totalPayouts: number
+  netProfit: number
+  averageCrashMultiplier: number
+  feedbackResponses: number
+  dailyWagered: DailyValue[]
+  dailyPayouts: DailyValue[]
+  dailyActivePlayers: DailyValue[]
+  dailyNetProfit: DailyValue[]
+}
+
+export interface RevenueReport {
+  range: ReportRangeInfo
+  totalWagered: number
+  totalPayouts: number
+  grossRevenue: number
+  freeCreditsGiven: number
+  freeCreditsBreakdown: { label: string; amount: number }[]
+  netProfit: number
+  profitMarginPercentage: number | null
+  betCount: number
+  averageBet: number
+  houseEdgePercentage: number
+  expectedGrossRevenue: number
+  actualRtpPercentage: number
+  daily: { date: string; wagered: number; payouts: number; grossRevenue: number; freeCredits: number; netProfit: number }[]
+}
+
+export interface GamePerformanceReport {
+  range: ReportRangeInfo
+  totalRounds: number
+  averageRoundSeconds: number
+  averageCrashMultiplier: number
+  highestMultiplier: number
+  lowestMultiplier: number
+  instantCrashes: number
+  distribution: LabelledCount[]
+  thresholds: { multiplier: number; rounds: number; percentage: number }[]
+  dailyRounds: DailyValue[]
+  dailyAverageCrash: DailyValue[]
+}
+
+export interface PlayerActivityReport {
+  range: ReportRangeInfo
+  totalRegisteredPlayers: number
+  activePlayers: number
+  newPlayers: number
+  returningPlayers: number
+  gamesPlayed: number
+  averageGamesPerPlayer: number
+  sessions: number
+  averageSessionMinutes: number
+  peakConcurrentPlayers: number
+  daily: { date: string; activePlayers: number; newPlayers: number; gamesPlayed: number }[]
+  sessionLengths: LabelledCount[]
+}
+
+export interface LobbyReport {
+  range: ReportRangeInfo
+  activeLobbies: number
+  lobbiesCreated: number
+  lobbiesCreatedAllTime: number
+  averageLobbySize: number
+  largestLobbySize: number
+  maxPlayersSetting: number
+  playersInLobbies: number
+  joins: number
+  dailyJoins: DailyValue[]
+  dailyLobbiesCreated: DailyValue[]
+}
+
+export interface SkinUsageReport {
+  playersWithLoadout: number
+  playersWithoutLoadout: number
+  planes: LabelledCount[]
+  skies: LabelledCount[]
+}
+
+// ---------- feedback reports ----------
+
+export interface FeedbackAnalytics {
+  range: ReportRangeInfo
+  totalSubmissions: number
+  uniquePlayers: number
+  eligiblePlayers: number
+  responseRatePercentage: number
+  averageRating: number
+  positivePercentage: number
+  neutralPercentage: number
+  negativePercentage: number
+  sentimentScore: number
+  creditsAwarded: number
+  rewardedSubmissions: number
+  ratingDistribution: CountBucket[]
+  requestedImprovements: { tag: string; label: string; count: number; fromCheckboxes: number; fromComments: number }[]
+  keywords: CountBucket[]
+  daily: { date: string; submissions: number; averageRating: number }[]
+}
+
+export interface FeedbackSubmissionItem {
+  feedbackId: string
+  playerId: string
+  username: string
+  createdAtUtc: string
+  rating: number
+  sentiment: 'Positive' | 'Neutral' | 'Negative'
+  categories: string[]
+  likedText: string | null
+  improveText: string | null
+  additionalComment: string | null
+  rewardReceived: boolean
+  creditsAwarded: number
+  roundsPlayedAtSubmit: number
+  cashOutsAtSubmit: number
+  roundsPlayedNow: number
+}
+
+export interface FeedbackSubmissionsPage {
+  page: number
+  pageSize: number
+  totalCount: number
+  items: FeedbackSubmissionItem[]
+}
+
+export interface FeedbackSubmissionFilters {
+  search?: string
+  rating?: number
+  sentiment?: string
+  category?: string
+  rewarded?: boolean
+  page?: number
 }
 
 export interface FeedbackCluster {
@@ -45,107 +204,68 @@ export interface FeedbackCluster {
   examples: string[]
 }
 
-export interface FeedbackInsights {
-  source: 'gemini' | 'keywords'
-  summary: string
-  clusters: FeedbackCluster[]
-  generatedAtUtc: string
-  warning: string | null
+export interface FeedbackInsightsReport {
+  range: ReportRangeInfo
+  analysed: number
+  positivePercentage: number
+  neutralPercentage: number
+  negativePercentage: number
+  insights: {
+    source: 'gemini' | 'keywords'
+    summary: string
+    clusters: FeedbackCluster[]
+    generatedAtUtc: string
+    warning: string | null
+  }
 }
 
-export interface FeedbackEntry {
-  feedbackId: string
-  username: string
-  rating: number
-  tags: string[]
-  improveText: string | null
-  likedText: string | null
-  sentiment: 'Positive' | 'Negative' | 'Neutral'
+export interface FeedbackSettings {
+  firstPromptAfterRounds: number
+  promptIntervalRounds: number
+  intervalStepRounds: number
+  rewardCredits: number
+  /** Off: feedback is still collected but never pays credits. */
+  rewardsEnabled: boolean
+}
+
+/** One keyword theme used to group feedback when no AI key is set. */
+export interface FeedbackTheme {
+  title: string
+  keywords: string[]
+  /** Shown when players mostly complain about it. */
+  fix: string
+  /** Shown when players mostly praise it. */
+  keep: string
+}
+
+// ---------- game management ----------
+
+/** GET/PUT /api/admin/payments: the payment gateway switch and whether purchases can actually open. */
+export interface PaymentSettings {
+  enabled: boolean
+  gatewayConfigured: boolean
+  sandbox: boolean
+  livePaymentsAllowed: boolean
+  purchasesOpen: boolean
+}
+
+export interface GameManagementSettings {
+  lobbyMaxPlayers: number
+  defaultMusicVolume: number
+  defaultPlaneVolume: number
+  defaultGameVolume: number
+}
+
+export interface ActiveLobby {
+  lobbyId: string
+  name: string
+  inviteCode: string
+  hostUsername: string
+  members: number
   createdAtUtc: string
 }
 
-export interface FeedbackAnalytics {
-  days: number
-  totalSubmissions: number
-  uniquePlayers: number
-  averageRating: number
-  sentimentScore: number
-  totalCreditsAwarded: number
-  totalCreditsAwardedAllTime: number
-  ratingDistribution: CountBucket[]
-  tags: { tag: string; count: number; averageRating: number }[]
-  keywords: CountBucket[]
-  daily: { date: string; submissions: number; averageRating: number }[]
-  insights: FeedbackInsights
-  recent: FeedbackEntry[]
-}
-
-export interface RtpWindow {
-  label: string
-  totalBets: number
-  totalPayouts: number
-  ggr: number
-  betCount: number
-  actualRtpPercentage: number
-  actualHouseEdgePercentage: number
-}
-
-export interface DailyFinancialPoint {
-  date: string
-  bets: number
-  payouts: number
-  ggr: number
-  rtpPercentage: number
-  betCount: number
-}
-
-export interface FinancialAnalytics {
-  totalBets: number
-  totalPayouts: number
-  ggr: number
-  bonuses: number
-  ngr: number
-  betCount: number
-  averageBet: number
-  averageCashoutMultiplier: number
-  cashoutRatePercentage: number
-  actualRtpPercentage: number
-  theoreticalRtpPercentage: number
-  houseEdgePercentage: number
-  daily: DailyFinancialPoint[]
-  windows: RtpWindow[]
-}
-
-export interface GameplayAnalytics {
-  roundsCrashed: number
-  averageCrashMultiplier: number
-  shareBelow2xPercentage: number
-  crashDistribution: { label: string; count: number; percentage: number }[]
-  currentOnlinePlayers: number
-  peakConcurrentPlayers: number
-  peakConcurrentAtUtc: string | null
-  averageDailyActiveUsers: number
-  uniqueActivePlayers: number
-  daily: { date: string; activeUsers: number; peakConcurrent: number; sessions: number }[]
-}
-
-export interface RetentionAnalytics {
-  newPlayers: number
-  points: { label: string; day: number; eligible: number; retained: number; percentage: number }[]
-  sessionsCounted: number
-  averageSessionMinutes: number
-  medianSessionMinutes: number
-  sessionsPerActivePlayer: number
-  sessionLengthDistribution: CountBucket[]
-}
-
-export interface AnalyticsOverview {
-  days: number
-  generatedAtUtc: string
-  financial: FinancialAnalytics
-  gameplay: GameplayAnalytics
-  retention: RetentionAnalytics
-}
+// ---------- admin management ----------
 
 export interface AdminRoleEntry {
   userId: string
@@ -156,4 +276,53 @@ export interface AdminRoleEntry {
   lastSeenUtc: string
 }
 
+export type AdminRole = 'Admin' | 'Manager'
 export type RoleAction = 'grant-admin' | 'revoke-admin' | 'grant-manager' | 'revoke-manager'
+
+export interface AdminInvitation {
+  invitationId: string
+  name: string
+  email: string
+  role: AdminRole
+  status: 'Pending' | 'Accepted' | 'Revoked' | 'Expired'
+  invitedBy: string
+  createdAtUtc: string
+  expiresAtUtc: string
+  acceptedAtUtc: string | null
+}
+
+export interface InvitationPreview {
+  email: string
+  name: string
+  role: AdminRole
+  status: AdminInvitation['status']
+  invitedBy: string
+  accountExists: boolean
+  expiresAtUtc: string
+}
+
+// ---------- AI Advisor ----------
+
+export interface AdvisorRecommendation {
+  title: string
+  area: string
+  impact: 'High' | 'Medium' | 'Low'
+  why: string
+  action: string
+  evidence: string[]
+}
+
+export interface AdvisorRecommendations {
+  range: ReportRangeInfo
+  /** 'gemini' or 'rules'. */
+  source: string
+  /** False without a Gemini key: recommendations are rule-based and chat is unavailable. */
+  aiAvailable: boolean
+  facts: { label: string; value: string }[]
+  recommendations: AdvisorRecommendation[]
+}
+
+export interface AdvisorChatMessage {
+  role: 'user' | 'assistant'
+  text: string
+}

@@ -6,6 +6,7 @@ import { getCraft, type CraftId } from '@/lib/craft'
 import Plane from './Plane.vue'
 import Explosion from './Explosion.vue'
 import { soundEngine } from '@/lib/soundEngine'
+import type { FlightRow } from '@/composables/useLobbyFlight'
 
 /**
  * Crash-game flight. Time runs left to right, multiplier upwards, and the curve
@@ -17,7 +18,7 @@ import { soundEngine } from '@/lib/soundEngine'
  * checkpoint rings wait ahead at milestone multipliers (2x, 5x, 10x…); the plane
  * flies through each one with a flash and a chime, and passed rings stay on the trail.
  */
-const props = defineProps<{ craft: CraftId }>()
+const props = withDefaults(defineProps<{ craft: CraftId; wingmen?: FlightRow[] }>(), { wingmen: () => [] })
 
 const gameStore = useGameStore()
 const { multiplier, elapsed } = useFlightClock()
@@ -135,11 +136,57 @@ const myCashOut = computed(() => {
   return { x: toX(secondsAt(r.cashOutMultiplier)), y: toY(r.cashOutMultiplier), label: `+${r.payout.toLocaleString()}` }
 })
 
-const otherCashOuts = computed(() =>
+// ---------- lobby-mates ----------
+// Every lobby-mate flies in formation behind my plane, whether or not they bet this round
+// (they share the round, so they're always at the same multiplier). One who bet and cashed
+// out peels off and is parked at their cash-out point; the rest go down with the crash.
+
+const wingSize = computed(() => Math.round(planeSize.value * 0.42))
+
+function craftRotation(id: CraftId) {
+  const c = getCraft(id)
+  return c.rotate + c.pitch - heading.value
+}
+
+const formation = computed(() => {
+  const s = planeSize.value
+  const p = plot.value
+  const rows = props.wingmen.filter((w) => w.status !== 'cashed' && w.status !== 'crashed')
+  if (waiting.value) {
+    // Lined up on the runway ahead of me, waiting for take-off.
+    return rows.map((w, i) => ({
+      w,
+      x: Math.min(p.right, p.left + s * 0.75 + i * wingSize.value * 1.15),
+      y: p.bottom - wingSize.value * 0.35,
+      rotate: getCraft(w.craftId).rotate + getCraft(w.craftId).pitch,
+    }))
+  }
+  if (!flying.value) return []
+  const rad = (heading.value * Math.PI) / 180
+  const dir = { x: Math.cos(rad), y: -Math.sin(rad) }
+  const perp = { x: Math.sin(rad), y: Math.cos(rad) }
+  const centre = planeCentre()
+  const now = performance.now() / 1000
+  return rows.map((w, i) => {
+    const rank = Math.floor(i / 2) + 1
+    const side = i % 2 === 0 ? 1 : -0.55
+    const back = rank * s * 0.55
+    const off = side * rank * s * 0.3
+    const bob = Math.sin(now * 2.2 + i) * s * 0.02
+    return {
+      w,
+      x: Math.max(p.left, Math.min(width.value - wingSize.value / 2, centre.x - dir.x * back + perp.x * off)),
+      y: Math.max(wingSize.value / 2, Math.min(p.bottom, centre.y - dir.y * back + perp.y * off + bob)),
+      rotate: craftRotation(w.craftId),
+    }
+  })
+})
+
+const parked = computed(() =>
   airborne.value
-    ? gameStore.roundBets
-        .filter((b) => b.kind === 'cashout' && b.cashOutMultiplier)
-        .map((b, i) => ({ key: `${b.playerId}-${i}`, x: toX(secondsAt(b.cashOutMultiplier!)), y: toY(b.cashOutMultiplier!) }))
+    ? props.wingmen
+        .filter((w) => w.status === 'cashed' && w.cashOutMultiplier)
+        .map((w) => ({ w, x: toX(secondsAt(w.cashOutMultiplier!)), y: toY(w.cashOutMultiplier!) }))
     : [],
 )
 
@@ -287,8 +334,10 @@ const multiplierClass = computed(() =>
         <path :d="ringArc('back')" fill="none" stroke-width="7" stroke-linecap="round" :style="{ stroke: upcomingRing.tone, strokeOpacity: 0.55 }" />
       </g>
 
-      <!-- other pilots' cash-outs -->
-      <circle v-for="c in otherCashOuts" :key="c.key" :cx="c.x" :cy="c.y" r="3.5" style="fill: var(--neon-violet); stroke: var(--background)" />
+      <!-- lobby-mates' cash-out points -->
+      <g v-for="c in parked" :key="`parked-${c.w.playerId}`">
+        <circle :cx="c.x" :cy="c.y" r="4" style="fill: var(--neon-lime); stroke: var(--background)" />
+      </g>
 
       <!-- my cash-out -->
       <g v-if="myCashOut">
@@ -298,6 +347,37 @@ const multiplierClass = computed(() =>
         </text>
       </g>
     </svg>
+
+    <!-- lobby-mates: in formation while flying, parked where they cashed out -->
+    <div
+      v-for="f in formation"
+      :key="`wing-${f.w.playerId}`"
+      class="pointer-events-none absolute left-0 top-0"
+      :style="{ transform: `translate3d(${(f.x - wingSize / 2).toFixed(1)}px, ${(f.y - wingSize / 2).toFixed(1)}px, 0)`, width: `${wingSize}px` }"
+    >
+      <img
+        :src="getCraft(f.w.craftId).src"
+        alt=""
+        width="1024"
+        height="1024"
+        class="h-auto w-full object-contain opacity-80 [filter:drop-shadow(0_0_6px_var(--neon-violet))]"
+        :style="{ transform: `rotate(${f.rotate.toFixed(1)}deg)` }"
+      />
+      <span class="absolute left-1/2 top-full max-w-24 -translate-x-1/2 truncate whitespace-nowrap border border-violet/50 bg-void/80 px-1 font-arcade text-[7px] uppercase text-foreground">
+        {{ f.w.username }}
+      </span>
+    </div>
+    <div
+      v-for="c in parked"
+      :key="`parked-label-${c.w.playerId}`"
+      class="pointer-events-none absolute left-0 top-0"
+      :style="{ transform: `translate3d(${c.x.toFixed(1)}px, ${c.y.toFixed(1)}px, 0)` }"
+    >
+      <span class="absolute bottom-2 left-0 flex -translate-x-1/2 items-center gap-1 whitespace-nowrap border border-lime/60 bg-void/85 px-1 py-0.5 font-arcade text-[7px] uppercase text-lime">
+        <img :src="getCraft(c.w.craftId).src" alt="" width="1024" height="1024" class="h-3.5 w-3.5 object-contain" />
+        {{ c.w.username }} {{ c.w.cashOutMultiplier?.toFixed(2) }}x
+      </span>
+    </div>
 
     <!-- aircraft riding the curve -->
     <div

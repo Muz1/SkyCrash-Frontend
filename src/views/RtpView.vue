@@ -71,7 +71,7 @@ function handleSaved() {
   <AdminShell
     help-text="Theoretical RTP is derived directly from the configured house edge — it's the payout rate the math guarantees over the long run. All-Time / Last 24 Hours show the ACTUAL rate paid out to real players, for comparison. Changing the house edge affects every round from the moment it's saved onward, and requires re-entering your password to confirm — it never changes a round already in progress."
   >
-    <AdminPage
+    <AdminPage :page-export="false"
       title="RTP & House Edge"
       eyebrow="Game economics"
       subtitle="Configured house edge versus the return-to-player actually paid out."

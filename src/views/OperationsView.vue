@@ -30,7 +30,7 @@ onUnmounted(() => {
   <AdminShell
     help-text="A live snapshot of the game: how many players are currently online, the current round's status and number, how much has been wagered and how many rounds have run in the last hour, and how many bets are active on the round right now. Refreshes automatically every few seconds."
   >
-    <AdminPage title="Operations" eyebrow="Live monitoring" subtitle="A live snapshot of the game, refreshed every few seconds.">
+    <AdminPage :page-export="false" title="Operations" eyebrow="Live monitoring" subtitle="A live snapshot of the game, refreshed every few seconds.">
       <template #actions>
         <span class="adm-live">Live</span>
         <ExportPdfButton :build="buildReport" />

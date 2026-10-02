@@ -19,16 +19,14 @@ const adminName = computed(() => authStore.username ?? playerStore.profile?.user
 const initial = computed(() => adminName.value.charAt(0).toUpperCase())
 const roleLabel = computed(() => (playerStore.profile?.isManager ? 'Manager' : 'Administrator'))
 
-// Console theme: the admin's saved choice, else their OS preference. Per-browser only.
-const THEME_KEY = 'skycrash_admin_theme'
+// The dashboard is light grey by default; admins can switch to the dark console. Per-browser.
+const THEME_KEY = 'skycrash_admin_theme_v2'
 function initialTheme(): 'light' | 'dark' {
   try {
-    const saved = localStorage.getItem(THEME_KEY)
-    if (saved === 'light' || saved === 'dark') return saved
+    return localStorage.getItem(THEME_KEY) === 'dark' ? 'dark' : 'light'
   } catch {
-    // Storage blocked: fall through to the OS preference.
+    return 'light'
   }
-  return window.matchMedia?.('(prefers-color-scheme: light)').matches ? 'light' : 'dark'
 }
 const theme = ref<'light' | 'dark'>(initialTheme())
 watch(theme, (value) => {
@@ -52,9 +50,10 @@ function handleLogout() {
       <div class="adm-brand">
         <img :src="logo" alt="Sky Crash" width="1152" height="576" />
         <span class="adm-brand-divider" aria-hidden="true" />
-        <span class="adm-brand-label">Admin Console</span>
+        <span class="adm-brand-label">Admin Dashboard</span>
       </div>
       <div class="flex items-center gap-3">
+        <HelpTip v-if="helpText" :text="helpText" />
         <div class="adm-user">
           <span class="adm-avatar" aria-hidden="true">{{ initial }}</span>
           <div class="hidden sm:block">
@@ -73,20 +72,18 @@ function handleLogout() {
           <Moon v-else aria-hidden="true" />
         </button>
         <button type="button" class="adm-btn adm-btn--ghost" @click="handleLogout">
-          <LogOut aria-hidden="true" /> Logout
+          <LogOut aria-hidden="true" /> <span class="hidden sm:inline">Logout</span>
         </button>
       </div>
     </header>
 
-    <nav class="adm-tabbar" aria-label="Admin sections">
-      <AdminTabs />
-      <div class="flex shrink-0 items-center">
-        <HelpTip v-if="helpText" :text="helpText" />
-      </div>
-    </nav>
-
-    <main class="adm-main">
-      <slot />
-    </main>
+    <div class="adm-layout">
+      <aside class="adm-sidebar">
+        <AdminTabs />
+      </aside>
+      <main class="adm-main">
+        <slot />
+      </main>
+    </div>
   </div>
 </template>

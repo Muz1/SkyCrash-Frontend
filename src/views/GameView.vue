@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
-import { Volume2, VolumeX, Users, Warehouse, RotateCw } from '@lucide/vue'
+import { Volume2, VolumeX, RotateCw, CircleHelp, Zap } from '@lucide/vue'
 import { useGameStore } from '@/stores/gameStore'
 import { usePlayerStore } from '@/stores/playerStore'
 import { useHangarStore } from '@/stores/hangarStore'
@@ -17,11 +17,17 @@ import HudHeader from '@/components/sky/HudHeader.vue'
 import NeonPanel from '@/components/sky/NeonPanel.vue'
 import ArcadeButton from '@/components/sky/ArcadeButton.vue'
 import StatusBadge from '@/components/sky/StatusBadge.vue'
-import AchievementBadge from '@/components/sky/AchievementBadge.vue'
+import LobbyFlightBoard from '@/components/sky/LobbyFlightBoard.vue'
+import AutoCashOutControl from '@/components/sky/AutoCashOutControl.vue'
+import SpinTimerChip from '@/components/sky/SpinTimerChip.vue'
+import TutorialOverlay from '@/components/sky/TutorialOverlay.vue'
+import { useLobbyFlight } from '@/composables/useLobbyFlight'
+import { useTutorial } from '@/composables/useTutorial'
+import { getCraft } from '@/lib/craft'
 import FeedbackPrompt from '@/components/sky/FeedbackPrompt.vue'
 import HowToPlay from '@/components/sky/HowToPlay.vue'
 import { useFeedbackPrompt } from '@/composables/useFeedbackPrompt'
-import DailyChallengesPopup from '@/components/sky/DailyChallengesPopup.vue'
+import DailyChallengeBar from '@/components/sky/DailyChallengeBar.vue'
 import SpinWheel from '@/components/sky/SpinWheel.vue'
 import { useGameScreenPrompts } from '@/composables/useGameScreenPrompts'
 import { useChallengeStore } from '@/stores/challengeStore'
@@ -34,7 +40,9 @@ const audioStore = useAudioStore()
 useGameAudio()
 const prompts = useGameScreenPrompts()
 const challengeStore = useChallengeStore()
-const feedback = useFeedbackPrompt({ isBlocked: () => prompts.anyOpen.value })
+const lobbyFlight = useLobbyFlight()
+const tutorial = useTutorial()
+const feedback = useFeedbackPrompt({ isBlocked: () => prompts.anyOpen.value || tutorial.isOpen.value })
 
 const skin = computed(() => (hangarStore.skinId === 'taking-off' ? 'taking-off' : hangarStore.skinId))
 const craft = computed(() => hangarStore.craftId)
@@ -68,7 +76,6 @@ const isPlacingBet = ref(false)
 const isCashingOut = ref(false)
 /** Bet requested while a round was in flight; placed automatically when the next round opens. */
 const queuedForNextRound = ref(false)
-const showRoundBets = ref(false)
 
 watch([betAmountInput, autoCashoutEnabled, autoCashoutTarget], () => {
   try {
@@ -227,6 +234,23 @@ function crashChipClass(value: number) {
             {{ p.toFixed(2) }}x
           </li>
         </ul>
+        <LobbyFlightBoard
+          mode="chip"
+          :me="lobbyFlight.me.value"
+          :mates="lobbyFlight.mates.value"
+          :in-lobby="lobbyFlight.inLobby.value"
+          :lobby-name="lobbyFlight.lobbyName.value"
+          :multiplier="gameStore.currentMultiplier"
+        />
+        <button
+          type="button"
+          aria-label="How to play: replay the tutorial"
+          title="How to play"
+          class="grid h-8 w-8 shrink-0 place-items-center border-2 border-violet/50 bg-void/70 text-muted-foreground clip-hud transition-colors hover:border-electric hover:text-electric"
+          @click="tutorial.open()"
+        >
+          <CircleHelp class="h-3.5 w-3.5" aria-hidden="true" />
+        </button>
         <button
           type="button"
           :aria-label="audioStore.effectsEnabled ? 'Mute plane and game sounds' : 'Unmute plane and game sounds'"
@@ -242,7 +266,7 @@ function crashChipClass(value: number) {
 
       <HowToPlay compact class="mt-1.5" />
 
-      <FlightStage :craft="craft" class="mt-1 min-h-[180px] flex-1">
+      <FlightStage :craft="craft" :wingmen="lobbyFlight.mates.value" class="mt-1 min-h-[180px] flex-1">
         <template #readout>
           <div v-if="cashedOutThisRound" class="animate-sky-pop mt-3 text-center">
             <p class="font-display text-xs font-black uppercase tracking-[0.3em] text-lime text-glow-lime sm:text-sm">
@@ -256,6 +280,12 @@ function crashChipClass(value: number) {
             </p>
           </div>
           <p
+            v-else-if="flying && hasActiveBet && gameStore.myAutoCashoutTarget"
+            class="mt-2 inline-flex items-center gap-1.5 border border-electric/70 bg-void/70 px-2 py-0.5 font-arcade text-[8px] uppercase tracking-[0.2em] text-electric"
+          >
+            <Zap class="h-3 w-3" aria-hidden="true" /> Auto Cash Out at {{ gameStore.myAutoCashoutTarget.toFixed(2) }}x
+          </p>
+          <p
             v-else-if="crashed"
             class="animate-sky-pop mt-2 font-display text-sm font-black uppercase tracking-[0.24em] text-danger [text-shadow:0_0_16px_color-mix(in_oklab,var(--neon-red)_85%,transparent)] sm:text-lg"
           >
@@ -263,79 +293,57 @@ function crashChipClass(value: number) {
           </p>
         </template>
 
-        <!-- bets this round: panel on larger screens, tap-to-open chip on phones -->
-        <div v-if="gameStore.roundBets.length > 0" class="absolute right-0 top-1 z-10 flex max-h-[55%] flex-col items-end">
-          <button
-            type="button"
-            class="clip-hud flex items-center gap-1.5 border border-magenta/60 bg-void/75 px-2 py-1 font-arcade text-[8px] uppercase text-magenta sm:hidden"
-            :aria-expanded="showRoundBets"
-            @click="showRoundBets = !showRoundBets"
-          >
-            <Users class="h-3 w-3" aria-hidden="true" /> {{ gameStore.roundBets.length }}
-          </button>
-          <div
-            :class="[
-              'neon-panel clip-hud mt-1 w-56 min-h-0 overflow-y-auto p-2',
-              showRoundBets ? 'block' : 'hidden sm:block',
-            ]"
-          >
-            <p class="mb-1.5 font-display text-[9px] font-black uppercase tracking-[0.3em] text-magenta">Bets This Round</p>
-            <ul class="flex flex-col gap-1">
-              <li
-                v-for="(b, i) in gameStore.roundBets"
-                :key="`${b.playerId}-${i}`"
-                :class="[
-                  'flex items-center gap-1 font-arcade text-[8px]',
-                  b.kind === 'cashout' ? 'text-lime' : 'text-muted-foreground',
-                ]"
-              >
-                <AchievementBadge :achievement-key="b.displayedAchievementKey" size="xs" />
-                <span class="truncate">{{ b.username }}</span>
-                <span class="ml-auto shrink-0">
-                  {{ b.kind === 'cashout' ? `+${b.amount} @ ${b.cashOutMultiplier?.toFixed(2)}x` : b.amount }}
-                </span>
-              </li>
-            </ul>
-          </div>
-        </div>
+        <!-- me + my lobby-mates this round: panel on larger screens, tap-to-open chip on phones -->
+        <LobbyFlightBoard
+          :me="lobbyFlight.me.value"
+          :mates="lobbyFlight.mates.value"
+          :in-lobby="lobbyFlight.inLobby.value"
+          :lobby-name="lobbyFlight.lobbyName.value"
+          :multiplier="gameStore.currentMultiplier"
+        />
       </FlightStage>
     </main>
 
     <!-- controls: one compact panel for every phase; bottom padding clears the nav dock's peek tab -->
     <div class="relative z-20 px-3 pb-[calc(env(safe-area-inset-bottom)+2.25rem)] pt-2 sm:px-4">
       <NeonPanel accent="magenta" class="mx-auto w-full max-w-4xl [&>div]:p-3 sm:[&>div]:p-4">
-        <div class="grid gap-3 md:grid-cols-[minmax(0,1fr)_minmax(240px,300px)] md:items-center">
+        <div class="grid gap-3 md:grid-cols-[minmax(0,1fr)_minmax(240px,300px)] md:items-center md:gap-6">
           <div class="min-w-0">
-            <div class="flex items-center gap-2">
+            <div class="flex flex-wrap items-center gap-3">
               <p class="hidden font-display text-sm font-black uppercase tracking-[0.2em] text-magenta text-glow-magenta sm:block">
                 New Flight
               </p>
               <RouterLink
                 to="/hangar"
-                :aria-label="`Hangar: change plane and sky${hangarStore.isCustomized ? ' (custom loadout equipped)' : ''}`"
-                :class="[
-                  'clip-hud ml-auto flex items-center gap-1.5 border-2 bg-void/70 px-2.5 py-1.5 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-electric',
-                  hangarStore.isCustomized
-                    ? 'border-lime bg-lime/10 text-lime hover:[box-shadow:var(--glow-lime)]'
-                    : 'border-electric text-electric hover:[box-shadow:var(--glow-blue)]',
-                ]"
+                :aria-label="`Your plane: ${getCraft(craft).name}. Open the hangar to change plane and sky`"
+                class="clip-hud ml-auto flex items-center gap-1.5 border-2 border-electric bg-void/70 py-1 pl-1 pr-2.5 text-electric transition-all hover:[box-shadow:var(--glow-blue)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-electric"
               >
-                <Warehouse class="h-4 w-4" aria-hidden="true" />
-                <span class="font-arcade text-[8px] uppercase tracking-[0.15em]">Hangar</span>
-                <span class="hidden text-sm font-bold text-foreground sm:inline">· Change plane &amp; sky</span>
+                <img
+                  :src="getCraft(craft).src"
+                  alt=""
+                  width="1024"
+                  height="1024"
+                  class="h-6 w-6 object-contain"
+                  :style="{ transform: `rotate(${getCraft(craft).rotate}deg)` }"
+                />
+                <span class="flex flex-col leading-tight">
+                  <span class="font-arcade text-[7px] uppercase tracking-[0.15em] text-muted-foreground">Your plane</span>
+                  <span class="text-sm font-bold text-foreground">{{ getCraft(craft).name }} <span class="text-electric">· Change</span></span>
+                </span>
               </RouterLink>
+              <SpinTimerChip />
               <button
                 v-if="prompts.outOfCredits.value"
                 type="button"
-                class="ml-auto flex items-center gap-1.5 border-2 border-ember px-2 py-1 font-arcade text-[8px] uppercase tracking-[0.15em] text-foreground [box-shadow:var(--glow-ember)] hover:bg-ember/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ember sm:ml-2"
+                class="flex items-center gap-1.5 border-2 border-ember px-2 py-1 font-arcade text-[8px] uppercase tracking-[0.15em] text-foreground [box-shadow:var(--glow-ember)] hover:bg-ember/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ember"
                 @click="prompts.openWheel"
               >
-                <RotateCw class="h-3 w-3" aria-hidden="true" /> Free spin
+                <RotateCw class="h-3 w-3" aria-hidden="true" /> Out of credits?
               </button>
             </div>
 
             <!-- quick amounts: single scrollable row so it never wraps onto extra lines -->
-            <div class="-mx-1 mt-0 flex gap-1.5 overflow-x-auto px-1 pb-0.5 [scrollbar-width:none] sm:mt-2 [&::-webkit-scrollbar]:hidden">
+            <div class="-mx-1 mt-1 flex gap-3 overflow-x-auto px-1 pb-0.5 [scrollbar-width:none] sm:mt-2 [&::-webkit-scrollbar]:hidden">
               <button
                 v-for="v in BET_STEPS"
                 :key="v"
@@ -359,7 +367,7 @@ function crashChipClass(value: number) {
               </button>
             </div>
 
-            <div class="mt-2.5 flex flex-wrap items-end gap-x-4 gap-y-2">
+            <div class="mt-2.5 flex flex-wrap items-end gap-x-6 gap-y-2">
               <label class="block">
                 <span class="font-arcade text-[7px] uppercase tracking-[0.3em] text-muted-foreground">Bet Amount</span>
                 <input
@@ -371,28 +379,15 @@ function crashChipClass(value: number) {
                   class="mt-1 block w-28 border-2 border-violet/50 bg-void/70 px-2 py-1 font-arcade text-base text-ember text-glow-ember focus:border-magenta focus:outline-none"
                 />
               </label>
-              <div>
-                <label class="flex cursor-pointer items-center gap-2 font-arcade text-[7px] uppercase tracking-[0.3em] text-muted-foreground">
-                  <input v-model="autoCashoutEnabled" type="checkbox" class="accent-[var(--neon-blue)]" />
-                  Auto Cashout
-                </label>
-                <div class="mt-1 flex items-center gap-1">
-                  <input
-                    v-model.number="autoCashoutTarget"
-                    type="number"
-                    inputmode="decimal"
-                    min="1.01"
-                    step="0.05"
-                    :disabled="!autoCashoutEnabled"
-                    aria-label="Auto cashout target multiplier"
-                    class="block w-24 border-2 border-violet/50 bg-void/70 px-2 py-1 font-arcade text-sm text-electric text-glow-blue focus:border-magenta focus:outline-none disabled:opacity-40"
-                  />
-                  <span class="text-[9px] text-muted-foreground">x</span>
-                </div>
-              </div>
+              <AutoCashOutControl
+                v-model:enabled="autoCashoutEnabled"
+                v-model:target="autoCashoutTarget"
+                :locked="hasActiveBet"
+                :armed-target="gameStore.myAutoCashoutTarget"
+                :error="autoCashoutError"
+              />
             </div>
 
-            <p v-if="autoCashoutError" class="mt-1.5 text-sm text-danger">{{ autoCashoutError }}</p>
             <p v-if="gameStore.myBetStatus === 'Rejected'" class="mt-1.5 text-sm text-danger">
               {{ gameStore.betRejectionReason }}
             </p>
@@ -458,7 +453,7 @@ function crashChipClass(value: number) {
 
     <NavDock />
 
-    <DailyChallengesPopup
+    <DailyChallengeBar
       v-if="prompts.briefingOpen.value"
       :challenges="challengeStore.challenges"
       @close="prompts.closeBriefing"
@@ -466,8 +461,10 @@ function crashChipClass(value: number) {
     <SpinWheel v-if="prompts.wheelOpen.value" :out-of-credits="prompts.outOfCredits.value" @close="prompts.closeWheel" />
 
     <FeedbackPrompt
-      v-if="feedback.isOpen.value && !prompts.anyOpen.value"
+      v-if="feedback.isOpen.value && !prompts.anyOpen.value && !tutorial.isOpen.value"
       :controller="feedback"
     />
+
+    <TutorialOverlay v-if="tutorial.isOpen.value" @close="tutorial.finish" />
   </div>
 </template>

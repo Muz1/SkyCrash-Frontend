@@ -13,6 +13,8 @@ export interface RegisterPayload {
   username: string
   email: string
   password: string
+  /** The player ticked "I agree to the Terms of Service". */
+  acceptTerms: boolean
 }
 
 export interface LoginPayload {
@@ -41,6 +43,11 @@ export interface PlayerProfile {
   /** Hangar loadout saved server-side; null until the player first equips (see lib/craft.ts, lib/skins.ts). */
   equippedCraftId?: string | null
   equippedSkyId?: string | null
+  /** False until the player agrees to the current Terms of Service (always true for admins). */
+  hasAcceptedTerms?: boolean
+  currentTermsVersion?: string
+  /** False until the first-flight tutorial has been finished or skipped. */
+  hasCompletedTutorial?: boolean
 }
 
 export interface UpdateProfilePayload {
@@ -251,6 +258,8 @@ export interface Achievement {
   name: string
   description: string
   target: number
+  /** Credits paid once when it unlocks. Older servers omit it. */
+  rewardCredits?: number
   progress: number
   unlocked: boolean
   unlockedAtUtc: string | null
@@ -288,6 +297,8 @@ export interface SpinStatus {
   cooldownSeconds: number
   /** Prize per wheel segment, in drawing order. */
   segments: number[]
+  /** Chance of landing on each segment (same order), summing to 1. Older servers omit it. */
+  odds?: number[]
 }
 
 export interface SpinResult {
@@ -323,5 +334,18 @@ export interface PublicSettings {
   lobbyMaxPlayers: number
   /** Default volumes (0–100) for players who never changed their own. */
   audio: { music: number; plane: number; game: number }
+  /** True while players can buy credits (admin switch on and gateway usable). */
+  paymentsEnabled?: boolean
 }
 
+
+/** A lobby-mate's bet on the current round (GameHub.GetLobbyRoundBets). */
+export interface LobbyRoundBet {
+  playerId: string
+  username: string
+  displayedAchievementKey: string | null
+  equippedCraftId: string | null
+  amount: number
+  status: 'Placed' | 'CashedOut' | 'Lost'
+  cashOutMultiplier: number | null
+}

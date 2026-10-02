@@ -9,6 +9,7 @@ import { usePrivateLobbyStore } from '@/stores/privateLobbyStore'
 import { useToastStore } from '@/stores/toastStore'
 import { useAchievementStore } from '@/stores/achievementStore'
 import { useChallengeStore } from '@/stores/challengeStore'
+import { useSpinStore } from '@/stores/spinStore'
 import { badgeFor } from '@/lib/achievements'
 import { challengeBadgeFor } from '@/lib/challengeBadges'
 import type { OnlinePlayer } from '@/types'
@@ -54,6 +55,7 @@ type BetPlacedByPlayerPayload = {
   playerId: string
   username: string
   displayedAchievementKey: string | null
+  equippedCraftId?: string | null
   amount: number
 }
 
@@ -99,6 +101,7 @@ type AchievementUnlockedPayload = {
   achievementKey: string
   name: string
   description: string
+  rewardCredits?: number
 }
 
 type ChallengeCompletedPayload = {
@@ -140,6 +143,7 @@ export function useSignalRConnection() {
         useLobbyStore().clear()
         useAchievementStore().clear()
         useChallengeStore().clear()
+        useSpinStore().clear()
         usePrivateLobbyStore().clear()
         router.push({ name: 'login', query: { blocked: '1' } })
       })
@@ -214,12 +218,17 @@ connection.on('PlayerCashedOut', (payload: PlayerCashedOutPayload) => {
     })
     connection.on('AchievementUnlocked', (payload: AchievementUnlockedPayload) => {
       achievementStore.fetchAchievements()
-      toastStore.push({
-        title: 'Achievement Unlocked',
-        message: `${payload.name} — ${payload.description}`,
-        accent: 'ember',
-        imageSrc: badgeFor(payload.achievementKey),
-      })
+      const reward = payload.rewardCredits ?? 0
+      if (reward > 0) usePlayerStore().fetchProfile() // the reward is already in the balance
+      toastStore.push(
+        {
+          title: 'Achievement Unlocked',
+          message: `${payload.name} — ${payload.description}${reward > 0 ? ` +${reward.toLocaleString()} credits` : ''}`,
+          accent: 'ember',
+          imageSrc: badgeFor(payload.achievementKey),
+        },
+        reward > 0 ? 7000 : undefined,
+      )
     })
     connection.on('ChallengeCompleted', (payload: ChallengeCompletedPayload) => {
       challengeStore.fetchTodayChallenges()

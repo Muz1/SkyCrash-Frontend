@@ -1,5 +1,14 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
+import type { LobbyRoundBet } from '@/types'
+
+/** A lobby-mate's bet this round, kept up to date by the bet/cash-out broadcasts. */
+export interface LobbyBet {
+  amount: number
+  craftId: string | null
+  status: 'Placed' | 'CashedOut'
+  cashOutMultiplier: number | null
+}
 
 export type RoundPhase = 'Idle' | 'Waiting' | 'Running' | 'Crashed'
 
@@ -26,6 +35,8 @@ export const useGameStore = defineStore('game', () => {
       cashOutMultiplier?: number
     }[]
   >([])
+  /** One entry per lobby-mate who bet this round, keyed by player id. Only lobby-mates are ever sent. */
+  const lobbyBets = ref<Record<string, LobbyBet>>({})
   const cashOutStatus = ref<'None' | 'CashedOut' | 'Rejected'>('None')
   const cashOutResult = ref<{ cashOutMultiplier: number; payout: number; auto: boolean } | null>(null)
   const cashOutRejectionReason = ref<string | null>(null)
@@ -90,6 +101,7 @@ export const useGameStore = defineStore('game', () => {
     myAutoCashoutTarget.value = null
     betRejectionReason.value = null
     roundBets.value = []
+    lobbyBets.value = {}
     cashOutStatus.value = 'None'
     cashOutResult.value = null
     cashOutRejectionReason.value = null
@@ -130,8 +142,13 @@ export const useGameStore = defineStore('game', () => {
     playerId: string
     username: string
     displayedAchievementKey?: string | null
+    equippedCraftId?: string | null
     amount: number
   }) {
+    lobbyBets.value = {
+      ...lobbyBets.value,
+      [payload.playerId]: { amount: payload.amount, craftId: payload.equippedCraftId ?? null, status: 'Placed', cashOutMultiplier: null },
+    }
     roundBets.value = [
       ...roundBets.value,
       {
@@ -151,6 +168,16 @@ export const useGameStore = defineStore('game', () => {
     cashOutMultiplier: number
     payout: number
   }) {
+    const existing = lobbyBets.value[payload.playerId]
+    lobbyBets.value = {
+      ...lobbyBets.value,
+      [payload.playerId]: {
+        amount: existing?.amount ?? 0,
+        craftId: existing?.craftId ?? null,
+        status: 'CashedOut',
+        cashOutMultiplier: payload.cashOutMultiplier,
+      },
+    }
     roundBets.value = [
       ...roundBets.value,
       {
@@ -162,6 +189,17 @@ export const useGameStore = defineStore('game', () => {
         cashOutMultiplier: payload.cashOutMultiplier,
       },
     ]
+  }
+
+  /** Replaces the lobby board with the server's view (after joining or reloading mid-round). */
+  function applyLobbyRoundBets(forRoundId: string, bets: LobbyRoundBet[]) {
+    if (forRoundId !== roundId.value) return
+    const next: Record<string, LobbyBet> = {}
+    for (const b of bets) {
+      if (b.status === 'Lost') continue
+      next[b.playerId] = { amount: b.amount, craftId: b.equippedCraftId, status: b.status, cashOutMultiplier: b.cashOutMultiplier }
+    }
+    lobbyBets.value = next
   }
 
   function onCashOutConfirmed(payload: { cashOutMultiplier: number; payout: number; auto?: boolean }) {
@@ -193,6 +231,8 @@ export const useGameStore = defineStore('game', () => {
     myAutoCashoutTarget,
     betRejectionReason,
     roundBets,
+    lobbyBets,
+    applyLobbyRoundBets,
     cashOutStatus,
     cashOutResult,
     cashOutRejectionReason,

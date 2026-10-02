@@ -141,7 +141,12 @@ async function toggleDisplayed(key: string, isDisplayed: boolean) {
             />
             <div class="min-w-0 flex-1">
               <p class="font-display text-sm uppercase tracking-[0.12em] text-foreground">{{ a.name }}</p>
-              <p class="text-xs text-muted-foreground">{{ a.description }}</p>
+              <p class="text-xs text-muted-foreground">
+                {{ a.description }}
+                <span v-if="a.rewardCredits" :class="['ml-1 font-bold', a.unlocked ? 'text-lime' : 'text-ember']">
+                  {{ a.unlocked ? 'Earned' : 'Reward' }} +{{ a.rewardCredits.toLocaleString() }}
+                </span>
+              </p>
               <div class="mt-1.5 h-1.5 w-full max-w-xs overflow-hidden border border-violet/40 bg-void/60">
                 <div
                   :class="a.unlocked ? 'bg-lime [box-shadow:var(--glow-lime)]' : 'bg-electric [box-shadow:var(--glow-blue)]'"

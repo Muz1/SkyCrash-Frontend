@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { nextTick, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { usePlayerStore } from '@/stores/playerStore'
 import { useWalletStore } from '@/stores/walletStore'
@@ -8,17 +8,17 @@ import Shell from '@/components/sky/Shell.vue'
 import NeonPanel from '@/components/sky/NeonPanel.vue'
 import ArcadeButton from '@/components/sky/ArcadeButton.vue'
 import BuyCreditsPanel from '@/components/sky/BuyCreditsPanel.vue'
-import SpinWheel from '@/components/sky/SpinWheel.vue'
-import { BET_STEPS } from '@/lib/betSteps'
+import SpinTimerChip from '@/components/sky/SpinTimerChip.vue'
+import { useSpinStore } from '@/stores/spinStore'
+import { usePublicSettingsStore } from '@/stores/publicSettingsStore'
 
 const route = useRoute()
 const router = useRouter()
 const playerStore = usePlayerStore()
 const walletStore = useWalletStore()
 const paymentStore = usePaymentStore()
-const wheelOpen = ref(false)
-const isToppingUp = ref(false)
-const claimed = ref<number | null>(null)
+const spinStore = useSpinStore()
+const publicSettings = usePublicSettingsStore()
 
 // Actual crediting happens once PayFast's ITN reaches our backend, which is
 // slightly delayed relative to this redirect - not confirmed yet, just "in progress".
@@ -28,6 +28,13 @@ const wasCredited = ref(false)
 
 onMounted(async () => {
   walletStore.fetchTransactions()
+  if (!spinStore.status) void spinStore.load()
+  // "Buy credits" in the top bar links to #buy-credits: scroll the panel into view once it's shown.
+  void publicSettings.load().then(async () => {
+    if (route.hash !== '#buy-credits') return
+    await nextTick()
+    document.getElementById('buy-credits')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  })
 
   const payment = route.query.payment
   if (payment === 'success' || payment === 'cancelled') {
@@ -42,19 +49,6 @@ onMounted(async () => {
     }
   }
 })
-
-async function handleTopUp() {
-  isToppingUp.value = true
-  claimed.value = null
-  try {
-    await walletStore.requestDemoTopUp()
-    claimed.value = 1000
-  } catch {
-    // errorMessage is already set on the store; nothing further to do here.
-  } finally {
-    isToppingUp.value = false
-  }
-}
 </script>
 
 <template>
@@ -70,35 +64,18 @@ async function handleTopUp() {
         </p>
         <p class="mt-2 font-arcade text-[8px] uppercase tracking-[0.4em] text-muted-foreground">Arcade balance</p>
 
-        <button
-          class="clip-hud mt-7 w-full border-2 border-violet/60 bg-void/60 p-4 transition-all hover:border-lime hover:[box-shadow:var(--glow-lime)] disabled:pointer-events-none disabled:opacity-40"
-          :disabled="isToppingUp"
-          @click="handleTopUp"
+        <!-- Free credits only come from the spin wheel (its own page). -->
+        <RouterLink
+          to="/spin"
+          class="clip-hud mt-7 block w-full border-2 border-violet/60 bg-void/60 p-4 transition-all hover:border-ember hover:[box-shadow:var(--glow-ember)]"
         >
-          <span class="block font-arcade text-base text-lime">+1,000</span>
-          <span class="mt-1 block font-display text-[10px] uppercase tracking-[0.24em] text-muted-foreground">
-            {{ isToppingUp ? 'Refuelling…' : 'Add Demo Credits' }}
+          <span class="block font-arcade text-base text-ember">Spin the wheel</span>
+          <span class="mt-1 block font-display text-xs uppercase tracking-[0.2em] text-foreground/80">
+            Free credits<template v-if="spinStore.topPrize"> · up to {{ spinStore.topPrize.toLocaleString() }}</template> · every 5 minutes
           </span>
-        </button>
+        </RouterLink>
+        <div class="mt-2 flex justify-center"><SpinTimerChip /></div>
 
-        <button
-          class="clip-hud mt-3 w-full border-2 border-violet/60 bg-void/60 p-4 transition-all hover:border-ember hover:[box-shadow:var(--glow-ember)]"
-          @click="wheelOpen = true"
-        >
-          <span class="block font-arcade text-base text-ember">Spin to win</span>
-          <span class="mt-1 block font-display text-[10px] uppercase tracking-[0.24em] text-muted-foreground">
-            Free credits wheel · up to 2,000
-          </span>
-        </button>
-        <SpinWheel
-          v-if="wheelOpen"
-          :out-of-credits="(playerStore.profile?.creditBalance ?? 0) < BET_STEPS[0]"
-          @close="wheelOpen = false"
-        />
-
-        <p role="status" class="mt-5 min-h-5 font-arcade text-[8px] uppercase tracking-[0.28em] text-lime">
-          {{ claimed ? `Insert coin — ${claimed.toLocaleString()} credits loaded` : '' }}
-        </p>
         <p v-if="walletStore.errorMessage" class="mt-2 font-arcade text-[8px] uppercase tracking-[0.28em] text-danger">
           {{ walletStore.errorMessage }}
         </p>
@@ -109,7 +86,7 @@ async function handleTopUp() {
       </NeonPanel>
 
       <p class="mt-6 text-xs uppercase tracking-[0.25em] text-muted-foreground">
-        The button above is a free test top-up. Real purchases use the panel below.
+        Free credits come from the wheel above.<template v-if="publicSettings.settings?.paymentsEnabled"> To buy more, use the panel below.</template>
       </p>
 
       <NeonPanel v-if="purchaseStatus" class="mt-6" :accent="purchaseStatus === 'success' ? 'lime' : 'ember'">
@@ -127,7 +104,8 @@ async function handleTopUp() {
         </p>
       </NeonPanel>
 
-      <BuyCreditsPanel class="mt-6 text-left" />
+      <!-- Only while an admin has payments switched on (the server refuses checkouts otherwise too). -->
+      <BuyCreditsPanel v-if="publicSettings.settings?.paymentsEnabled" id="buy-credits" class="mt-6 scroll-mt-4 text-left" />
 
       <NeonPanel class="mt-6 text-left" title="Transaction History" accent="blue">
         <p v-if="walletStore.transactions.length === 0" class="text-sm text-muted-foreground">No transactions yet.</p>

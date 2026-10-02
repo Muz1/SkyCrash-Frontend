@@ -46,7 +46,7 @@ onMounted(() => {
   <AdminShell
     help-text="Search, filter and sort every player account. Promote/demote grants or removes admin access (managers only; see the Admin Roles tab). Block immediately prevents that player from logging in or playing, and disconnects any live session — unblock restores access. Adjust changes a player's credit balance directly, for support or correction purposes, and is logged."
   >
-    <AdminPage title="Player Management" eyebrow="Accounts" subtitle="Search, filter and manage every player account.">
+    <AdminPage :page-export="false" title="Player Management" eyebrow="Accounts" subtitle="Search, filter and manage every player account.">
       <template #actions>
         <ExportPdfButton :build="buildReport" />
       </template>

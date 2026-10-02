@@ -27,21 +27,31 @@ const props = withDefaults(
 const showTable = ref(false)
 const active = ref<number | null>(null)
 
-const max = computed(() => Math.max(0, ...props.series.flatMap((s) => s.values)))
-const ceiling = computed(() => {
-  if (max.value <= 0) return 1
-  const exp = 10 ** Math.floor(Math.log10(max.value))
-  const n = max.value / exp
-  const nice = n <= 1 ? 1 : n <= 2 ? 2 : n <= 2.5 ? 2.5 : n <= 5 ? 5 : 10
-  return nice * exp
-})
-const ticks = computed(() => [0, 0.5, 1].map((k) => ceiling.value * k))
+const all = computed(() => props.series.flatMap((s) => s.values))
+const max = computed(() => Math.max(0, ...all.value))
+const min = computed(() => Math.min(0, ...all.value))
+
+// A "nice" round number at or above v, so gridlines land on round values.
+function nice(v: number) {
+  if (v <= 0) return 0
+  const exp = 10 ** Math.floor(Math.log10(v))
+  const n = v / exp
+  return (n <= 1 ? 1 : n <= 2 ? 2 : n <= 2.5 ? 2.5 : n <= 5 ? 5 : 10) * exp
+}
+// Values below zero (e.g. a loss-making day) extend the axis down past a zero line.
+const ceiling = computed(() => nice(max.value) || (min.value < 0 ? 0 : 1))
+const floor = computed(() => -nice(-min.value))
+const span = computed(() => ceiling.value - floor.value || 1)
+const ticks = computed(() =>
+  floor.value < 0 ? [floor.value, 0, ceiling.value].filter((t, i, a) => a.indexOf(t) === i) : [0, ceiling.value / 2, ceiling.value],
+)
 const n = computed(() => props.dates.length)
-const isEmpty = computed(() => max.value === 0)
+const isEmpty = computed(() => all.value.every((v) => v === 0))
 
 // x/y in a 0–100 space; the SVG stretches, strokes don't (non-scaling-stroke).
 const x = (i: number) => (n.value <= 1 ? 50 : (i / (n.value - 1)) * 100)
-const y = (v: number) => 100 - (v / ceiling.value) * 100
+const y = (v: number) => 100 - ((v - floor.value) / span.value) * 100
+const tickPos = (t: number) => `${((t - floor.value) / span.value) * 100}%`
 
 const paths = computed(() =>
   props.series.map((s, si) => ({
@@ -101,7 +111,7 @@ const xLabels = computed(() => {
     <template v-else>
       <div class="adm-trend" :style="{ height: `${height}px` }">
         <div class="adm-vchart-grid" aria-hidden="true">
-          <div v-for="t in ticks" :key="t" class="adm-vchart-tick" :style="{ bottom: `${(t / ceiling) * 100}%` }">
+          <div v-for="t in ticks" :key="t" class="adm-vchart-tick" :style="{ bottom: tickPos(t) }">
             <span>{{ format(t) }}</span>
           </div>
         </div>

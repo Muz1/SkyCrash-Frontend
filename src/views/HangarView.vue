@@ -114,6 +114,10 @@ function rarityBadgeClass(rarity: Rarity) {
       <p class="mt-1 font-arcade text-[8px] uppercase tracking-[0.34em] text-muted-foreground">
         Loadout · Aircraft &amp; Skies
       </p>
+      <p class="mt-2 max-w-2xl text-base text-foreground/90">
+        Choose the plane you fly and the sky you fly in. Tap any card to preview it, then equip it.
+        Your lobby-mates see your plane in their game. All {{ CRAFTS.length }} planes and {{ SKY_SKINS.length }} skies are unlocked.
+      </p>
 
       <!-- Always-visible summary of the equipped loadout. -->
       <section
@@ -217,6 +221,8 @@ function rarityBadgeClass(rarity: Rarity) {
             <p :class="cn('font-arcade text-sm', craftEquipped ? 'text-lime text-glow-lime' : 'text-ember text-glow-ember')">
               {{ craftEquipped ? 'Equipped' : 'Trying On' }}
             </p>
+            <p class="mt-3 font-arcade text-[8px] uppercase tracking-[0.3em] text-muted-foreground">Requirement</p>
+            <p class="text-sm text-foreground">None. Unlocked for every pilot.</p>
 
             <div class="mt-6 flex flex-col gap-3">
               <p
@@ -292,7 +298,7 @@ function rarityBadgeClass(rarity: Rarity) {
                   Equipped
                 </span>
                 <span v-else class="mt-1 block text-xs leading-snug text-muted-foreground">
-                  {{ previewCraft === c.id ? 'On the pad' : 'Try on' }}
+                  Unlocked · {{ previewCraft === c.id ? 'On the pad' : 'Tap to try on' }}
                 </span>
               </span>
               <span

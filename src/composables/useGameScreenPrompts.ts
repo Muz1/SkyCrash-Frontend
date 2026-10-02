@@ -21,10 +21,10 @@ function writeKey(key: string, value: string) {
 }
 
 /**
- * The game screen's two pop-ups that come before playing:
- *  - Today's Challenges briefing, once per UTC day per player.
+ * The game screen's two prompts:
+ *  - Today's Challenges notification bar along the top, until dismissed for the day.
  *  - The free-credits wheel, whenever the balance can't cover the smallest bet.
- * The wheel wins if both apply (you can't play without credits anyway).
+ * The bar never blocks play; the out-of-credits notice does (it pauses the feedback prompt).
  */
 export function useGameScreenPrompts() {
   const challengeStore = useChallengeStore()
@@ -41,7 +41,8 @@ export function useGameScreenPrompts() {
   const outOfCredits = computed(
     () => !!playerStore.profile && !playerStore.profile.isAdmin && playerStore.profile.creditBalance < minBet,
   )
-  const anyOpen = computed(() => briefingOpen.value || wheelOpen.value)
+  // The challenge bar doesn't block anything; only the out-of-credits notice does.
+  const anyOpen = computed(() => wheelOpen.value)
 
   const briefingKey = () => `skycrash_daily_brief_${authStore.playerId ?? 'anon'}`
   const todayUtc = () => new Date().toISOString().slice(0, 10)
@@ -49,13 +50,11 @@ export function useGameScreenPrompts() {
   function maybeOpenWheel() {
     // A bet still in the air might pay out, so wait for it to resolve.
     if (outOfCredits.value && !wheelDismissed.value && gameStore.myBetStatus !== 'Placed') {
-      briefingOpen.value = false
       wheelOpen.value = true
     }
   }
 
   function openWheel() {
-    briefingOpen.value = false
     wheelOpen.value = true
   }
 
@@ -80,14 +79,13 @@ export function useGameScreenPrompts() {
     if (playerStore.profile?.isAdmin) return
 
     maybeOpenWheel()
-    if (wheelOpen.value) return
 
     try {
       await challengeStore.fetchTodayChallenges()
     } catch {
       return
     }
-    if (readKey(briefingKey()) !== todayUtc() && challengeStore.challenges.length > 0 && !wheelOpen.value) {
+    if (readKey(briefingKey()) !== todayUtc() && challengeStore.challenges.length > 0) {
       briefingOpen.value = true
     }
   })

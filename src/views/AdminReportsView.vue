@@ -58,7 +58,7 @@ onMounted(() => {
   <AdminShell
     help-text="Rounds Report lists every round with its outcome and betting activity, most recent first. Player Activity lets you look up one player's full bet history for support or investigation purposes. Both are read-only."
   >
-    <AdminPage title="Reports" eyebrow="Audit" subtitle="Round outcomes and per-player betting activity. Read-only.">
+    <AdminPage :page-export="false" title="Reports" eyebrow="Audit" subtitle="Round outcomes and per-player betting activity. Read-only.">
       <template #actions>
         <ExportPdfButton :build="buildReport" />
       </template>

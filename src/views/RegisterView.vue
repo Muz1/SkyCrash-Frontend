@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/AuthStore'
 import * as authService from '@/services/AuthService'
 import ArcadeButton from '@/components/sky/ArcadeButton.vue'
@@ -8,15 +8,18 @@ import ArcadeField from '@/components/sky/ArcadeField.vue'
 import CRTOverlay from '@/components/sky/CRTOverlay.vue'
 import SkyEnvironment from '@/components/sky/SkyEnvironment.vue'
 import Wordmark from '@/components/sky/Wordmark.vue'
+import TermsContent from '@/components/sky/TermsContent.vue'
 
 const authStore = useAuthStore()
 const router = useRouter()
+const route = useRoute()
 
 const username = ref('')
 const email = ref('')
 const password = ref('')
 const confirmPassword = ref('')
 const agreedToTerms = ref(false)
+const showTerms = ref(false)
 const errorMessage = ref('')
 const isSubmitting = ref(false)
 
@@ -59,10 +62,17 @@ async function handleSubmit() {
     return
   }
 
+  if (!agreedToTerms.value) {
+    errorMessage.value = 'Please agree to the Terms of Service to create your account.'
+    return
+  }
+
   isSubmitting.value = true
   try {
-    await authStore.register({ username: username.value, email: email.value, password: password.value })
-    router.push('/')
+    await authStore.register({ username: username.value, email: email.value, password: password.value, acceptTerms: true })
+    // Back to where they came from (e.g. an admin invite link), else the landing page.
+    const redirect = typeof route.query.redirect === 'string' && route.query.redirect.startsWith('/') ? route.query.redirect : '/'
+    router.push(redirect)
   } catch (err: unknown) {
     type AxiosLikeError = { response?: { data?: unknown } }
     const data = (err as AxiosLikeError).response?.data as unknown
@@ -129,10 +139,19 @@ async function handleSubmit() {
           <ArcadeField v-model="confirmPassword" label="Confirm Password" type="password" placeholder="••••••••" required />
         </div>
 
-        <label class="mt-5 flex items-center gap-2 text-xs text-muted-foreground">
-          <input v-model="agreedToTerms" type="checkbox" required class="accent-[var(--neon-lime)]" />I agree to the flight
-          terms
-        </label>
+        <div class="mt-5 border-2 border-lime/50 bg-lime/5 p-3">
+          <label class="flex cursor-pointer items-start gap-3 text-base text-foreground">
+            <input v-model="agreedToTerms" type="checkbox" required class="mt-1 h-5 w-5 shrink-0 accent-[var(--neon-lime)]" />
+            <span>I agree to the Terms of Service</span>
+          </label>
+          <button
+            type="button"
+            class="mt-1.5 pl-8 text-sm font-semibold text-electric underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-electric"
+            @click="showTerms = true"
+          >
+            Read the Terms of Service
+          </button>
+        </div>
 
         <p v-if="errorMessage" role="alert" class="mt-4 font-arcade text-[8px] uppercase leading-relaxed text-danger">
           {{ errorMessage }}
@@ -147,6 +166,19 @@ async function handleSubmit() {
           <RouterLink to="/login" class="text-electric hover:text-glow-blue">Login</RouterLink>
         </p>
       </form>
+    </div>
+
+    <div v-if="showTerms" class="fixed inset-0 z-[90] grid place-items-center bg-void/80 p-4 backdrop-blur-sm" @click.self="showTerms = false">
+      <section role="dialog" aria-modal="true" aria-labelledby="terms-title" class="neon-panel clip-hud flex max-h-[85dvh] w-full max-w-xl flex-col p-5">
+        <h2 id="terms-title" class="font-display text-xl font-black uppercase tracking-[0.14em] text-foreground">Terms of Service</h2>
+        <div class="mt-3 min-h-0 flex-1 overflow-y-auto border-2 border-violet/40 bg-void/60 p-4" tabindex="0">
+          <TermsContent />
+        </div>
+        <div class="mt-4 flex flex-wrap justify-end gap-2">
+          <ArcadeButton type="button" size="md" variant="ghost" @click="showTerms = false">Close</ArcadeButton>
+          <ArcadeButton type="button" size="md" variant="cash" @click="((agreedToTerms = true), (showTerms = false))">I agree</ArcadeButton>
+        </div>
+      </section>
     </div>
   </div>
 </template>
