@@ -1,13 +1,15 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import Aircraft from './Aircraft.vue'
-import { LOBBY_CAPACITY, type LobbyMate } from '@/lib/lobby'
+import PilotAvatar from './PilotAvatar.vue'
+import { type LobbyMate } from '@/lib/lobby'
+import { skinTint } from '@/lib/skins'
 
 /**
  * Background aircraft for the pilots sharing your lobby: each one cruises
- * across the sky in its own lane with a call-sign tag. Purely decorative
- * (the member list carries the same info), and never more planes than a
- * lobby holds.
+ * across the sky in its own lane, flying the plane they equipped, with a trail
+ * tinted by their equipped sky and an avatar + call-sign tag. Purely decorative
+ * (the member list carries the same info).
  */
 const props = defineProps<{ mates: LobbyMate[] }>()
 
@@ -35,14 +37,20 @@ const LANES: Lane[] = [
 ]
 
 const flights = computed(() =>
-  props.mates.slice(0, LOBBY_CAPACITY).map((mate, i) => ({ mate, lane: LANES[i % LANES.length]! })),
+  props.mates.map((mate, i) => {
+    const base = LANES[i % LANES.length]!
+    // Bigger admin-set lobbies reuse lanes half a loop apart so planes still don't overlap.
+    const lap = Math.floor(i / LANES.length)
+    const lane = lap === 0 ? base : { ...base, offset: base.offset + (base.duration / 2) * lap }
+    return { mate, lane, tint: skinTint(mate.skyId) }
+  }),
 )
 </script>
 
 <template>
   <div aria-hidden class="pointer-events-none absolute inset-0 overflow-hidden">
     <div
-      v-for="{ mate, lane } in flights"
+      v-for="{ mate, lane, tint } in flights"
       :key="mate.playerId"
       class="lobby-fleet-lane absolute left-0"
       :style="{
@@ -52,12 +60,21 @@ const flights = computed(() =>
         '--fleet-rest-x': lane.rest,
       }"
     >
-      <div class="flex flex-col items-center opacity-85" :style="{ animation: `ambient-bob ${lane.bob}s ease-in-out infinite` }">
-        <Aircraft :craft="mate.craftId" :size="lane.size" :idle="false" :trail-intensity="0.45" />
+      <div class="flex flex-col items-center opacity-90" :style="{ animation: `ambient-bob ${lane.bob}s ease-in-out infinite` }">
+        <!-- soft halo in the pilot's sky colour -->
+        <div class="relative">
+          <span
+            class="absolute inset-[18%] rounded-full blur-2xl"
+            :style="{ background: `color-mix(in oklab, ${tint} 38%, transparent)` }"
+          />
+          <Aircraft :craft="mate.craftId" :size="lane.size" :idle="false" :trail-intensity="0.55" :trail-color="tint" />
+        </div>
         <span
-          class="clip-hud -mt-2 max-w-[9rem] truncate border border-electric/70 bg-void/85 px-2 py-1 font-arcade text-[7px] uppercase text-foreground"
+          class="clip-hud -mt-2 flex max-w-[11rem] items-center gap-1.5 border bg-void/85 py-1 pl-1 pr-2.5"
+          :style="{ borderColor: `color-mix(in oklab, ${tint} 80%, transparent)` }"
         >
-          {{ mate.username }}
+          <PilotAvatar :username="mate.username" />
+          <span class="truncate font-arcade text-[8px] uppercase leading-none text-foreground">{{ mate.username }}</span>
         </span>
       </div>
     </div>

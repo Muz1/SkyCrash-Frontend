@@ -1,8 +1,10 @@
 import { CRAFTS, DEFAULT_CRAFT, type CraftId } from '@/lib/craft'
+import { DEFAULT_SKIN, SKY_SKINS, type SkinId } from '@/lib/skins'
 
 /**
- * Hard cap on pilots per private lobby. Enforced on the frontend only — the
- * backend's LobbyService.JoinLobbyAsync has no capacity check today.
+ * Fallback seat limit for a private lobby. The real limit is admin-configurable
+ * and comes from the server (LobbyDetails.maxPlayers / public settings), which
+ * also enforces it by rejecting joins to a full lobby with a 409.
  */
 export const LOBBY_CAPACITY = 8
 
@@ -11,20 +13,30 @@ export interface LobbyMate {
   playerId: string
   username: string
   craftId: CraftId
+  skyId: SkinId
 }
 
-/**
- * The craft a lobby member flies. Lobby payloads don't carry the equipped
- * loadout yet (it only lives in each player's localStorage), so this reads an
- * `equippedCraftId` field if the backend ever adds one and otherwise falls back
- * to the default jet.
- */
-export function craftForMember(member: object): CraftId {
-  const raw = 'equippedCraftId' in member ? (member as { equippedCraftId?: unknown }).equippedCraftId : undefined
-  const match = CRAFTS.find((c) => c.id === raw)
-  return match ? match.id : DEFAULT_CRAFT
+/** The equipped craft a lobby member flies; the default jet if unknown or never saved. */
+export function craftForMember(member: { equippedCraftId?: string | null }): CraftId {
+  return CRAFTS.find((c) => c.id === member.equippedCraftId)?.id ?? DEFAULT_CRAFT
 }
 
-export function isLobbyFull(memberCount: number) {
-  return memberCount >= LOBBY_CAPACITY
+/** The equipped sky a lobby member picked; tints their trail in the lobby. */
+export function skyForMember(member: { equippedSkyId?: string | null }): SkinId {
+  return SKY_SKINS.find((s) => s.id === member.equippedSkyId)?.id ?? DEFAULT_SKIN
+}
+
+export function isLobbyFull(memberCount: number, capacity = LOBBY_CAPACITY) {
+  return memberCount >= capacity
+}
+
+/** A stable colour per username for the initial-letter avatar (there are no avatar images). */
+export function avatarColour(username: string) {
+  let hash = 0
+  for (const ch of username) hash = (hash * 31 + ch.charCodeAt(0)) >>> 0
+  return `oklch(0.72 0.19 ${hash % 360})`
+}
+
+export function avatarInitial(username: string) {
+  return (username.trim()[0] ?? '?').toUpperCase()
 }

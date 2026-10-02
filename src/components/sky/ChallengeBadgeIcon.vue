@@ -23,7 +23,7 @@ const sizeClass = computed(() => ({ sm: 'h-9 w-9', md: 'h-12 w-12', lg: 'h-20 w-
 <template>
   <span
     v-if="info"
-    :class="cn('relative inline-grid shrink-0 place-items-center rounded-full border-2 bg-void/70 p-1', sizeClass, locked && 'opacity-35 grayscale', props.class)"
+    :class="cn('relative inline-grid shrink-0 place-items-center rounded-full border-2 bg-void/70 p-1', sizeClass, locked && 'opacity-60 grayscale-[70%]', props.class)"
     :style="{ borderColor: info.color, boxShadow: locked ? undefined : `0 0 12px ${info.color}66` }"
     role="img"
     :aria-label="`${info.name} badge${locked ? ' (not earned yet)' : count > 1 ? `, earned ${count} times` : ''}`"

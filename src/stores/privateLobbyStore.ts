@@ -1,24 +1,30 @@
 import { defineStore } from 'pinia'
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
+import axios from 'axios'
 import * as lobbyService from '@/services/lobbyService'
+import { usePublicSettingsStore } from '@/stores/publicSettingsStore'
 import { LOBBY_CAPACITY } from '@/lib/lobby'
-import type { LobbyDetails } from '@/types'
-
-const FULL_MESSAGE = `That lobby is full (${LOBBY_CAPACITY}/${LOBBY_CAPACITY} pilots).`
+import type { LobbyDetails, LobbyMemberInfo } from '@/types'
 
 function normalizeCode(code: string) {
   return code.trim().toUpperCase()
 }
 
 export const usePrivateLobbyStore = defineStore('privateLobby', () => {
+  const publicSettings = usePublicSettingsStore()
   const lobby = ref<LobbyDetails | null>(null)
   const isLoading = ref(false)
   const errorMessage = ref<string | null>(null)
-  /** Invite codes we already found full this session, so the join button can stay disabled for them. */
-  const fullInviteCodes = ref<string[]>([])
+  /** Invite code the server last rejected as full (409), so the join button can say so. */
+  const fullInviteCode = ref<string | null>(null)
+
+  /** Seats per lobby: the joined lobby's own limit, else the admin setting, else the built-in fallback. */
+  const capacity = computed(
+    () => lobby.value?.maxPlayers ?? publicSettings.settings?.lobbyMaxPlayers ?? LOBBY_CAPACITY,
+  )
 
   function isKnownFull(inviteCode: string) {
-    return fullInviteCodes.value.includes(normalizeCode(inviteCode))
+    return fullInviteCode.value !== null && fullInviteCode.value === normalizeCode(inviteCode)
   }
 
   async function fetchMyLobby() {
@@ -43,30 +49,17 @@ export const usePrivateLobbyStore = defineStore('privateLobby', () => {
   async function join(inviteCode: string) {
     errorMessage.value = null
     const code = normalizeCode(inviteCode)
-    if (isKnownFull(code)) {
-      errorMessage.value = FULL_MESSAGE
-      throw new Error(FULL_MESSAGE)
-    }
-
-    let joined: LobbyDetails
     try {
-      joined = await lobbyService.joinPrivateLobby(code)
+      lobby.value = await lobbyService.joinPrivateLobby(code)
+      fullInviteCode.value = null
     } catch (err) {
+      // The server enforces the seat limit: a full lobby is a 409 (so is "already in a lobby", hence the text check).
       errorMessage.value = extractMessage(err)
+      if (axios.isAxiosError(err) && err.response?.status === 409 && /full/i.test(errorMessage.value)) {
+        fullInviteCode.value = code
+      }
       throw err
     }
-
-    // The backend doesn't cap lobby size, and there's no way to peek at a lobby
-    // before joining it, so the cap is enforced here: if we'd be pilot #9, step
-    // straight back out and report the lobby as full.
-    if (joined.members.length > LOBBY_CAPACITY) {
-      await lobbyService.leavePrivateLobby().catch(() => undefined)
-      lobby.value = null
-      fullInviteCodes.value = [...fullInviteCodes.value, code]
-      errorMessage.value = FULL_MESSAGE
-      throw new Error(FULL_MESSAGE)
-    }
-    lobby.value = joined
   }
 
   async function leave() {
@@ -84,13 +77,17 @@ export const usePrivateLobbyStore = defineStore('privateLobby', () => {
   }
 
   // SignalR-driven updates — keep the member list live without a refetch.
-  function memberJoined(member: { playerId: string; username: string; displayedAchievementKey: string | null }) {
+  function memberJoined(
+    member: Pick<LobbyMemberInfo, 'playerId' | 'username' | 'displayedAchievementKey' | 'equippedCraftId' | 'equippedSkyId'>,
+  ) {
     if (!lobby.value) return
     if (lobby.value.members.some((m) => m.playerId === member.playerId)) return
     lobby.value.members.push({
       playerId: member.playerId,
       username: member.username,
       displayedAchievementKey: member.displayedAchievementKey,
+      equippedCraftId: member.equippedCraftId ?? null,
+      equippedSkyId: member.equippedSkyId ?? null,
       joinedAtUtc: new Date().toISOString(),
       isHost: false,
     })
@@ -127,6 +124,7 @@ export const usePrivateLobbyStore = defineStore('privateLobby', () => {
     lobby,
     isLoading,
     errorMessage,
+    capacity,
     isKnownFull,
     fetchMyLobby,
     create,

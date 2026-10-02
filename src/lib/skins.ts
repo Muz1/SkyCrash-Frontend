@@ -26,6 +26,8 @@ export interface SkySkin {
   blurb: string
   /** Environment mood: drives ambient particles and lighting. */
   mood: 'ground' | 'high' | 'space'
+  /** Signature colour of the sky, used to tint a pilot's trail in the lobby. */
+  tint: string
 }
 
 export const SKY_SKINS: SkySkin[] = [
@@ -35,6 +37,7 @@ export const SKY_SKINS: SkySkin[] = [
     src: sunsetRunway,
     blurb: 'Where every flight begins.',
     mood: 'ground',
+    tint: 'var(--neon-orange)',
   },
   {
     id: 'cloud-city',
@@ -42,6 +45,7 @@ export const SKY_SKINS: SkySkin[] = [
     src: cloudCity,
     blurb: 'Above the weather, below the stars.',
     mood: 'high',
+    tint: 'var(--neon-blue)',
   },
   {
     id: 'cape-town',
@@ -49,6 +53,7 @@ export const SKY_SKINS: SkySkin[] = [
     src: capeTown,
     blurb: 'Table Mountain, the Atlantic and a burning horizon.',
     mood: 'ground',
+    tint: 'var(--neon-magenta)',
   },
   {
     id: 'johannesburg',
@@ -56,6 +61,7 @@ export const SKY_SKINS: SkySkin[] = [
     src: johannesburg,
     blurb: 'Gold-hour towers and highways full of light.',
     mood: 'ground',
+    tint: 'oklch(0.84 0.17 85)',
   },
   {
     id: 'durban',
@@ -63,6 +69,7 @@ export const SKY_SKINS: SkySkin[] = [
     src: durban,
     blurb: 'Warm Indian Ocean air over the beachfront.',
     mood: 'ground',
+    tint: 'oklch(0.8 0.15 190)',
   },
   {
     id: 'midnight',
@@ -70,6 +77,7 @@ export const SKY_SKINS: SkySkin[] = [
     src: midnight,
     blurb: 'Moonlight on the cloud deck.',
     mood: 'high',
+    tint: 'var(--neon-violet)',
   },
   {
     id: 'deep-space',
@@ -77,6 +85,7 @@ export const SKY_SKINS: SkySkin[] = [
     src: deepSpace,
     blurb: 'Nothing left but the void.',
     mood: 'space',
+    tint: 'oklch(0.7 0.2 280)',
   },
   {
     id: 'taking-off',
@@ -84,11 +93,16 @@ export const SKY_SKINS: SkySkin[] = [
     src: sunsetRunway,
     blurb: 'Runway to orbit as the multiplier climbs.',
     mood: 'ground',
+    tint: 'var(--neon-lime)',
   },
 ]
 
 export function skinSrc(id: SkinId) {
   return SKY_SKINS.find((s) => s.id === id)?.src ?? sunsetRunway
+}
+
+export function skinTint(id: SkinId) {
+  return SKY_SKINS.find((s) => s.id === id)?.tint ?? 'var(--neon-orange)'
 }
 
 export function skinMood(id: SkinId) {

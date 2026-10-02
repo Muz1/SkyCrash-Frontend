@@ -17,6 +17,8 @@ const props = withDefaults(
     trailIntensity?: number
     crashing?: boolean
     idle?: boolean
+    /** Overrides the craft's own trail colour (e.g. a lobby-mate's sky tint). */
+    trailColor?: string
     class?: string
   }>(),
   {
@@ -29,6 +31,7 @@ const props = withDefaults(
 )
 
 const c = computed(() => getCraft(props.craft))
+const trailColour = computed(() => props.trailColor ?? c.value.trail)
 const trailLen = computed(() => props.size * (0.9 + props.trailIntensity * 0.9))
 const particles = Array.from({ length: 10 }, (_, i) => i)
 </script>
@@ -47,7 +50,7 @@ const particles = Array.from({ length: 10 }, (_, i) => i)
             width: `${trailLen}px`,
             height: `${Math.max(4, size * 0.055)}px`,
             transform: 'rotate(180deg) translateY(-50%)',
-            background: `linear-gradient(90deg, transparent, color-mix(in oklab, ${c.trail} 70%, transparent) 55%, color-mix(in oklab, ${c.trail} 95%, transparent))`,
+            background: `linear-gradient(90deg, transparent, color-mix(in oklab, ${trailColour} 70%, transparent) 55%, color-mix(in oklab, ${trailColour} 95%, transparent))`,
             opacity: 0.28 + trailIntensity * 0.5,
             animation: 'trail-pulse 900ms ease-in-out infinite',
           }"
@@ -59,7 +62,7 @@ const particles = Array.from({ length: 10 }, (_, i) => i)
           :style="{
             width: `${Math.max(3, size * 0.035)}px`,
             height: `${Math.max(3, size * 0.035)}px`,
-            background: i % 3 === 0 ? 'oklch(0.98 0.05 90)' : c.trail,
+            background: i % 3 === 0 ? 'oklch(0.98 0.05 90)' : trailColour,
             opacity: 0,
             '--tx': `${-trailLen * (0.35 + (i % 5) * 0.16)}px`,
             '--ty': `${(i % 2 ? 1 : -1) * size * 0.035 * (1 + (i % 3))}px`,

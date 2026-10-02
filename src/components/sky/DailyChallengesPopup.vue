@@ -79,7 +79,8 @@ onBeforeUnmount(() => document.removeEventListener('keydown', onKeyDown))
           class="flex items-center gap-4 border-2 p-3"
           :class="c.isCompleted ? 'border-lime/60 bg-lime/10' : 'border-violet/50 bg-[oklch(0.15_0.05_285)]'"
         >
-          <ChallengeBadgeIcon :badge-key="c.badgeKey" size="lg" :locked="!c.isCompleted" />
+          <!-- full colour here: it is the prize on offer, not a locked slot -->
+          <ChallengeBadgeIcon :badge-key="c.badgeKey" size="lg" />
           <div class="min-w-0 flex-1">
             <p class="font-arcade text-[9px] uppercase tracking-wider text-foreground/75">{{ c.track }}</p>
             <p class="mt-1 text-base font-bold leading-snug text-foreground">{{ c.description }}</p>

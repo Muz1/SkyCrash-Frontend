@@ -38,6 +38,9 @@ export interface PlayerProfile {
   /** Admins with manager status can grant/revoke admin access and appoint managers. */
   isManager?: boolean
   displayedAchievementKey: string | null
+  /** Hangar loadout saved server-side; null until the player first equips (see lib/craft.ts, lib/skins.ts). */
+  equippedCraftId?: string | null
+  equippedSkyId?: string | null
 }
 
 export interface UpdateProfilePayload {
@@ -62,6 +65,8 @@ export interface OnlinePlayer {
   playerId: string
   username: string
   displayedAchievementKey: string | null
+  equippedCraftId?: string | null
+  equippedSkyId?: string | null
 }
 
 export interface WalletBalance {
@@ -298,6 +303,8 @@ export interface LobbyMemberInfo {
   displayedAchievementKey: string | null
   joinedAtUtc: string
   isHost: boolean
+  equippedCraftId?: string | null
+  equippedSkyId?: string | null
 }
 
 export interface LobbyDetails {
@@ -307,5 +314,14 @@ export interface LobbyDetails {
   hostPlayerId: string
   hostUsername: string
   members: LobbyMemberInfo[]
+  /** Admin-configurable seat limit. Older servers omit it (see LOBBY_CAPACITY). */
+  maxPlayers?: number
+}
+
+/** GET /api/settings/public: admin-set values every player (signed in or not) can read. */
+export interface PublicSettings {
+  lobbyMaxPlayers: number
+  /** Default volumes (0–100) for players who never changed their own. */
+  audio: { music: number; plane: number; game: number }
 }
 

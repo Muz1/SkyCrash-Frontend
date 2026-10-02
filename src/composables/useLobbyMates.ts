@@ -2,7 +2,7 @@ import { computed, onMounted } from 'vue'
 import { useAuthStore } from '@/stores/AuthStore'
 import { useLobbyStore } from '@/stores/lobbyStore'
 import { usePrivateLobbyStore } from '@/stores/privateLobbyStore'
-import { LOBBY_CAPACITY, craftForMember, type LobbyMate } from '@/lib/lobby'
+import { craftForMember, skyForMember, type LobbyMate } from '@/lib/lobby'
 
 /**
  * The other pilots sharing the player's lobby, for the background fleet.
@@ -26,8 +26,8 @@ export function useLobbyMates(options: { fetch?: boolean } = {}) {
     const source = privateLobbyStore.lobby?.members ?? lobbyStore.onlinePlayers
     return source
       .filter((p) => p.playerId !== authStore.playerId)
-      .slice(0, LOBBY_CAPACITY - 1)
-      .map((p) => ({ playerId: p.playerId, username: p.username, craftId: craftForMember(p) }))
+      .slice(0, Math.max(0, privateLobbyStore.capacity - 1))
+      .map((p) => ({ playerId: p.playerId, username: p.username, craftId: craftForMember(p), skyId: skyForMember(p) }))
   })
 
   return { mates }

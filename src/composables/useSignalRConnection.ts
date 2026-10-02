@@ -11,6 +11,7 @@ import { useAchievementStore } from '@/stores/achievementStore'
 import { useChallengeStore } from '@/stores/challengeStore'
 import { badgeFor } from '@/lib/achievements'
 import { challengeBadgeFor } from '@/lib/challengeBadges'
+import type { OnlinePlayer } from '@/types'
 
 
 type RoundSnapshot = {
@@ -79,6 +80,8 @@ type LobbyMemberJoinedPayload = {
   playerId: string
   username: string
   displayedAchievementKey: string | null
+  equippedCraftId?: string | null
+  equippedSkyId?: string | null
 }
 
 type LobbyMemberLeftPayload = {
@@ -121,7 +124,7 @@ export function useSignalRConnection() {
     const connection = getConnection()
 
     if (connection.state === 'Disconnected') {
-      connection.on('PlayerOnline', (player: { playerId: string; username: string; displayedAchievementKey: string | null }) => {
+      connection.on('PlayerOnline', (player: OnlinePlayer) => {
         lobbyStore.addOnlinePlayer(player)
       })
 

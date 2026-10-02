@@ -4,6 +4,7 @@ import { useHangarStore } from '@/stores/hangarStore'
 import { useLobbyMates } from '@/composables/useLobbyMates'
 import { CRAFTS, RARITY_STYLE, getCraft, type CraftId, type Rarity } from '@/lib/craft'
 import { SKY_SKINS, type SkinId } from '@/lib/skins'
+import { Check } from '@lucide/vue'
 import { cn } from '@/lib/cn'
 import SkyEnvironment from '@/components/sky/SkyEnvironment.vue'
 import Ambient from '@/components/sky/Ambient.vue'
@@ -24,12 +25,30 @@ const tab = ref<Tab>('aircraft')
 const previewCraft = ref<CraftId>(hangarStore.craftId)
 const outgoing = ref<CraftId | null>(null)
 const enterKey = ref(0)
-const previewSky = ref<SkinId>(hangarStore.skinId === 'taking-off' ? 'sunset-runway' : hangarStore.skinId)
+// The preview bay always opens on what's equipped, so returning here shows the current loadout.
+const previewSky = ref<SkinId>(hangarStore.skinId)
 
 const active = computed(() => getCraft(previewCraft.value))
 const activeSky = computed(() => SKY_SKINS.find((s) => s.id === previewSky.value) ?? SKY_SKINS[0]!)
 const craftEquipped = computed(() => hangarStore.craftId === previewCraft.value)
 const skyEquipped = computed(() => hangarStore.skinId === previewSky.value)
+const equippedCraft = computed(() => getCraft(hangarStore.craftId))
+const equippedSky = computed(() => SKY_SKINS.find((s) => s.id === hangarStore.skinId) ?? SKY_SKINS[0]!)
+
+// The saved loadout can arrive from the server after the page opens: follow it
+// unless the player is already trying something else on.
+watch(
+  () => hangarStore.craftId,
+  (now, before) => {
+    if (previewCraft.value === before) previewCraft.value = now
+  },
+)
+watch(
+  () => hangarStore.skinId,
+  (now, before) => {
+    if (previewSky.value === before) previewSky.value = now
+  },
+)
 
 function tryOn(id: CraftId) {
   if (id === previewCraft.value) return
@@ -95,6 +114,38 @@ function rarityBadgeClass(rarity: Rarity) {
       <p class="mt-1 font-arcade text-[8px] uppercase tracking-[0.34em] text-muted-foreground">
         Loadout · Aircraft &amp; Skies
       </p>
+
+      <!-- Always-visible summary of the equipped loadout. -->
+      <section
+        aria-label="Equipped loadout"
+        class="clip-hud mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 border-2 border-lime/80 bg-void/75 px-3 py-2 [box-shadow:inset_0_0_18px_color-mix(in_oklab,var(--neon-lime)_16%,transparent)]"
+      >
+        <span class="flex items-center gap-1.5 font-arcade text-[9px] uppercase tracking-[0.2em] text-lime text-glow-lime">
+          <Check class="h-4 w-4" aria-hidden="true" /> Equipped
+        </span>
+        <span class="flex items-center gap-2">
+          <img
+            :src="equippedCraft.src"
+            alt=""
+            width="1024"
+            height="1024"
+            class="h-8 w-8 object-contain"
+            :style="{ transform: `rotate(${equippedCraft.rotate}deg)` }"
+          />
+          <span class="text-sm font-bold uppercase tracking-[0.12em] text-foreground">
+            <span class="sr-only">Plane: </span>{{ equippedCraft.name }}
+          </span>
+        </span>
+        <span class="flex items-center gap-2">
+          <img :src="equippedSky.src" alt="" width="1920" height="1088" class="h-6 w-10 border border-lime/60 object-cover" />
+          <span class="text-sm font-bold uppercase tracking-[0.12em] text-foreground">
+            <span class="sr-only">Sky: </span>{{ equippedSky.name }}
+          </span>
+        </span>
+        <span v-if="!hangarStore.savedToServer" class="text-xs text-muted-foreground sm:ml-auto">
+          Saved on this device · will sync to your pilot profile
+        </span>
+      </section>
 
       <div class="mt-5 flex gap-2">
         <button
@@ -162,14 +213,21 @@ function rarityBadgeClass(rarity: Rarity) {
             </div>
             <p class="mt-4 text-sm leading-relaxed text-muted-foreground">{{ active.blurb }}</p>
 
-            <p class="mt-5 font-arcade text-[7px] uppercase tracking-[0.3em] text-muted-foreground">Status</p>
+            <p class="mt-5 font-arcade text-[8px] uppercase tracking-[0.3em] text-muted-foreground">Status</p>
             <p :class="cn('font-arcade text-sm', craftEquipped ? 'text-lime text-glow-lime' : 'text-ember text-glow-ember')">
               {{ craftEquipped ? 'Equipped' : 'Trying On' }}
             </p>
 
             <div class="mt-6 flex flex-col gap-3">
-              <ArcadeButton size="lg" variant="primary" :disabled="craftEquipped" @click="hangarStore.setCraft(previewCraft)">
-                {{ craftEquipped ? 'Equipped' : 'Equip Aircraft' }}
+              <p
+                v-if="craftEquipped"
+                role="status"
+                class="clip-hud flex items-center justify-center gap-2 border-2 border-lime bg-lime/15 px-8 py-4 font-display text-base font-black uppercase tracking-[0.14em] text-lime [box-shadow:var(--glow-lime)] sm:text-lg"
+              >
+                <Check class="h-5 w-5" aria-hidden="true" /> Equipped
+              </p>
+              <ArcadeButton v-else size="lg" variant="primary" @click="hangarStore.setCraft(previewCraft)">
+                Equip Aircraft
               </ArcadeButton>
               <RouterLink to="/game">
                 <ArcadeButton size="sm" variant="blue" class="w-full">To The Runway</ArcadeButton>
@@ -180,14 +238,21 @@ function rarityBadgeClass(rarity: Rarity) {
             <p class="font-display text-2xl font-black uppercase tracking-[0.2em] text-foreground">{{ activeSky.name }}</p>
             <p class="mt-4 text-sm leading-relaxed text-muted-foreground">{{ activeSky.blurb }}</p>
 
-            <p class="mt-5 font-arcade text-[7px] uppercase tracking-[0.3em] text-muted-foreground">Status</p>
+            <p class="mt-5 font-arcade text-[8px] uppercase tracking-[0.3em] text-muted-foreground">Status</p>
             <p :class="cn('font-arcade text-sm', skyEquipped ? 'text-lime text-glow-lime' : 'text-electric text-glow-blue')">
               {{ skyEquipped ? 'Equipped' : 'Previewing' }}
             </p>
 
             <div class="mt-6 flex flex-col gap-3">
-              <ArcadeButton size="lg" variant="primary" :disabled="skyEquipped" @click="hangarStore.setSkin(previewSky)">
-                {{ skyEquipped ? 'Equipped' : 'Equip Sky' }}
+              <p
+                v-if="skyEquipped"
+                role="status"
+                class="clip-hud flex items-center justify-center gap-2 border-2 border-lime bg-lime/15 px-8 py-4 font-display text-base font-black uppercase tracking-[0.14em] text-lime [box-shadow:var(--glow-lime)] sm:text-lg"
+              >
+                <Check class="h-5 w-5" aria-hidden="true" /> Equipped
+              </p>
+              <ArcadeButton v-else size="lg" variant="primary" @click="hangarStore.setSkin(previewSky)">
+                Equip Sky
               </ArcadeButton>
               <RouterLink to="/game">
                 <ArcadeButton size="sm" variant="blue" class="w-full">To The Runway</ArcadeButton>
@@ -202,23 +267,40 @@ function rarityBadgeClass(rarity: Rarity) {
           <li v-for="c in CRAFTS" :key="c.id">
             <button
               type="button"
+              :aria-pressed="previewCraft === c.id"
+              :aria-label="`${c.name}, ${c.rarity}${hangarStore.craftId === c.id ? ', equipped' : ''}`"
               :class="
                 cn(
-                  'clip-hud flex w-full items-center gap-3 border-2 bg-void/60 p-3 text-left transition-all duration-150 hover:-translate-y-0.5',
-                  previewCraft === c.id
-                    ? cn(RARITY_STYLE[c.rarity].border, RARITY_STYLE[c.rarity].glow)
-                    : 'border-violet/40 hover:border-electric',
+                  'clip-hud relative flex w-full items-center gap-3 border-2 bg-void/60 p-3 text-left transition-all duration-150 hover:-translate-y-0.5',
+                  hangarStore.craftId === c.id
+                    ? 'border-lime bg-lime/10 [box-shadow:var(--glow-lime)]'
+                    : previewCraft === c.id
+                      ? cn(RARITY_STYLE[c.rarity].border, RARITY_STYLE[c.rarity].glow, 'border-dashed')
+                      : 'border-violet/40 hover:border-electric',
                 )
               "
               @click="tryOn(c.id)"
             >
               <img :src="c.src" alt="" width="1024" height="1024" loading="lazy" class="h-14 w-14 shrink-0 object-contain" :style="{ transform: `rotate(${c.rotate}deg)` }" />
-              <span class="min-w-0 flex-1">
-                <span class="block font-arcade text-[8px] uppercase text-foreground">{{ c.name }}</span>
-                <span :class="cn('mt-1 block font-arcade text-[6px] uppercase', RARITY_STYLE[c.rarity].text)">{{ c.rarity }}</span>
-                <span class="mt-1 block text-[11px] leading-snug text-muted-foreground">
-                  {{ hangarStore.craftId === c.id ? 'Equipped' : previewCraft === c.id ? 'On the pad' : 'Try on' }}
+              <span class="min-w-0 flex-1 pr-6">
+                <span class="block font-arcade text-[9px] uppercase leading-snug text-foreground">{{ c.name }}</span>
+                <span :class="cn('mt-1 block font-arcade text-[7px] uppercase', RARITY_STYLE[c.rarity].text)">{{ c.rarity }}</span>
+                <span
+                  v-if="hangarStore.craftId === c.id"
+                  class="mt-1.5 inline-flex items-center gap-1 bg-lime px-1.5 py-1 font-arcade text-[8px] uppercase leading-none text-void"
+                >
+                  Equipped
                 </span>
+                <span v-else class="mt-1 block text-xs leading-snug text-muted-foreground">
+                  {{ previewCraft === c.id ? 'On the pad' : 'Try on' }}
+                </span>
+              </span>
+              <span
+                v-if="hangarStore.craftId === c.id"
+                aria-hidden="true"
+                class="absolute right-2 top-2 grid h-6 w-6 place-items-center rounded-full bg-lime text-void [box-shadow:var(--glow-lime)]"
+              >
+                <Check class="h-4 w-4" />
               </span>
             </button>
           </li>
@@ -227,34 +309,75 @@ function rarityBadgeClass(rarity: Rarity) {
           <li v-for="s in SKY_SKINS.filter((s) => s.id !== 'taking-off')" :key="s.id">
             <button
               type="button"
+              :aria-pressed="previewSky === s.id"
+              :aria-label="`${s.name}${hangarStore.skinId === s.id ? ', equipped' : ''}`"
               :class="
                 cn(
-                  'clip-hud w-full overflow-hidden border-2 text-left transition-all duration-150 hover:-translate-y-0.5',
-                  previewSky === s.id ? 'border-lime [box-shadow:var(--glow-lime)]' : 'border-violet/40 hover:border-magenta',
+                  'clip-hud relative w-full overflow-hidden border-2 text-left transition-all duration-150 hover:-translate-y-0.5',
+                  hangarStore.skinId === s.id
+                    ? 'border-lime [box-shadow:var(--glow-lime)]'
+                    : previewSky === s.id
+                      ? 'border-dashed border-electric [box-shadow:var(--glow-blue)]'
+                      : 'border-violet/40 hover:border-magenta',
                 )
               "
               @click="previewSky = s.id"
             >
               <img :src="s.src" alt="" width="1920" height="1088" loading="lazy" class="h-20 w-full object-cover" />
-              <span class="block px-2 py-2 font-arcade text-[7px] uppercase text-foreground">
+              <span
+                v-if="hangarStore.skinId === s.id"
+                aria-hidden="true"
+                class="absolute right-2 top-2 grid h-6 w-6 place-items-center rounded-full bg-lime text-void [box-shadow:var(--glow-lime)]"
+              >
+                <Check class="h-4 w-4" />
+              </span>
+              <span
+                :class="
+                  cn(
+                    'flex items-center justify-between gap-1 px-2 py-2 font-arcade text-[8px] uppercase leading-snug text-foreground',
+                    hangarStore.skinId === s.id && 'bg-lime/15',
+                  )
+                "
+              >
                 {{ s.name }}
-                <span v-if="hangarStore.skinId === s.id" class="ml-1 text-lime">·EQ</span>
+                <span v-if="hangarStore.skinId === s.id" class="shrink-0 bg-lime px-1.5 py-1 text-[7px] leading-none text-void">
+                  Equipped
+                </span>
               </span>
             </button>
           </li>
           <li>
             <button
               type="button"
+              :aria-pressed="previewSky === 'taking-off'"
+              :aria-label="`Taking Off${hangarStore.skinId === 'taking-off' ? ', equipped' : ''}`"
               :class="
                 cn(
-                  'clip-hud h-full w-full border-2 p-3 text-left transition-all duration-150 hover:-translate-y-0.5',
-                  previewSky === 'taking-off' ? 'border-ember [box-shadow:var(--glow-ember)]' : 'border-violet/40 hover:border-ember',
+                  'clip-hud relative h-full w-full border-2 p-3 text-left transition-all duration-150 hover:-translate-y-0.5',
+                  hangarStore.skinId === 'taking-off'
+                    ? 'border-lime bg-lime/10 [box-shadow:var(--glow-lime)]'
+                    : previewSky === 'taking-off'
+                      ? 'border-dashed border-ember [box-shadow:var(--glow-ember)]'
+                      : 'border-violet/40 hover:border-ember',
                 )
               "
               @click="previewSky = 'taking-off'"
             >
-              <span class="block font-arcade text-[8px] uppercase text-ember">Taking Off</span>
-              <span class="mt-2 block text-[11px] leading-snug text-muted-foreground">
+              <span
+                v-if="hangarStore.skinId === 'taking-off'"
+                aria-hidden="true"
+                class="absolute right-2 top-2 grid h-6 w-6 place-items-center rounded-full bg-lime text-void [box-shadow:var(--glow-lime)]"
+              >
+                <Check class="h-4 w-4" />
+              </span>
+              <span class="block font-arcade text-[9px] uppercase text-ember">Taking Off</span>
+              <span
+                v-if="hangarStore.skinId === 'taking-off'"
+                class="mt-1.5 inline-block bg-lime px-1.5 py-1 font-arcade text-[7px] uppercase leading-none text-void"
+              >
+                Equipped
+              </span>
+              <span class="mt-2 block text-xs leading-snug text-muted-foreground">
                 Dynamic: runway → cloud deck → orbit as the multiplier climbs.
               </span>
             </button>
