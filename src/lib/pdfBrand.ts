@@ -133,3 +133,18 @@ export function drawPageChrome(doc: jsPDF, title: string): void {
 export function fileStamp(): string {
   return new Date().toISOString().slice(0, 10)
 }
+
+/**
+ * Text for jsPDF's built-in fonts (WinAnsi): swaps characters they can't draw for close
+ * equivalents, e.g. the typographic minus used for negative amounts, thin/narrow spaces from
+ * number formatting and curly quotes, and drops emoji.
+ */
+export function pdfSafe(text: string): string {
+  return text
+    .replace(/−/g, '-')
+    .replace(/[ -   ]/g, ' ')
+    .replace(/[‘’]/g, "'")
+    .replace(/[“”]/g, '"')
+    .replace(/[​-‍️]|\p{Extended_Pictographic}/gu, '')
+    .trim()
+}

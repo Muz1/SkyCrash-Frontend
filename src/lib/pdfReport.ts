@@ -2,6 +2,8 @@
 // so exporting adds no backend load. jsPDF is imported lazily on first export so it never
 // ends up in the bundle that regular players download.
 
+import { pdfSafe } from './pdfBrand'
+
 export type ReportCell = string | number | null | undefined
 
 export type ReportSection =
@@ -18,7 +20,7 @@ export interface ReportDefinition {
 
 function cellText(value: ReportCell): string {
   if (value === null || value === undefined || value === '') return '—'
-  return String(value)
+  return pdfSafe(String(value))
 }
 
 // Figures (counts, money, multipliers, percentages) are right-aligned in tables.
