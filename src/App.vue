@@ -24,7 +24,9 @@ watch(
 
 // Browsers only allow audio after a user gesture, so the engine starts on the
 // first tap/click/keypress anywhere in the app.
-const GESTURES = ['pointerdown', 'keydown', 'touchend'] as const
+// Mobile browsers (iOS especially) may refuse the first attempt, so every gesture retries
+// until audio is actually running; 'click' and 'touchend' count as activation on iOS.
+const GESTURES = ['pointerdown', 'pointerup', 'click', 'keydown', 'touchend'] as const
 function unlockAudio() {
   soundEngine.unlock()
   if (soundEngine.unlocked) GESTURES.forEach((e) => window.removeEventListener(e, unlockAudio))

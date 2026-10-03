@@ -23,12 +23,45 @@ const PLAYLIST = [bgmTrack1, bgmTrack2]
 
 const MASTER_LEVEL = 0.9
 const MUSIC_LEVEL = 0.35
+/** Quietest level the music bus goes to while playing (inaudible, but not silent). */
+const SILENT_FLOOR = 0.001
 const PLANE_LEVEL = 0.8
 const GAME_LEVEL = 0.8
 
 export type AudioChannel = 'master' | 'music' | 'plane' | 'game'
 
 type AudioContextCtor = typeof AudioContext
+
+function isIOS(): boolean {
+  return /iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)
+}
+
+/** A 0.5 s silent 8 kHz mono WAV, as a data URI (no network request). */
+function silentWav(): string {
+  const samples = 4000
+  const bytes = new Uint8Array(44 + samples)
+  const view = new DataView(bytes.buffer)
+  const write = (o: number, t: string) => [...t].forEach((c, i) => view.setUint8(o + i, c.charCodeAt(0)))
+  write(0, 'RIFF'); view.setUint32(4, 36 + samples, true); write(8, 'WAVE')
+  write(12, 'fmt '); view.setUint32(16, 16, true); view.setUint16(20, 1, true); view.setUint16(22, 1, true)
+  view.setUint32(24, 8000, true); view.setUint32(28, 8000, true); view.setUint16(32, 1, true); view.setUint16(34, 8, true)
+  write(36, 'data'); view.setUint32(40, samples, true)
+  bytes.fill(128, 44)
+  let binary = ''
+  bytes.forEach((b) => (binary += String.fromCharCode(b)))
+  return `data:audio/wav;base64,${btoa(binary)}`
+}
+
+let keepAlive: HTMLAudioElement | null = null
+function startSilentKeepAlive() {
+  if (!keepAlive) {
+    keepAlive = new Audio(silentWav())
+    keepAlive.loop = true
+    keepAlive.setAttribute('playsinline', '')
+    keepAlive.setAttribute('x-webkit-airplay', 'deny')
+  }
+  if (keepAlive.paused) keepAlive.play().catch(() => undefined)
+}
 
 function audioContextCtor(): AudioContextCtor | null {
   if (typeof window === 'undefined') return null
@@ -60,22 +93,48 @@ class SoundEngine {
 
   private engine: { osc: OscillatorNode; sub: OscillatorNode; filter: BiquadFilterNode; gain: GainNode } | null = null
 
+  /**
+   * True once audio is really running (and the soundtrack, if wanted, is actually playing).
+   * Mobile browsers often ignore the first attempt, so callers keep calling unlock() on
+   * every user gesture until this is true.
+   */
   get unlocked() {
-    return this.ctx !== null
+    if (!this.ctx || this.ctx.state !== 'running') return false
+    return !this.musicWanted || !this.music || !this.music.paused
   }
 
   /** Create/resume the context. Must be called from a user gesture handler. */
   unlock() {
+    // iPhones: play through the ringer/silent switch like a music app, instead of being
+    // muted in silent mode (Safari 16.4+; ignored elsewhere).
+    const session = (navigator as Navigator & { audioSession?: { type: string } }).audioSession
+    if (session && session.type !== 'playback') {
+      try {
+        session.type = 'playback'
+      } catch {
+        // Not supported: carry on with the default session.
+      }
+    }
+    // Older iPhones (no audioSession API): a silent, looping HTML audio clip switches the page
+    // into media playback, so Web Audio (and the soundtrack routed through it) isn't muted by
+    // the silent switch. Started from this gesture; retried on later gestures if refused.
+    if (!session && isIOS()) startSilentKeepAlive()
     if (!this.ctx) {
       const Ctor = audioContextCtor()
       if (!Ctor) return
       this.ctx = new Ctor()
       this.buildGraph(this.ctx)
-      if (this.musicWanted) this.playMusic()
+      // iOS "interrupts" audio for calls, Siri or the lock screen; pick back up afterwards.
+      this.ctx.addEventListener('statechange', () => {
+        if (this.ctx?.state !== 'running' && document.visibilityState === 'visible') void this.ctx?.resume()
+      })
+      this.startWatchdog()
     }
-    if (this.ctx.state === 'suspended' && document.visibilityState === 'visible') {
+    if (this.ctx.state !== 'running' && document.visibilityState === 'visible') {
       void this.ctx.resume()
     }
+    // Retried on every gesture until it sticks: the first play() is often refused on phones.
+    if (this.musicWanted) this.playMusic()
   }
 
   /** Pause all output while the tab is hidden; resume when it returns. */
@@ -281,8 +340,11 @@ class SoundEngine {
     return this.masterEnabled ? MASTER_LEVEL * this.volume.master : 0
   }
 
+  // Browsers pause a media element whose output is completely silent, so while music is
+  // wanted its level never drops below an inaudible floor (a fade-in from 0 used to make the
+  // soundtrack stop a fraction of a second after starting on some devices).
   private musicLevel() {
-    return this.musicWanted ? MUSIC_LEVEL * this.volume.music : 0
+    return this.musicWanted ? Math.max(SILENT_FLOOR, MUSIC_LEVEL * this.volume.music) : 0
   }
 
   private planeLevel() {
@@ -299,19 +361,19 @@ class SoundEngine {
     this.master.connect(ctx.destination)
 
     this.musicGain = ctx.createGain()
-    this.musicGain.gain.value = 0
+    this.musicGain.gain.value = this.musicWanted ? SILENT_FLOOR : 0
     this.musicDuck = ctx.createGain()
     this.musicDuck.connect(this.musicGain).connect(this.master)
 
     // Background playlist, routed through the music bus so it can be ducked.
+    // The playlist loops forever: each track hands over to the next when it ends, a track
+    // that fails to load is skipped, and the watchdog restarts playback if the browser
+    // stalls or pauses it.
     this.music = new Audio(PLAYLIST[this.trackIndex])
     this.music.preload = 'auto'
-    this.music.addEventListener('ended', () => {
-      this.trackIndex = (this.trackIndex + 1) % PLAYLIST.length
-      if (!this.music) return
-      this.music.src = PLAYLIST[this.trackIndex]!
-      if (this.musicWanted) this.playMusic()
-    })
+    this.music.setAttribute('playsinline', '')
+    this.music.addEventListener('ended', () => this.nextTrack())
+    this.music.addEventListener('error', () => this.nextTrack())
     ctx.createMediaElementSource(this.music).connect(this.musicDuck)
 
     this.planeGain = ctx.createGain()
@@ -335,8 +397,39 @@ class SoundEngine {
 
   private playMusic() {
     if (!this.music || document.visibilityState !== 'visible') return
-    // play() can reject if the browser still considers audio locked; toggling music retries.
+    if (this.ctx && this.ctx.state !== 'running') void this.ctx.resume()
+    if (!this.music.paused) return
+    // play() can reject while the browser still considers audio locked; the next user
+    // gesture (or the watchdog) tries again.
     this.music.play().catch(() => undefined)
+  }
+
+  private nextTrack() {
+    if (!this.music) return
+    this.trackIndex = (this.trackIndex + 1) % PLAYLIST.length
+    this.music.src = PLAYLIST[this.trackIndex]!
+    if (this.musicWanted) this.playMusic()
+  }
+
+  /** Every few seconds: if the soundtrack should be playing but isn't, start it again. */
+  private startWatchdog() {
+    let lastTime = -1
+    let stuck = 0
+    setInterval(() => {
+      const m = this.music
+      if (!m || !this.musicWanted || document.visibilityState !== 'visible') return
+      if (m.paused) {
+        this.playMusic()
+        return
+      }
+      // Playing but not advancing (a stalled stream) for ~12 s: move on to the next track.
+      stuck = m.currentTime === lastTime ? stuck + 1 : 0
+      lastTime = m.currentTime
+      if (stuck >= 3) {
+        stuck = 0
+        this.nextTrack()
+      }
+    }, 4000)
   }
 
   private blip(
