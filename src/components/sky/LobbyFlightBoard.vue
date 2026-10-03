@@ -75,7 +75,7 @@ function statusClass(row: FlightRow) {
     <button
       v-if="mode === 'chip'"
       type="button"
-      class="clip-hud flex h-8 items-center gap-1.5 border-2 border-magenta/60 bg-void/80 px-2 font-arcade text-[8px] uppercase text-magenta"
+      class="clip-hud flex h-8 items-center gap-1.5 border-2 border-magenta/60 bg-void/80 px-2 font-arcade text-[0.5rem] uppercase text-magenta"
       :aria-expanded="open"
       aria-controls="lobby-flight-board"
       @click="open = !open"
@@ -104,7 +104,7 @@ function statusClass(row: FlightRow) {
             : 'fixed inset-x-3 top-[calc(env(safe-area-inset-top)+7rem)] z-[61] max-h-[60dvh]',
         ]"
       >
-        <p class="font-display text-[9px] font-black uppercase tracking-[0.3em] text-ember">
+        <p class="font-display text-[0.5625rem] font-black uppercase tracking-[0.3em] text-ember">
           My flight
         </p>
         <div class="mt-1 flex items-center gap-2">
@@ -126,7 +126,7 @@ function statusClass(row: FlightRow) {
           </div>
           <span
             :class="[
-              'clip-hud shrink-0 border px-1.5 py-0.5 font-arcade text-[7px] uppercase',
+              'clip-hud shrink-0 border px-1.5 py-0.5 font-arcade text-[0.4375rem] uppercase',
               statusClass(me),
             ]"
             >{{ statusText(me) }}</span
@@ -136,10 +136,10 @@ function statusClass(row: FlightRow) {
         <div class="mt-2 border-t border-violet/40 pt-2">
           <template v-if="inLobby">
             <p
-              class="flex items-baseline justify-between gap-2 font-display text-[9px] font-black uppercase tracking-[0.3em] text-magenta"
+              class="flex items-baseline justify-between gap-2 font-display text-[0.5625rem] font-black uppercase tracking-[0.3em] text-magenta"
             >
               <span class="truncate">Lobby · {{ lobbyName }}</span>
-              <span class="shrink-0 font-arcade text-[7px] tracking-normal text-muted-foreground"
+              <span class="shrink-0 font-arcade text-[0.4375rem] tracking-normal text-muted-foreground"
                 >{{ bettingCount }}/{{ mates.length }} bet</span
               >
             </p>
@@ -174,7 +174,7 @@ function statusClass(row: FlightRow) {
                 </div>
                 <span
                   :class="[
-                    'clip-hud shrink-0 border px-1.5 py-0.5 font-arcade text-[7px] uppercase',
+                    'clip-hud shrink-0 border px-1.5 py-0.5 font-arcade text-[0.4375rem] uppercase',
                     statusClass(m),
                   ]"
                   >{{ statusText(m) }}</span
@@ -191,7 +191,7 @@ function statusClass(row: FlightRow) {
             </p>
           </template>
           <template v-else>
-            <p class="font-display text-[9px] font-black uppercase tracking-[0.3em] text-magenta">
+            <p class="font-display text-[0.5625rem] font-black uppercase tracking-[0.3em] text-magenta">
               Solo flight
             </p>
             <p class="mt-1 text-xs text-muted-foreground">

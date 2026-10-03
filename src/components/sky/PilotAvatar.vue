@@ -15,7 +15,7 @@ const colour = computed(() => avatarColour(props.username))
     :class="
       cn(
         'grid shrink-0 place-items-center rounded-full border-2 border-void font-display font-black leading-none text-void',
-        size === 'md' ? 'h-9 w-9 text-sm' : 'h-6 w-6 text-[11px]',
+        size === 'md' ? 'h-9 w-9 text-sm' : 'h-6 w-6 text-[0.6875rem]',
         props.class,
       )
     "

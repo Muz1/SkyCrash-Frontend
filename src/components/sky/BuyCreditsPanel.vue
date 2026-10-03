@@ -38,7 +38,7 @@ function buyPack(packId: string) {
         @click="buyPack(pack.id)"
       >
         <span class="block font-arcade text-sm text-lime">{{ pack.credits.toLocaleString() }}</span>
-        <span class="mt-1 block text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+        <span class="mt-1 block text-[0.625rem] uppercase tracking-[0.2em] text-muted-foreground">
           R{{ pack.priceZar.toFixed(2) }}
         </span>
       </button>

@@ -90,7 +90,7 @@ onBeforeUnmount(stopAscent)
 function rarityBadgeClass(rarity: Rarity) {
   const s = RARITY_STYLE[rarity]
   return cn(
-    'clip-hud inline-block border px-2 py-1 font-arcade text-[7px] uppercase leading-none',
+    'clip-hud inline-block border px-2 py-1 font-arcade text-[0.4375rem] uppercase leading-none',
     s.border,
     s.text,
     rarity === 'LEGENDARY' || rarity === 'SPECIAL' ? s.glow : '',
@@ -111,7 +111,7 @@ function rarityBadgeClass(rarity: Rarity) {
       <h1 class="font-display text-2xl font-black uppercase tracking-[0.3em] text-magenta text-glow-magenta sm:text-4xl">
         Hangar
       </h1>
-      <p class="mt-1 font-arcade text-[8px] uppercase tracking-[0.34em] text-muted-foreground">
+      <p class="mt-1 font-arcade text-[0.5rem] uppercase tracking-[0.34em] text-muted-foreground">
         Loadout · Aircraft &amp; Skies
       </p>
       <p class="mt-2 max-w-2xl text-base text-foreground/90">
@@ -124,7 +124,7 @@ function rarityBadgeClass(rarity: Rarity) {
         aria-label="Equipped loadout"
         class="clip-hud mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 border-2 border-lime/80 bg-void/75 px-3 py-2 [box-shadow:inset_0_0_18px_color-mix(in_oklab,var(--neon-lime)_16%,transparent)]"
       >
-        <span class="flex items-center gap-1.5 font-arcade text-[9px] uppercase tracking-[0.2em] text-lime text-glow-lime">
+        <span class="flex items-center gap-1.5 font-arcade text-[0.5625rem] uppercase tracking-[0.2em] text-lime text-glow-lime">
           <Check class="h-4 w-4" aria-hidden="true" /> Equipped
         </span>
         <span class="flex items-center gap-2">
@@ -158,7 +158,7 @@ function rarityBadgeClass(rarity: Rarity) {
           type="button"
           :class="
             cn(
-              'clip-hud border-2 px-5 py-2 font-arcade text-[9px] uppercase tracking-[0.2em] transition-all duration-150',
+              'clip-hud border-2 px-5 py-2 font-arcade text-[0.5625rem] uppercase tracking-[0.2em] transition-all duration-150',
               tab === t
                 ? 'border-ember bg-[image:var(--grad-sunset)] text-void [box-shadow:var(--glow-ember)]'
                 : 'border-violet/50 text-muted-foreground hover:border-electric hover:text-electric',
@@ -171,7 +171,7 @@ function rarityBadgeClass(rarity: Rarity) {
       </div>
 
       <div class="mt-6 grid gap-5 lg:grid-cols-[minmax(0,1.25fr)_minmax(0,1fr)]">
-        <section aria-label="Preview" class="neon-panel clip-hud relative min-h-[300px] overflow-hidden p-4 sm:min-h-[380px]">
+        <section aria-label="Preview" class="neon-panel clip-hud relative min-h-[18.75rem] overflow-hidden p-4 sm:min-h-[23.75rem]">
           <SkyEnvironment
             v-if="tab === 'skies'"
             :skin="previewSky"
@@ -186,8 +186,8 @@ function rarityBadgeClass(rarity: Rarity) {
             class="pointer-events-none absolute inset-0"
             style="background: radial-gradient(ellipse at 30% 80%, color-mix(in oklab, var(--neon-violet) 30%, transparent), transparent 65%)"
           />
-          <div v-if="tab === 'skies'" class="relative min-h-[260px] sm:min-h-[330px]" />
-          <div v-else class="relative grid h-full min-h-[260px] place-items-center sm:min-h-[330px]">
+          <div v-if="tab === 'skies'" class="relative min-h-[16.25rem] sm:min-h-[20.625rem]" />
+          <div v-else class="relative grid h-full min-h-[16.25rem] place-items-center sm:min-h-[20.625rem]">
             <div>
               <div
                 v-if="outgoing"
@@ -204,7 +204,7 @@ function rarityBadgeClass(rarity: Rarity) {
               </div>
             </div>
           </div>
-          <p class="relative mt-2 text-center font-arcade text-[7px] uppercase tracking-[0.3em] text-muted-foreground">
+          <p class="relative mt-2 text-center font-arcade text-[0.4375rem] uppercase tracking-[0.3em] text-muted-foreground">
             {{ activeSky.name }} · Preview Bay
           </p>
         </section>
@@ -217,11 +217,11 @@ function rarityBadgeClass(rarity: Rarity) {
             </div>
             <p class="mt-4 text-sm leading-relaxed text-muted-foreground">{{ active.blurb }}</p>
 
-            <p class="mt-5 font-arcade text-[8px] uppercase tracking-[0.3em] text-muted-foreground">Status</p>
+            <p class="mt-5 font-arcade text-[0.5rem] uppercase tracking-[0.3em] text-muted-foreground">Status</p>
             <p :class="cn('font-arcade text-sm', craftEquipped ? 'text-lime text-glow-lime' : 'text-ember text-glow-ember')">
               {{ craftEquipped ? 'Equipped' : 'Trying On' }}
             </p>
-            <p class="mt-3 font-arcade text-[8px] uppercase tracking-[0.3em] text-muted-foreground">Requirement</p>
+            <p class="mt-3 font-arcade text-[0.5rem] uppercase tracking-[0.3em] text-muted-foreground">Requirement</p>
             <p class="text-sm text-foreground">None. Unlocked for every pilot.</p>
 
             <div class="mt-6 flex flex-col gap-3">
@@ -244,7 +244,7 @@ function rarityBadgeClass(rarity: Rarity) {
             <p class="font-display text-2xl font-black uppercase tracking-[0.2em] text-foreground">{{ activeSky.name }}</p>
             <p class="mt-4 text-sm leading-relaxed text-muted-foreground">{{ activeSky.blurb }}</p>
 
-            <p class="mt-5 font-arcade text-[8px] uppercase tracking-[0.3em] text-muted-foreground">Status</p>
+            <p class="mt-5 font-arcade text-[0.5rem] uppercase tracking-[0.3em] text-muted-foreground">Status</p>
             <p :class="cn('font-arcade text-sm', skyEquipped ? 'text-lime text-glow-lime' : 'text-electric text-glow-blue')">
               {{ skyEquipped ? 'Equipped' : 'Previewing' }}
             </p>
@@ -289,11 +289,11 @@ function rarityBadgeClass(rarity: Rarity) {
             >
               <img :src="c.src" alt="" width="1024" height="1024" loading="lazy" class="h-14 w-14 shrink-0 object-contain" :style="{ transform: `rotate(${c.rotate}deg)` }" />
               <span class="min-w-0 flex-1 pr-6">
-                <span class="block font-arcade text-[9px] uppercase leading-snug text-foreground">{{ c.name }}</span>
-                <span :class="cn('mt-1 block font-arcade text-[7px] uppercase', RARITY_STYLE[c.rarity].text)">{{ c.rarity }}</span>
+                <span class="block font-arcade text-[0.5625rem] uppercase leading-snug text-foreground">{{ c.name }}</span>
+                <span :class="cn('mt-1 block font-arcade text-[0.4375rem] uppercase', RARITY_STYLE[c.rarity].text)">{{ c.rarity }}</span>
                 <span
                   v-if="hangarStore.craftId === c.id"
-                  class="mt-1.5 inline-flex items-center gap-1 bg-lime px-1.5 py-1 font-arcade text-[8px] uppercase leading-none text-void"
+                  class="mt-1.5 inline-flex items-center gap-1 bg-lime px-1.5 py-1 font-arcade text-[0.5rem] uppercase leading-none text-void"
                 >
                   Equipped
                 </span>
@@ -340,13 +340,13 @@ function rarityBadgeClass(rarity: Rarity) {
               <span
                 :class="
                   cn(
-                    'flex items-center justify-between gap-1 px-2 py-2 font-arcade text-[8px] uppercase leading-snug text-foreground',
+                    'flex items-center justify-between gap-1 px-2 py-2 font-arcade text-[0.5rem] uppercase leading-snug text-foreground',
                     hangarStore.skinId === s.id && 'bg-lime/15',
                   )
                 "
               >
                 {{ s.name }}
-                <span v-if="hangarStore.skinId === s.id" class="shrink-0 bg-lime px-1.5 py-1 text-[7px] leading-none text-void">
+                <span v-if="hangarStore.skinId === s.id" class="shrink-0 bg-lime px-1.5 py-1 text-[0.4375rem] leading-none text-void">
                   Equipped
                 </span>
               </span>
@@ -376,10 +376,10 @@ function rarityBadgeClass(rarity: Rarity) {
               >
                 <Check class="h-4 w-4" />
               </span>
-              <span class="block font-arcade text-[9px] uppercase text-ember">Taking Off</span>
+              <span class="block font-arcade text-[0.5625rem] uppercase text-ember">Taking Off</span>
               <span
                 v-if="hangarStore.skinId === 'taking-off'"
-                class="mt-1.5 inline-block bg-lime px-1.5 py-1 font-arcade text-[7px] uppercase leading-none text-void"
+                class="mt-1.5 inline-block bg-lime px-1.5 py-1 font-arcade text-[0.4375rem] uppercase leading-none text-void"
               >
                 Equipped
               </span>

@@ -17,7 +17,7 @@ export const arcadeButton = cva(
           'border-danger text-danger bg-[linear-gradient(180deg,color-mix(in_oklab,var(--neon-red)_22%,transparent),transparent)] [box-shadow:0_0_10px_color-mix(in_oklab,var(--neon-red)_80%,transparent)] hover:text-foreground focus-visible:ring-danger',
       },
       size: {
-        sm: 'px-3 py-1.5 text-[10px]',
+        sm: 'px-3 py-1.5 text-[0.625rem]',
         md: 'px-5 py-2.5 text-xs sm:text-sm',
         lg: 'px-8 py-4 text-base sm:text-lg',
         xl: 'px-10 py-5 text-lg sm:text-2xl',

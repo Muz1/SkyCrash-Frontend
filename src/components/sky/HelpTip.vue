@@ -22,7 +22,7 @@ const open = ref(false)
     <div
       v-if="open"
       role="tooltip"
-      class="absolute right-0 top-[calc(100%+8px)] z-30 w-80 rounded-lg border border-[var(--adm-border-strong)] bg-[oklch(0.18_0.045_290)] p-4 text-left text-[14px] leading-relaxed text-[var(--adm-text-2)] shadow-[0_16px_40px_-12px_oklch(0_0_0/0.8)]"
+      class="absolute right-0 top-[calc(100%+8px)] z-30 w-80 rounded-lg border border-[var(--adm-border-strong)] bg-[oklch(0.18_0.045_290)] p-4 text-left text-[0.875rem] leading-relaxed text-[var(--adm-text-2)] shadow-[0_16px_40px_-12px_oklch(0_0_0/0.8)]"
     >
       {{ text }}
     </div>

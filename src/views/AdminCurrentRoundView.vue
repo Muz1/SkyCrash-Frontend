@@ -30,7 +30,7 @@ onUnmounted(() => {
             <span class="adm-num">#{{ adminRoundStore.round.roundNumber }}</span>
           </AdminKpi>
           <AdminKpi label="Status" :icon="Radio" tone="blue">
-            <AdminPill :label="adminRoundStore.round.status" class="!h-8 !px-3 !text-[17px]" />
+            <AdminPill :label="adminRoundStore.round.status" class="!h-8 !px-3 !text-[1.0625rem]" />
           </AdminKpi>
           <AdminKpi label="Live Multiplier" :icon="TrendingUp" tone="lime">
             <span class="adm-num">{{ adminRoundStore.round.currentMultiplier.toFixed(2) }}x</span>
@@ -52,7 +52,7 @@ onUnmounted(() => {
                 </span>
                 <div>
                   <p class="adm-kpi-label">Locked Crash Multiplier</p>
-                  <p class="adm-num text-[44px] font-bold leading-none text-[var(--neon-orange)]">
+                  <p class="adm-num text-[2.75rem] font-bold leading-none text-[var(--neon-orange)]">
                     {{ adminRoundStore.round.predeterminedCrashMultiplier.toFixed(2) }}x
                   </p>
                 </div>

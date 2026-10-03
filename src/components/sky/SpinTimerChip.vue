@@ -31,13 +31,13 @@ onMounted(() => {
   >
     <RotateCw v-if="seconds === 0" class="h-3.5 w-3.5" aria-hidden="true" />
     <Timer v-else class="h-3.5 w-3.5" aria-hidden="true" />
-    <span class="font-arcade text-[8px] uppercase tracking-[0.12em]">
+    <span class="font-arcade text-[0.5rem] uppercase tracking-[0.12em]">
       {{ seconds === 0 ? 'Free spin ready' : 'Next spin' }}
     </span>
     <span
       v-if="seconds > 0"
       role="timer"
-      class="font-arcade text-[9px] tabular-nums text-foreground"
+      class="font-arcade text-[0.5625rem] tabular-nums text-foreground"
       >{{ formatDuration(seconds) }}</span
     >
   </RouterLink>

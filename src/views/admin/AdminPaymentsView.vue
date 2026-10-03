@@ -56,8 +56,8 @@ async function toggle() {
             <div class="flex items-center gap-4">
               <CreditCard class="h-8 w-8 shrink-0 text-[var(--adm-text-2)]" aria-hidden="true" />
               <div class="min-w-0 flex-1">
-                <p class="text-[18px] font-bold text-[var(--adm-text)]">Buying credits</p>
-                <p class="text-[14px] text-[var(--adm-text-3)]">
+                <p class="text-[1.125rem] font-bold text-[var(--adm-text)]">Buying credits</p>
+                <p class="text-[0.875rem] text-[var(--adm-text-3)]">
                   {{
                     settings.purchasesOpen
                       ? 'Open: players see "Buy credits" in the top bar and their wallet.'
@@ -88,7 +88,7 @@ async function toggle() {
                 <span class="sr-only">{{ settings.enabled ? 'On' : 'Off' }}</span>
               </button>
               <span
-                class="w-8 text-[16px] font-bold"
+                class="w-8 text-[1rem] font-bold"
                 :class="settings.enabled ? 'adm-success' : 'text-[var(--adm-text-3)]'"
               >
                 {{ settings.enabled ? 'ON' : 'OFF' }}
@@ -110,7 +110,7 @@ async function toggle() {
           caption="Set in the API's appsettings.json"
           accent="violet"
         >
-          <dl v-if="settings" class="grid grid-cols-[auto_1fr] gap-x-6 gap-y-3 text-[16px]">
+          <dl v-if="settings" class="grid grid-cols-[auto_1fr] gap-x-6 gap-y-3 text-[1rem]">
             <dt class="text-[var(--adm-text-3)]">Credentials</dt>
             <dd class="font-bold" :class="settings.gatewayConfigured ? 'adm-success' : 'adm-error'">
               {{ settings.gatewayConfigured ? 'Configured' : 'Missing' }}

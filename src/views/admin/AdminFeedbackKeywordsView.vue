@@ -125,7 +125,7 @@ function reset() {
             <li
               v-for="(k, ki) in t.keywords"
               :key="k"
-              class="inline-flex items-center gap-1 rounded-full border border-[var(--adm-border-strong)] bg-[var(--adm-surface-2)] py-0.5 pl-3 pr-1 text-[14px] text-[var(--adm-text)]"
+              class="inline-flex items-center gap-1 rounded-full border border-[var(--adm-border-strong)] bg-[var(--adm-surface-2)] py-0.5 pl-3 pr-1 text-[0.875rem] text-[var(--adm-text)]"
             >
               {{ k }}
               <button
@@ -137,7 +137,7 @@ function reset() {
                 <X class="h-3.5 w-3.5" aria-hidden="true" />
               </button>
             </li>
-            <li v-if="t.keywords.length === 0" class="text-[14px] text-[var(--adm-text-3)]">
+            <li v-if="t.keywords.length === 0" class="text-[0.875rem] text-[var(--adm-text-3)]">
               No keywords yet.
             </li>
           </ul>
@@ -165,7 +165,7 @@ function reset() {
 
         <button
           type="button"
-          class="grid min-h-40 place-items-center rounded-[var(--adm-radius)] border-2 border-dashed border-[var(--adm-border-strong)] text-[16px] font-bold text-[var(--adm-text-2)] hover:border-[var(--neon-violet)] hover:text-[var(--adm-text)]"
+          class="grid min-h-40 place-items-center rounded-[var(--adm-radius)] border-2 border-dashed border-[var(--adm-border-strong)] text-[1rem] font-bold text-[var(--adm-text-2)] hover:border-[var(--neon-violet)] hover:text-[var(--adm-text)]"
           @click="addTheme"
         >
           <span class="flex items-center gap-2"

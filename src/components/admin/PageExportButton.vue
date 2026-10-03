@@ -36,7 +36,7 @@ async function exportPage() {
     <p
       v-if="error"
       role="alert"
-      class="absolute top-full mt-1 whitespace-nowrap text-[13px] font-semibold text-[oklch(0.72_0.19_22)]"
+      class="absolute top-full mt-1 whitespace-nowrap text-[0.8125rem] font-semibold text-[oklch(0.72_0.19_22)]"
     >
       {{ error }}
     </p>

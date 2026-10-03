@@ -41,7 +41,7 @@ const shown = computed(() => (Number.isFinite(target.value) ? target.value : 0))
     />
     <div class="min-w-0">
       <p
-        class="font-arcade text-[8px] uppercase tracking-[0.2em]"
+        class="font-arcade text-[0.5rem] uppercase tracking-[0.2em]"
         :class="props.armedTarget ? 'text-electric' : 'text-muted-foreground'"
       >
         {{
@@ -76,7 +76,7 @@ const shown = computed(() => (Number.isFinite(target.value) ? target.value : 0))
         aria-hidden="true"
       />
       <span
-        class="font-arcade text-[8px] uppercase tracking-[0.2em]"
+        class="font-arcade text-[0.5rem] uppercase tracking-[0.2em]"
         :class="enabled ? 'text-electric' : 'text-foreground'"
         >Auto Cash Out</span
       >
@@ -86,7 +86,7 @@ const shown = computed(() => (Number.isFinite(target.value) ? target.value : 0))
         :aria-checked="enabled"
         aria-label="Auto Cash Out"
         :class="[
-          'ml-auto flex items-center gap-1.5 border-2 px-1 py-0.5 font-arcade text-[8px] uppercase transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-electric',
+          'ml-auto flex items-center gap-1.5 border-2 px-1 py-0.5 font-arcade text-[0.5rem] uppercase transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-electric',
           enabled ? 'border-electric text-electric' : 'border-violet/60 text-muted-foreground',
         ]"
         @click="enabled = !enabled"
@@ -115,7 +115,7 @@ const shown = computed(() => (Number.isFinite(target.value) ? target.value : 0))
           class="block w-20 border-2 border-violet/50 bg-void/70 px-2 py-0.5 font-arcade text-sm text-electric text-glow-blue focus:border-electric focus:outline-none"
           @focus="enabled = true"
         />
-        <span class="font-arcade text-[10px] text-electric">x</span>
+        <span class="font-arcade text-[0.625rem] text-electric">x</span>
       </label>
       <button
         v-for="p in PRESETS"
@@ -123,7 +123,7 @@ const shown = computed(() => (Number.isFinite(target.value) ? target.value : 0))
         type="button"
         :aria-label="`Set auto cash out to ${p}x`"
         :class="[
-          'clip-hud border px-1.5 py-0.5 font-arcade text-[8px] transition-colors',
+          'clip-hud border px-1.5 py-0.5 font-arcade text-[0.5rem] transition-colors',
           enabled && target === p
             ? 'border-electric text-electric'
             : 'border-violet/40 text-muted-foreground hover:border-electric hover:text-electric',

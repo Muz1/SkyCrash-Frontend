@@ -73,12 +73,12 @@ async function toggleDisplayed(key: string, isDisplayed: boolean) {
           <li v-for="c in challengeStore.challenges" :key="c.id" class="flex gap-3">
             <ChallengeBadgeIcon :badge-key="c.badgeKey" size="md" :locked="!c.isCompleted" class="mt-0.5" />
             <div class="min-w-0 flex-1">
-            <p class="font-arcade text-[8px] uppercase tracking-[0.2em] text-foreground/70">
+            <p class="font-arcade text-[0.5rem] uppercase tracking-[0.2em] text-foreground/70">
               {{ c.track }} · {{ challengeBadgeFor(c.badgeKey)?.name }} badge
             </p>
             <div class="mt-1 flex items-center justify-between gap-2">
               <p class="font-display text-sm uppercase tracking-[0.12em] text-foreground">{{ c.description }}</p>
-              <span class="shrink-0 font-arcade text-[9px] uppercase tracking-[0.2em] text-ember">
+              <span class="shrink-0 font-arcade text-[0.5625rem] uppercase tracking-[0.2em] text-ember">
                 +{{ c.rewardCredits.toLocaleString() }}
               </span>
             </div>
@@ -89,14 +89,14 @@ async function toggleDisplayed(key: string, isDisplayed: boolean) {
                 :style="{ width: `${progressPercent(c.progress, c.target)}%` }"
               />
             </div>
-            <p class="mt-1 font-arcade text-[9px] uppercase tracking-[0.2em] text-muted-foreground">
+            <p class="mt-1 font-arcade text-[0.5625rem] uppercase tracking-[0.2em] text-muted-foreground">
               {{ formatProgress(c.progress, c.target) }}
               <span v-if="c.isCompleted" class="ml-2 text-lime">Complete</span>
             </p>
             <RouterLink
               v-if="!c.isCompleted && SOCIAL_CHALLENGE_TYPES.has(c.type)"
               to="/lobby"
-              class="mt-2 inline-flex items-center gap-1.5 font-arcade text-[8px] uppercase tracking-[0.2em] text-electric hover:text-foreground"
+              class="mt-2 inline-flex items-center gap-1.5 font-arcade text-[0.5rem] uppercase tracking-[0.2em] text-electric hover:text-foreground"
             >
               <Users class="h-3 w-3" aria-hidden="true" /> Open the lobby to invite friends
             </RouterLink>
@@ -154,7 +154,7 @@ async function toggleDisplayed(key: string, isDisplayed: boolean) {
                   :style="{ width: `${progressPercent(a.progress, a.target)}%` }"
                 />
               </div>
-              <p class="mt-1 font-arcade text-[8px] uppercase tracking-[0.2em] text-muted-foreground">
+              <p class="mt-1 font-arcade text-[0.5rem] uppercase tracking-[0.2em] text-muted-foreground">
                 {{ formatProgress(a.progress, a.target) }}
               </p>
             </div>

@@ -117,7 +117,7 @@ onMounted(load)
       <p
         v-if="result"
         role="status"
-        :class="result.ok ? 'adm-success flex items-center gap-2 !text-[15px]' : 'adm-error'"
+        :class="result.ok ? 'adm-success flex items-center gap-2 !text-[0.9375rem]' : 'adm-error'"
       >
         <CircleCheck v-if="result.ok" class="h-4 w-4 shrink-0" aria-hidden="true" />
         <CircleAlert v-else class="h-4 w-4 shrink-0" aria-hidden="true" />
@@ -161,7 +161,7 @@ onMounted(load)
                 <tr v-for="a in admins" :key="a.userId">
                   <td>
                     <p class="adm-strong">{{ a.username }}<span v-if="a.email === authStore.email" class="adm-muted"> (you)</span></p>
-                    <p class="adm-muted text-[13.5px]">{{ a.email }}</p>
+                    <p class="adm-muted text-[0.8438rem]">{{ a.email }}</p>
                   </td>
                   <td><AdminPill :label="a.isManager ? 'Manager' : 'Admin'" :tone="a.isManager ? 'warning' : 'accent'" /></td>
                   <td class="adm-muted adm-num-inline">{{ dateTime(a.lastSeenUtc) }}</td>

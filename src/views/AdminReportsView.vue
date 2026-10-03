@@ -67,7 +67,7 @@ onMounted(() => {
         <AdminPanel title="Rounds Report" caption="Most recent first" accent="ember" fill flush>
           <template v-if="roundsReport">
             <div class="adm-table-wrap">
-              <table class="adm-table adm-table--dense min-w-[640px]">
+              <table class="adm-table adm-table--dense min-w-[40rem]">
                 <thead>
                   <tr>
                     <th>Round</th>
@@ -134,14 +134,14 @@ onMounted(() => {
                 </div>
                 <AdminButton variant="primary" :disabled="isSearchingPlayers" @click="searchPlayers">Search</AdminButton>
               </div>
-              <div v-if="playerResults.length > 0" class="flex max-h-[68px] flex-wrap gap-1.5 overflow-y-auto">
+              <div v-if="playerResults.length > 0" class="flex max-h-[4.25rem] flex-wrap gap-1.5 overflow-y-auto">
                 <button
                   v-for="p in playerResults"
                   :key="p.playerId"
                   type="button"
                   data-player-chip
                   :class="[
-                    'inline-flex h-7 items-center gap-1.5 rounded-full border px-3 text-[13.5px] font-semibold transition-colors',
+                    'inline-flex h-7 items-center gap-1.5 rounded-full border px-3 text-[0.8438rem] font-semibold transition-colors',
                     selectedPlayer?.playerId === p.playerId
                       ? 'border-[oklch(0.75_0.17_231/0.6)] bg-[oklch(0.75_0.17_231/0.15)] text-[var(--neon-blue)]'
                       : 'border-[var(--adm-border-strong)] bg-[var(--adm-field)] text-[var(--adm-text-2)] hover:border-[oklch(0.75_0.17_231/0.5)] hover:text-[var(--adm-text)]',
@@ -156,11 +156,11 @@ onMounted(() => {
           </template>
 
           <template v-if="selectedPlayer">
-            <p class="flex-shrink-0 border-b border-[var(--adm-border)] px-4 py-2.5 text-[13.5px] font-semibold text-[var(--adm-text-2)]">
+            <p class="flex-shrink-0 border-b border-[var(--adm-border)] px-4 py-2.5 text-[0.8438rem] font-semibold text-[var(--adm-text-2)]">
               Bet history — <span class="text-[var(--neon-blue)]">{{ selectedPlayer.username }}</span>
             </p>
             <div class="adm-table-wrap">
-              <table class="adm-table adm-table--dense min-w-[520px]">
+              <table class="adm-table adm-table--dense min-w-[32.5rem]">
                 <thead>
                   <tr>
                     <th>Round</th>

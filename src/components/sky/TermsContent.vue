@@ -6,7 +6,7 @@ import { TERMS_IS_DRAFT, TERMS_SECTIONS, TERMS_VERSION } from '@/lib/terms'
 
 <template>
   <div class="text-left">
-    <p class="font-arcade text-[8px] uppercase tracking-[0.25em] text-muted-foreground">
+    <p class="font-arcade text-[0.5rem] uppercase tracking-[0.25em] text-muted-foreground">
       Version {{ TERMS_VERSION }}
     </p>
     <p

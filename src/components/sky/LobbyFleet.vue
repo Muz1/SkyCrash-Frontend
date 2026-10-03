@@ -74,7 +74,7 @@ const flights = computed(() =>
           :style="{ borderColor: `color-mix(in oklab, ${tint} 80%, transparent)` }"
         >
           <PilotAvatar :username="mate.username" />
-          <span class="truncate font-arcade text-[8px] uppercase leading-none text-foreground">{{ mate.username }}</span>
+          <span class="truncate font-arcade text-[0.5rem] uppercase leading-none text-foreground">{{ mate.username }}</span>
         </span>
       </div>
     </div>

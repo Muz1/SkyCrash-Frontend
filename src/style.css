@@ -90,6 +90,13 @@
     image-rendering: pixelated;
   }
 
+  /* Fluid scale: every rem-based size (text, spacing, panel widths) grows with the window,
+     from 16px on laptops and phones up to 24px on large monitors. Height counts too, since
+     the game screen must fit one screen without scrolling. */
+  html {
+    font-size: clamp(16px, calc(4px + 0.45vw + 0.6vh), 24px);
+  }
+
   /* The app is a fixed full-screen frame: the document itself never scrolls. */
   html,
   body,

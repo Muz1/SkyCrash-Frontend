@@ -155,7 +155,7 @@ async function handleSave() {
                 <AchievementBadge :achievement-key="playerStore.profile.displayedAchievementKey" size="md" />
                 {{ playerStore.profile.username }}
               </p>
-              <p class="font-arcade text-[8px] uppercase tracking-[0.3em] text-ember">
+              <p class="font-arcade text-[0.5rem] uppercase tracking-[0.3em] text-ember">
                 Pilot since {{ new Date(playerStore.profile.memberSinceUtc).toLocaleDateString() }}
               </p>
             </div>
@@ -163,7 +163,7 @@ async function handleSave() {
 
           <dl class="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
             <div v-for="s in stats" :key="s.label" class="clip-hud border border-violet/40 bg-void/50 p-3">
-              <dt class="font-arcade text-[7px] uppercase tracking-[0.24em] text-muted-foreground">{{ s.label }}</dt>
+              <dt class="font-arcade text-[0.4375rem] uppercase tracking-[0.24em] text-muted-foreground">{{ s.label }}</dt>
               <dd class="mt-1 font-arcade text-sm text-electric text-glow-blue">{{ s.value }}</dd>
             </div>
           </dl>
@@ -173,20 +173,20 @@ async function handleSave() {
           <form class="space-y-4" @submit.prevent="handleSave">
             <div>
               <ArcadeField v-model="username" label="Username" required />
-              <p v-if="usernameStatus === 'checking'" class="mt-1 text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+              <p v-if="usernameStatus === 'checking'" class="mt-1 text-[0.625rem] uppercase tracking-[0.2em] text-muted-foreground">
                 Checking availability…
               </p>
-              <p v-else-if="usernameStatus === 'available'" class="mt-1 text-[10px] uppercase tracking-[0.2em] text-lime">
+              <p v-else-if="usernameStatus === 'available'" class="mt-1 text-[0.625rem] uppercase tracking-[0.2em] text-lime">
                 Available
               </p>
               <div v-else-if="usernameStatus === 'taken'" class="mt-1.5">
-                <p class="text-[10px] uppercase tracking-[0.2em] text-danger">That username is already taken.</p>
+                <p class="text-[0.625rem] uppercase tracking-[0.2em] text-danger">That username is already taken.</p>
                 <div v-if="usernameSuggestions.length > 0" class="mt-1.5 flex flex-wrap gap-1.5">
                   <button
                     v-for="suggestion in usernameSuggestions"
                     :key="suggestion"
                     type="button"
-                    class="clip-hud border border-electric/50 px-2 py-1 text-[10px] text-electric transition-all hover:[box-shadow:var(--glow-blue)]"
+                    class="clip-hud border border-electric/50 px-2 py-1 text-[0.625rem] text-electric transition-all hover:[box-shadow:var(--glow-blue)]"
                     @click="applySuggestion(suggestion)"
                   >
                     {{ suggestion }}
@@ -196,8 +196,8 @@ async function handleSave() {
             </div>
             <ArcadeField v-model="email" label="Email" type="email" required />
 
-            <p v-if="successMessage" class="font-arcade text-[8px] uppercase tracking-[0.2em] text-lime">{{ successMessage }}</p>
-            <p v-if="errorMessage" class="font-arcade text-[8px] uppercase tracking-[0.2em] text-danger">{{ errorMessage }}</p>
+            <p v-if="successMessage" class="font-arcade text-[0.5rem] uppercase tracking-[0.2em] text-lime">{{ successMessage }}</p>
+            <p v-if="errorMessage" class="font-arcade text-[0.5rem] uppercase tracking-[0.2em] text-danger">{{ errorMessage }}</p>
 
             <ArcadeButton type="submit" size="md" variant="blue" :disabled="isSaving">
               {{ isSaving ? 'Saving…' : 'Save changes' }}

@@ -24,7 +24,7 @@ const model = defineModel<string | number>()
 
 <template>
   <label class="block">
-    <span class="mb-1.5 block font-display text-[9px] uppercase tracking-[0.3em] text-muted-foreground">
+    <span class="mb-1.5 block font-display text-[0.5625rem] uppercase tracking-[0.3em] text-muted-foreground">
       {{ label }}
     </span>
     <input

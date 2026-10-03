@@ -50,7 +50,7 @@ function glows(to: string) {
           "
         >
           <component :is="item.icon" :class="item.hero ? 'h-6 w-6 sm:h-7 sm:w-7' : 'h-4 w-4'" aria-hidden="true" />
-          <span class="font-arcade text-[6px] uppercase leading-none sm:text-[7px]">{{ item.label }}</span>
+          <span class="font-arcade text-[0.375rem] uppercase leading-none sm:text-[0.4375rem]">{{ item.label }}</span>
         </RouterLink>
       </li>
     </ul>

@@ -88,7 +88,7 @@ const xLabels = computed(() => {
       </button>
     </div>
 
-    <div v-if="showTable" class="adm-table-wrap max-h-[260px]">
+    <div v-if="showTable" class="adm-table-wrap max-h-[16.25rem]">
       <table class="adm-table adm-table--dense">
         <caption class="sr-only">{{ label }}</caption>
         <thead>

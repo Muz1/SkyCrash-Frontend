@@ -59,7 +59,7 @@ watch(
           :size="420"
           :idle="false"
           :trail-intensity="1.6"
-          class="w-[48vw] max-w-[460px]"
+          class="w-[48vw] max-w-[28.75rem]"
           :style="{ width: 'min(48vw, 460px)', height: 'min(48vw, 460px)' }"
         />
       </div>

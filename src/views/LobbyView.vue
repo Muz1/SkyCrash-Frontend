@@ -144,13 +144,13 @@ async function copyInviteCode() {
 
           <p
             v-if="lobbyFull"
-            class="clip-hud mt-3 border-2 border-ember bg-ember/15 px-3 py-2 text-center font-arcade text-[10px] uppercase tracking-[0.2em] text-ember"
+            class="clip-hud mt-3 border-2 border-ember bg-ember/15 px-3 py-2 text-center font-arcade text-[0.625rem] uppercase tracking-[0.2em] text-ember"
           >
             Lobby Full
           </p>
 
           <div class="mt-4 flex items-center justify-between gap-2">
-            <p class="font-arcade text-[8px] uppercase tracking-[0.3em] text-muted-foreground">Invite Code</p>
+            <p class="font-arcade text-[0.5rem] uppercase tracking-[0.3em] text-muted-foreground">Invite Code</p>
             <button
               type="button"
               :aria-label="`Copy invite code ${privateLobbyStore.lobby.inviteCode}`"
@@ -196,13 +196,13 @@ async function copyInviteCode() {
           </ul>
 
           <div v-if="lobbyBets.length > 0" class="mt-4">
-            <p class="font-arcade text-[8px] uppercase tracking-[0.3em] text-muted-foreground">This round</p>
+            <p class="font-arcade text-[0.5rem] uppercase tracking-[0.3em] text-muted-foreground">This round</p>
             <div class="mt-2 flex flex-wrap gap-2">
               <span
                 v-for="(b, i) in lobbyBets"
                 :key="`${b.playerId}-${i}`"
                 :class="[
-                  'clip-hud border px-2 py-1 font-arcade text-[8px]',
+                  'clip-hud border px-2 py-1 font-arcade text-[0.5rem]',
                   b.kind === 'cashout' ? 'border-lime/50 text-lime' : 'border-violet/40 text-muted-foreground',
                 ]"
               >
@@ -254,7 +254,7 @@ async function copyInviteCode() {
           role="alert"
           class="clip-hud mt-3 border-2 border-ember bg-ember/15 px-3 py-2 text-center"
         >
-          <p class="font-arcade text-[10px] uppercase tracking-[0.2em] text-ember">Lobby Full</p>
+          <p class="font-arcade text-[0.625rem] uppercase tracking-[0.2em] text-ember">Lobby Full</p>
           <p class="mt-1 text-sm text-foreground">{{ privateLobbyStore.errorMessage }}</p>
         </div>
         <p v-else-if="privateLobbyStore.errorMessage" role="alert" class="mt-3 text-sm font-semibold text-danger">

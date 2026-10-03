@@ -123,7 +123,7 @@ function handleSaved() {
                     min="0"
                     max="50"
                     step="0.1"
-                    class="adm-input adm-num w-full !pr-9 !text-[16px] !font-semibold"
+                    class="adm-input adm-num w-full !pr-9 !text-[1rem] !font-semibold"
                   />
                   <span class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[var(--adm-text-3)]">%</span>
                 </div>
@@ -163,7 +163,7 @@ function handleSaved() {
           fill
         >
           <div class="flex min-h-0 flex-1 flex-col justify-center gap-2">
-            <div class="flex items-end gap-4 text-[12px] font-bold uppercase tracking-[0.08em] text-[var(--adm-text-3)]">
+            <div class="flex items-end gap-4 text-[0.75rem] font-bold uppercase tracking-[0.08em] text-[var(--adm-text-3)]">
               <span class="w-36 shrink-0">Window</span>
               <div class="relative h-5 flex-1">
                 <span
@@ -186,8 +186,8 @@ function handleSaved() {
                 :title="`${row.label}: ${row.value}% actual vs ${rtpStore.summary.theoreticalRtpPercentage}% theoretical`"
               >
                 <span class="w-36 shrink-0">
-                  <span class="block text-[15px] font-semibold text-[var(--adm-text)]">{{ row.label }}</span>
-                  <span class="adm-num block text-[13px] text-[var(--adm-text-3)]">{{ row.value }}% actual</span>
+                  <span class="block text-[0.9375rem] font-semibold text-[var(--adm-text)]">{{ row.label }}</span>
+                  <span class="adm-num block text-[0.8125rem] text-[var(--adm-text-3)]">{{ row.value }}% actual</span>
                 </span>
                 <div class="relative h-8 flex-1">
                   <span
@@ -210,7 +210,7 @@ function handleSaved() {
                     :style="{ left: row.pos + '%', background: row.color, boxShadow: `0 0 0 3px var(--adm-surface), 0 0 10px ${row.color}` }"
                   />
                 </div>
-                <span class="adm-num w-28 shrink-0 text-right text-[15px] font-semibold text-[var(--adm-text)]">
+                <span class="adm-num w-28 shrink-0 text-right text-[0.9375rem] font-semibold text-[var(--adm-text)]">
                   {{ deltaVsTheoretical(row.value).replace(' vs theoretical', '') }}
                 </span>
               </li>

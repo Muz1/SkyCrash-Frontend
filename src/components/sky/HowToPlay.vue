@@ -52,7 +52,7 @@ function dismiss() {
       )
     "
   >
-    <span class="shrink-0 font-arcade text-[8px] uppercase tracking-[0.2em] text-ember">How to play</span>
+    <span class="shrink-0 font-arcade text-[0.5rem] uppercase tracking-[0.2em] text-ember">How to play</span>
     <span class="min-w-0 flex-1 leading-snug">
       <span class="font-bold">Bet</span> <span aria-hidden="true" class="text-ember">→</span>
       watch the multiplier climb <span aria-hidden="true" class="text-ember">→</span>
@@ -71,7 +71,7 @@ function dismiss() {
   <section v-else-if="!compact" aria-labelledby="how-to-play-title" :class="cn('w-full max-w-3xl', props.class)">
     <h2
       id="how-to-play-title"
-      class="mb-2 text-center font-arcade text-[9px] uppercase tracking-[0.3em] text-ember text-glow-ember"
+      class="mb-2 text-center font-arcade text-[0.5625rem] uppercase tracking-[0.3em] text-ember text-glow-ember"
     >
       How to play
     </h2>
@@ -80,7 +80,7 @@ function dismiss() {
         <NeonPanel accent="magenta" class="h-full [&>div]:p-2.5 sm:[&>div]:p-4">
           <p class="flex items-baseline gap-2">
             <span class="font-arcade text-sm text-magenta text-glow-magenta sm:text-xl">{{ s.n }}</span>
-            <span class="font-display text-[11px] font-black uppercase tracking-[0.1em] text-foreground sm:text-sm sm:tracking-[0.16em]">
+            <span class="font-display text-[0.6875rem] font-black uppercase tracking-[0.1em] text-foreground sm:text-sm sm:tracking-[0.16em]">
               {{ s.t }}
             </span>
           </p>

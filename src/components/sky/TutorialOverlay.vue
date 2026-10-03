@@ -94,12 +94,12 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
       class="neon-panel clip-hud relative w-full max-w-lg p-5 focus:outline-none sm:p-6"
     >
       <div class="flex items-center gap-3">
-        <p class="font-arcade text-[8px] uppercase tracking-[0.3em] text-ember">
+        <p class="font-arcade text-[0.5rem] uppercase tracking-[0.3em] text-ember">
           Pre-flight briefing · {{ index + 1 }}/{{ STEPS.length }}
         </p>
         <button
           type="button"
-          class="ml-auto flex items-center gap-1.5 border-2 border-violet/60 px-2 py-1 font-arcade text-[8px] uppercase tracking-[0.15em] text-foreground hover:border-magenta hover:text-magenta focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-magenta"
+          class="ml-auto flex items-center gap-1.5 border-2 border-violet/60 px-2 py-1 font-arcade text-[0.5rem] uppercase tracking-[0.15em] text-foreground hover:border-magenta hover:text-magenta focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-magenta"
           @click="emit('close')"
         >
           <X class="h-3 w-3" aria-hidden="true" /> Skip tutorial
@@ -118,7 +118,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
                 v-for="v in ['100', '250', '500', '1K']"
                 :key="v"
                 :class="[
-                  'clip-hud border-2 px-2.5 py-1 font-arcade text-[9px]',
+                  'clip-hud border-2 px-2.5 py-1 font-arcade text-[0.5625rem]',
                   v === '500'
                     ? 'border-ember text-ember [box-shadow:var(--glow-ember)]'
                     : 'border-violet/50 text-muted-foreground',
@@ -130,7 +130,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
               class="clip-hud border-2 border-magenta bg-magenta/20 px-6 py-2 font-display text-sm font-black uppercase tracking-[0.2em] text-foreground"
               >Bet 500</span
             >
-            <span class="font-arcade text-[8px] uppercase tracking-[0.3em] text-muted-foreground"
+            <span class="font-arcade text-[0.5rem] uppercase tracking-[0.3em] text-muted-foreground"
               >Next round in 7s</span
             >
           </div>
@@ -176,7 +176,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
           >
             <Zap class="h-5 w-5 text-electric" />
             <div>
-              <p class="font-arcade text-[9px] uppercase tracking-[0.2em] text-electric">
+              <p class="font-arcade text-[0.5625rem] uppercase tracking-[0.2em] text-electric">
                 Auto Cash Out: On
               </p>
               <p class="mt-1 font-arcade text-lg text-electric">2.00x</p>
@@ -211,7 +211,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
                 :style="{ transform: `rotate(${CRAFTS[i % CRAFTS.length]!.rotate}deg)` }"
               />
               <span class="font-semibold text-foreground">{{ p.n }}</span>
-              <span :class="['ml-auto font-arcade text-[8px] uppercase', p.c]">{{ p.s }}</span>
+              <span :class="['ml-auto font-arcade text-[0.5rem] uppercase', p.c]">{{ p.s }}</span>
             </li>
           </ul>
           <Users class="absolute right-3 top-3 h-5 w-5 text-magenta" />
@@ -249,7 +249,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
       <div class="mt-5 flex items-center gap-3">
         <button
           type="button"
-          class="flex items-center gap-1 border-2 border-violet/50 px-3 py-2 font-arcade text-[9px] uppercase text-foreground disabled:opacity-30"
+          class="flex items-center gap-1 border-2 border-violet/50 px-3 py-2 font-arcade text-[0.5625rem] uppercase text-foreground disabled:opacity-30"
           :disabled="index === 0"
           @click="back"
         >

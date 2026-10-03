@@ -106,13 +106,13 @@ onBeforeUnmount(() => {
       <li v-for="ch in channels" :key="ch.id">
         <div class="flex items-center justify-between gap-2">
           <label :for="`sound-${ch.id}`" class="min-w-0">
-            <span class="block font-arcade text-[9px] uppercase leading-tight text-foreground">{{ ch.label }}</span>
+            <span class="block font-arcade text-[0.5625rem] uppercase leading-tight text-foreground">{{ ch.label }}</span>
             <span class="mt-1 block text-xs leading-tight text-muted-foreground">{{ ch.hint }}</span>
           </label>
           <label
             :class="
               cn(
-                'flex min-h-8 shrink-0 cursor-pointer items-center gap-2 border-2 px-2 py-1 font-arcade text-[8px] uppercase leading-tight transition-colors focus-within:ring-2 focus-within:ring-electric',
+                'flex min-h-8 shrink-0 cursor-pointer items-center gap-2 border-2 px-2 py-1 font-arcade text-[0.5rem] uppercase leading-tight transition-colors focus-within:ring-2 focus-within:ring-electric',
                 ch.enabled ? 'border-violet/60 text-foreground hover:border-electric' : 'border-danger bg-danger/15 text-foreground',
               )
             "
@@ -143,7 +143,7 @@ onBeforeUnmount(() => {
             "
             @input="onInput(ch.id, $event)"
           />
-          <output :for="`sound-${ch.id}`" class="w-9 shrink-0 text-right font-arcade text-[9px] text-foreground">
+          <output :for="`sound-${ch.id}`" class="w-9 shrink-0 text-right font-arcade text-[0.5625rem] text-foreground">
             {{ ch.volume }}
           </output>
         </div>

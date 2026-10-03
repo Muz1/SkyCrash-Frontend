@@ -19,7 +19,7 @@ withDefaults(defineProps<{ compact?: boolean }>(), { compact: false })
         )
       "
     />
-    <span v-if="!compact" class="mt-2 block font-arcade text-[8px] uppercase tracking-[0.42em] text-electric text-glow-blue sm:text-xs">
+    <span v-if="!compact" class="mt-2 block font-arcade text-[0.5rem] uppercase tracking-[0.42em] text-electric text-glow-blue sm:text-xs">
       The sky is the limit
     </span>
   </RouterLink>

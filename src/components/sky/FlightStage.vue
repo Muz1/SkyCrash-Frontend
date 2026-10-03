@@ -363,7 +363,7 @@ const multiplierClass = computed(() =>
         class="h-auto w-full object-contain opacity-80 [filter:drop-shadow(0_0_6px_var(--neon-violet))]"
         :style="{ transform: `rotate(${f.rotate.toFixed(1)}deg)` }"
       />
-      <span class="absolute left-1/2 top-full max-w-24 -translate-x-1/2 truncate whitespace-nowrap border border-violet/50 bg-void/80 px-1 font-arcade text-[7px] uppercase text-foreground">
+      <span class="absolute left-1/2 top-full max-w-24 -translate-x-1/2 truncate whitespace-nowrap border border-violet/50 bg-void/80 px-1 font-arcade text-[0.4375rem] uppercase text-foreground">
         {{ f.w.username }}
       </span>
     </div>
@@ -373,7 +373,7 @@ const multiplierClass = computed(() =>
       class="pointer-events-none absolute left-0 top-0"
       :style="{ transform: `translate3d(${c.x.toFixed(1)}px, ${c.y.toFixed(1)}px, 0)` }"
     >
-      <span class="absolute bottom-2 left-0 flex -translate-x-1/2 items-center gap-1 whitespace-nowrap border border-lime/60 bg-void/85 px-1 py-0.5 font-arcade text-[7px] uppercase text-lime">
+      <span class="absolute bottom-2 left-0 flex -translate-x-1/2 items-center gap-1 whitespace-nowrap border border-lime/60 bg-void/85 px-1 py-0.5 font-arcade text-[0.4375rem] uppercase text-lime">
         <img :src="getCraft(c.w.craftId).src" alt="" width="1024" height="1024" class="h-3.5 w-3.5 object-contain" />
         {{ c.w.username }} {{ c.w.cashOutMultiplier?.toFixed(2) }}x
       </span>
@@ -431,7 +431,7 @@ const multiplierClass = computed(() =>
     <!-- centre readout -->
     <div class="pointer-events-none absolute inset-x-0 top-[42%] flex -translate-y-1/2 flex-col items-center text-center">
       <template v-if="waiting">
-        <p class="font-arcade text-[8px] uppercase tracking-[0.4em] text-muted-foreground">Next round in</p>
+        <p class="font-arcade text-[0.5rem] uppercase tracking-[0.4em] text-muted-foreground">Next round in</p>
         <p class="font-arcade text-[clamp(2rem,9vmin,4.5rem)] leading-none text-ember text-glow-ember">
           {{ gameStore.countdownSeconds ?? '…' }}
         </p>
@@ -445,7 +445,7 @@ const multiplierClass = computed(() =>
         >
           {{ multiplier.toFixed(2) }}x
         </p>      </template>
-      <p v-else class="font-arcade text-[10px] uppercase tracking-[0.4em] text-muted-foreground">Connecting…</p>
+      <p v-else class="font-arcade text-[0.625rem] uppercase tracking-[0.4em] text-muted-foreground">Connecting…</p>
       <slot name="readout" />
     </div>
 

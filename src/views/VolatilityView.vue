@@ -74,7 +74,7 @@ onMounted(() => {
         >
           <div class="flex min-h-0 flex-1 flex-col">
             <div
-              class="flex shrink-0 items-center gap-4 pb-2 text-[12px] font-bold uppercase tracking-[0.08em] text-[var(--adm-text-3)]"
+              class="flex shrink-0 items-center gap-4 pb-2 text-[0.75rem] font-bold uppercase tracking-[0.08em] text-[var(--adm-text-3)]"
             >
               <span class="w-32 shrink-0">Crash range</span>
               <span class="flex-1">Share of rounds</span>
@@ -88,7 +88,7 @@ onMounted(() => {
                 class="group flex items-center gap-4 rounded-md px-0 py-1.5 transition-colors hover:bg-[oklch(0.62_0.26_305/0.07)]"
                 :title="`${bucket.label}: ${bucket.percentage}% of rounds (${bucket.count})`"
               >
-                <span class="adm-num-inline w-32 shrink-0 text-[14.5px] font-semibold text-[var(--adm-text-2)]">
+                <span class="adm-num-inline w-32 shrink-0 text-[0.9062rem] font-semibold text-[var(--adm-text-2)]">
                   {{ bucket.label }}
                 </span>
                 <div class="relative h-3 flex-1 rounded-r-[4px] bg-[oklch(1_0_0/0.03)]">
@@ -97,10 +97,10 @@ onMounted(() => {
                     :style="{ width: Math.max(0.5, (bucket.percentage / maxPercentage) * 100) + '%' }"
                   />
                 </div>
-                <span class="adm-num w-16 shrink-0 text-right text-[14.5px] font-semibold text-[var(--adm-text)]">
+                <span class="adm-num w-16 shrink-0 text-right text-[0.9062rem] font-semibold text-[var(--adm-text)]">
                   {{ bucket.percentage }}%
                 </span>
-                <span class="adm-num w-16 shrink-0 text-right text-[14px] text-[var(--adm-text-3)]">{{ bucket.count }}</span>
+                <span class="adm-num w-16 shrink-0 text-right text-[0.875rem] text-[var(--adm-text-3)]">{{ bucket.count }}</span>
               </li>
             </ul>
           </div>

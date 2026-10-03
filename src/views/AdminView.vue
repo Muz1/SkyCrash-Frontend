@@ -60,7 +60,7 @@ onMounted(() => {
 
         <template #toolbar>
           <div class="adm-toolbar">
-            <div class="adm-search min-w-[240px] flex-1">
+            <div class="adm-search min-w-[15rem] flex-1">
               <Search aria-hidden="true" />
               <input
                 v-model="adminStore.searchTerm"
@@ -111,7 +111,7 @@ onMounted(() => {
         </template>
 
         <div class="adm-table-wrap">
-          <table class="adm-table min-w-[1000px]">
+          <table class="adm-table min-w-[62.5rem]">
             <thead>
               <tr>
                 <th>Username</th>
@@ -127,7 +127,7 @@ onMounted(() => {
               <tr v-for="player in adminStore.players" :key="player.playerId">
                 <td class="adm-strong">
                   {{ player.username }}
-                  <span v-if="player.playerId === authStore.playerId" class="adm-muted ml-1 text-[12.5px] font-medium">
+                  <span v-if="player.playerId === authStore.playerId" class="adm-muted ml-1 text-[0.7812rem] font-medium">
                     (you)
                   </span>
                 </td>

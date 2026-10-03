@@ -87,25 +87,25 @@ async function scrollDown() {
             class="rounded-[var(--adm-radius-sm)] border border-[var(--adm-border)] bg-[var(--adm-surface-2)] p-4"
           >
             <div class="flex flex-wrap items-center gap-2">
-              <span class="adm-num text-[16px] text-[var(--adm-text-3)]">{{ i + 1 }}.</span>
+              <span class="adm-num text-[1rem] text-[var(--adm-text-3)]">{{ i + 1 }}.</span>
               <Lightbulb class="h-5 w-5 text-[var(--neon-orange)]" aria-hidden="true" />
-              <h3 class="min-w-0 flex-1 text-[18px] font-bold text-[var(--adm-text)]">
+              <h3 class="min-w-0 flex-1 text-[1.125rem] font-bold text-[var(--adm-text)]">
                 {{ r.title }}
               </h3>
               <AdminPill :label="`${r.impact} impact`" :tone="impactTone[r.impact] ?? 'neutral'" />
               <AdminPill :label="r.area" tone="neutral" :dot="false" />
             </div>
-            <p class="mt-2 text-[15px] leading-relaxed text-[var(--adm-text-2)]">
+            <p class="mt-2 text-[0.9375rem] leading-relaxed text-[var(--adm-text-2)]">
               <strong>Why:</strong> {{ r.why }}
             </p>
-            <p class="mt-1 text-[15px] leading-relaxed text-[var(--adm-text)]">
+            <p class="mt-1 text-[0.9375rem] leading-relaxed text-[var(--adm-text)]">
               <strong>Do this:</strong> {{ r.action }}
             </p>
             <ul v-if="r.evidence.length" class="mt-2 space-y-1">
               <li
                 v-for="e in r.evidence"
                 :key="e"
-                class="text-[14px] italic text-[var(--adm-text-3)]"
+                class="text-[0.875rem] italic text-[var(--adm-text-3)]"
               >
                 “{{ e }}”
               </li>
@@ -132,7 +132,7 @@ async function scrollDown() {
               class="flex max-h-[26rem] flex-col gap-3 overflow-y-auto pr-1"
               aria-live="polite"
             >
-              <p v-if="messages.length === 0" class="text-[15px] text-[var(--adm-text-3)]">
+              <p v-if="messages.length === 0" class="text-[0.9375rem] text-[var(--adm-text-3)]">
                 Ask anything about these numbers or the feedback.
               </p>
               <div
@@ -147,7 +147,7 @@ async function scrollDown() {
                 />
                 <p
                   :class="[
-                    'max-w-[85%] whitespace-pre-wrap rounded-[var(--adm-radius-sm)] px-3 py-2 text-left text-[15px] leading-relaxed',
+                    'max-w-[85%] whitespace-pre-wrap rounded-[var(--adm-radius-sm)] px-3 py-2 text-left text-[0.9375rem] leading-relaxed',
                     m.role === 'user'
                       ? 'bg-[var(--adm-accent)] text-white'
                       : 'bg-[var(--adm-surface-2)] text-[var(--adm-text)]',
@@ -157,7 +157,7 @@ async function scrollDown() {
                   >{{ m.text }}
                 </p>
               </div>
-              <p v-if="asking" class="flex items-center gap-2 text-[15px] text-[var(--adm-text-3)]">
+              <p v-if="asking" class="flex items-center gap-2 text-[0.9375rem] text-[var(--adm-text-3)]">
                 <Bot class="h-5 w-5" aria-hidden="true" /> Thinking…
               </p>
             </div>
@@ -187,7 +187,7 @@ async function scrollDown() {
           :caption="`${data.range.days} day${data.range.days === 1 ? '' : 's'}`"
           accent="violet"
         >
-          <dl class="grid grid-cols-[1fr_auto] gap-x-6 gap-y-2 text-[15px]">
+          <dl class="grid grid-cols-[1fr_auto] gap-x-6 gap-y-2 text-[0.9375rem]">
             <template v-for="f in data.facts" :key="f.label">
               <dt class="text-[var(--adm-text-3)]">{{ f.label }}</dt>
               <dd class="adm-num text-right font-bold text-[var(--adm-text)]">{{ f.value }}</dd>

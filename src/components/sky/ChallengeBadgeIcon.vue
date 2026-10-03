@@ -31,7 +31,7 @@ const sizeClass = computed(() => ({ sm: 'h-9 w-9', md: 'h-12 w-12', lg: 'h-20 w-
     <img :src="info.src" alt="" class="h-full w-full object-contain" />
     <span
       v-if="count > 1"
-      class="absolute -bottom-1 -right-1 min-w-5 rounded-full border border-void bg-foreground px-1 text-center font-display text-[10px] font-black leading-4 text-void"
+      class="absolute -bottom-1 -right-1 min-w-5 rounded-full border border-void bg-foreground px-1 text-center font-display text-[0.625rem] font-black leading-4 text-void"
       aria-hidden="true"
     >
       x{{ count }}

@@ -28,7 +28,7 @@ const accentClass = computed(
 <template>
   <section :class="cn('neon-panel clip-hud crt-scan', props.class)">
     <header v-if="title" class="border-b border-border/70 px-4 py-2">
-      <h2 :class="cn('font-display text-[10px] font-black uppercase tracking-[0.32em] sm:text-xs', accentClass)">
+      <h2 :class="cn('font-display text-[0.625rem] font-black uppercase tracking-[0.32em] sm:text-xs', accentClass)">
         {{ title }}
       </h2>
     </header>

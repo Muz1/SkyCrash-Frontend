@@ -72,7 +72,7 @@ async function handleSubmit() {
           />
         </div>
 
-        <p v-if="errorMessage" role="alert" class="mt-4 font-arcade text-[8px] uppercase leading-relaxed text-danger">
+        <p v-if="errorMessage" role="alert" class="mt-4 font-arcade text-[0.5rem] uppercase leading-relaxed text-danger">
           {{ errorMessage }}
         </p>
 

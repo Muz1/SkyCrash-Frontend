@@ -65,11 +65,11 @@ async function save() {
         <AdminPanel title="Default volumes" caption="Players can always change their own in the AUDIO panel" accent="violet">
           <form v-if="draft" class="flex flex-col gap-5" @submit.prevent="save">
             <label v-for="c in channels" :key="c.key" class="block">
-              <span class="flex items-center gap-2 text-[16px] font-bold text-[var(--adm-text)]">
+              <span class="flex items-center gap-2 text-[1rem] font-bold text-[var(--adm-text)]">
                 <component :is="c.icon" class="h-5 w-5" aria-hidden="true" /> {{ c.label }}
-                <span class="ml-auto adm-num text-[18px]">{{ draft[c.key] }}%</span>
+                <span class="ml-auto adm-num text-[1.125rem]">{{ draft[c.key] }}%</span>
               </span>
-              <span class="mb-2 block text-[14px] text-[var(--adm-text-3)]">{{ c.hint }}</span>
+              <span class="mb-2 block text-[0.875rem] text-[var(--adm-text-3)]">{{ c.hint }}</span>
               <input v-model.number="draft[c.key]" type="range" min="0" max="100" class="w-full accent-[var(--neon-violet)]" :aria-label="`${c.label} default volume`" />
             </label>
             <div class="flex flex-wrap items-center gap-3">

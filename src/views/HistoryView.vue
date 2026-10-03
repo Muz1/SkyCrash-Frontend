@@ -47,7 +47,7 @@ function betStatus(status: string): 'CASHED OUT' | 'CRASHED' | 'LIVE' {
             <li v-for="b in historyStore.bets" :key="b.betId" class="flex items-center justify-between gap-3 py-3">
               <div class="min-w-0">
                 <p class="font-display text-xs uppercase tracking-[0.16em] text-foreground">Round #{{ b.roundNumber }}</p>
-                <p class="font-arcade text-[8px] uppercase tracking-[0.2em] text-muted-foreground">Bet {{ b.amount }}</p>
+                <p class="font-arcade text-[0.5rem] uppercase tracking-[0.2em] text-muted-foreground">Bet {{ b.amount }}</p>
               </div>
               <div class="flex items-center gap-2">
                 <span v-if="b.status === 'CashedOut'" class="font-arcade text-xs text-lime text-glow-lime">

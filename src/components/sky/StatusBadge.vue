@@ -15,7 +15,7 @@ const map: Record<string, string> = {
 }
 
 const classes = computed(() =>
-  cn('clip-hud inline-block border px-2 py-1 font-arcade text-[7px] uppercase leading-none', map[props.status]),
+  cn('clip-hud inline-block border px-2 py-1 font-arcade text-[0.4375rem] uppercase leading-none', map[props.status]),
 )
 </script>
 

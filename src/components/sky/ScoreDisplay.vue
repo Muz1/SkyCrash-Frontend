@@ -26,7 +26,7 @@ const toneClass = computed(
 
 <template>
   <div :class="cn('text-center', props.class)">
-    <p v-if="label" class="font-display text-[9px] uppercase tracking-[0.4em] text-muted-foreground">
+    <p v-if="label" class="font-display text-[0.5625rem] uppercase tracking-[0.4em] text-muted-foreground">
       {{ label }}
     </p>
     <p :class="cn('font-arcade text-2xl leading-tight sm:text-3xl', toneClass)">

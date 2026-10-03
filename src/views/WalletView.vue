@@ -62,7 +62,7 @@ onMounted(async () => {
         <p class="font-arcade text-4xl text-ember text-glow-ember sm:text-5xl">
           {{ (playerStore.profile?.creditBalance ?? 0).toLocaleString() }}
         </p>
-        <p class="mt-2 font-arcade text-[8px] uppercase tracking-[0.4em] text-muted-foreground">Arcade balance</p>
+        <p class="mt-2 font-arcade text-[0.5rem] uppercase tracking-[0.4em] text-muted-foreground">Arcade balance</p>
 
         <!-- Free credits only come from the spin wheel (its own page). -->
         <RouterLink
@@ -76,7 +76,7 @@ onMounted(async () => {
         </RouterLink>
         <div class="mt-2 flex justify-center"><SpinTimerChip /></div>
 
-        <p v-if="walletStore.errorMessage" class="mt-2 font-arcade text-[8px] uppercase tracking-[0.28em] text-danger">
+        <p v-if="walletStore.errorMessage" class="mt-2 font-arcade text-[0.5rem] uppercase tracking-[0.28em] text-danger">
           {{ walletStore.errorMessage }}
         </p>
 
@@ -90,16 +90,16 @@ onMounted(async () => {
       </p>
 
       <NeonPanel v-if="purchaseStatus" class="mt-6" :accent="purchaseStatus === 'success' ? 'lime' : 'ember'">
-        <p v-if="purchaseStatus === 'success' && isAwaitingCredit" class="font-arcade text-[10px] uppercase tracking-[0.2em] text-lime">
+        <p v-if="purchaseStatus === 'success' && isAwaitingCredit" class="font-arcade text-[0.625rem] uppercase tracking-[0.2em] text-lime">
           Payment received — waiting for credits to land…
         </p>
-        <p v-else-if="purchaseStatus === 'success' && wasCredited" class="font-arcade text-[10px] uppercase tracking-[0.2em] text-lime">
+        <p v-else-if="purchaseStatus === 'success' && wasCredited" class="font-arcade text-[0.625rem] uppercase tracking-[0.2em] text-lime">
           Purchase complete! Your balance is updated above.
         </p>
-        <p v-else-if="purchaseStatus === 'success'" class="font-arcade text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+        <p v-else-if="purchaseStatus === 'success'" class="font-arcade text-[0.625rem] uppercase tracking-[0.2em] text-muted-foreground">
           Payment is still processing — your credits will appear shortly. Refresh this page in a minute.
         </p>
-        <p v-else class="font-arcade text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+        <p v-else class="font-arcade text-[0.625rem] uppercase tracking-[0.2em] text-muted-foreground">
           Checkout was cancelled — no charge was made.
         </p>
       </NeonPanel>

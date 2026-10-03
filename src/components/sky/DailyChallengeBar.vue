@@ -53,7 +53,7 @@ onBeforeUnmount(() => {
     <div class="clip-hud flex items-center gap-3 border-2 border-lime/70 bg-void/90 px-3 py-2 text-foreground backdrop-blur [box-shadow:var(--glow-lime)]">
       <ChallengeBadgeIcon :badge-key="current.badgeKey" size="sm" />
       <div class="min-w-0 flex-1">
-        <p class="flex items-center gap-1.5 font-arcade text-[8px] uppercase tracking-[0.18em] text-lime">
+        <p class="flex items-center gap-1.5 font-arcade text-[0.5rem] uppercase tracking-[0.18em] text-lime">
           <Target class="h-3 w-3" aria-hidden="true" />
           {{ allDone ? 'All daily challenges done!' : `Daily challenge ${index % list.length + 1}/${list.length}` }}
         </p>
@@ -67,7 +67,7 @@ onBeforeUnmount(() => {
           <span class="hidden shrink-0 text-xs text-foreground/80 md:inline">· {{ challengeBadgeFor(current.badgeKey)?.name }}</span>
         </div>
       </div>
-      <RouterLink to="/missions" class="hidden shrink-0 font-arcade text-[8px] uppercase tracking-[0.15em] text-electric hover:text-foreground sm:block">
+      <RouterLink to="/missions" class="hidden shrink-0 font-arcade text-[0.5rem] uppercase tracking-[0.15em] text-electric hover:text-foreground sm:block">
         All missions
       </RouterLink>
       <button

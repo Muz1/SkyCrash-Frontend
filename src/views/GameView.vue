@@ -219,236 +219,240 @@ function crashChipClass(value: number) {
 
     <HudHeader />
 
-    <main class="relative z-10 mx-auto flex min-h-0 w-full max-w-6xl flex-1 flex-col px-3 sm:px-4">
-      <!-- round strip: number/phase, recent crash points, sound toggle -->
-      <div class="flex items-center gap-2">
-        <p class="shrink-0 text-[10px] uppercase tracking-[0.24em] text-muted-foreground sm:text-xs sm:tracking-[0.3em]">
-          #{{ gameStore.roundNumber ?? '—' }}<span class="hidden sm:inline"> · {{ phaseLabel }}</span>
-        </p>
-        <ul class="flex min-w-0 flex-1 gap-1.5 overflow-hidden [mask-image:linear-gradient(90deg,black_85%,transparent)]" aria-label="Recent crash points">
-          <li
-            v-for="(p, i) in gameStore.lastCrashPoints"
-            :key="`${i}-${p}`"
-            :class="['clip-hud shrink-0 border bg-void/60 px-2 py-0.5 font-arcade text-[8px]', crashChipClass(p)]"
-          >
-            {{ p.toFixed(2) }}x
-          </li>
-        </ul>
-        <LobbyFlightBoard
-          mode="chip"
-          :me="lobbyFlight.me.value"
-          :mates="lobbyFlight.mates.value"
-          :in-lobby="lobbyFlight.inLobby.value"
-          :lobby-name="lobbyFlight.lobbyName.value"
-          :multiplier="gameStore.currentMultiplier"
-        />
-        <button
-          type="button"
-          aria-label="How to play: replay the tutorial"
-          title="How to play"
-          class="grid h-8 w-8 shrink-0 place-items-center border-2 border-violet/50 bg-void/70 text-muted-foreground clip-hud transition-colors hover:border-electric hover:text-electric"
-          @click="tutorial.open()"
-        >
-          <CircleHelp class="h-3.5 w-3.5" aria-hidden="true" />
-        </button>
-        <button
-          type="button"
-          :aria-label="audioStore.effectsEnabled ? 'Mute plane and game sounds' : 'Unmute plane and game sounds'"
-          :aria-pressed="!audioStore.effectsEnabled"
-          :title="audioStore.effectsEnabled ? 'Mute plane and game sounds' : 'Unmute plane and game sounds'"
-          class="grid h-8 w-8 shrink-0 place-items-center border-2 border-violet/50 bg-void/70 text-muted-foreground clip-hud transition-colors hover:border-electric hover:text-electric"
-          @click="audioStore.toggleEffects()"
-        >
-          <Volume2 v-if="audioStore.effectsEnabled" class="h-3.5 w-3.5" aria-hidden="true" />
-          <VolumeX v-else class="h-3.5 w-3.5" aria-hidden="true" />
-        </button>
-      </div>
-
-      <HowToPlay compact class="mt-1.5" />
-
-      <FlightStage :craft="craft" :wingmen="lobbyFlight.mates.value" class="mt-1 min-h-[180px] flex-1">
-        <template #readout>
-          <div v-if="cashedOutThisRound" class="animate-sky-pop mt-3 text-center">
-            <p class="font-display text-xs font-black uppercase tracking-[0.3em] text-lime text-glow-lime sm:text-sm">
-              Cashed Out{{ gameStore.cashOutResult?.auto ? ' (Auto)' : '' }}
-            </p>
-            <p class="mt-1 font-arcade text-xl text-lime text-glow-lime sm:text-2xl">
-              +{{ (gameStore.cashOutResult?.payout ?? 0).toLocaleString() }}
-            </p>
-            <p class="font-arcade text-[8px] uppercase tracking-[0.4em] text-ember">
-              at {{ gameStore.cashOutResult?.cashOutMultiplier.toFixed(2) }}x
-            </p>
-          </div>
-          <p
-            v-else-if="flying && hasActiveBet && gameStore.myAutoCashoutTarget"
-            class="mt-2 inline-flex items-center gap-1.5 border border-electric/70 bg-void/70 px-2 py-0.5 font-arcade text-[8px] uppercase tracking-[0.2em] text-electric"
-          >
-            <Zap class="h-3 w-3" aria-hidden="true" /> Auto Cash Out at {{ gameStore.myAutoCashoutTarget.toFixed(2) }}x
+    <!-- phones/tablets: stage above controls. Wide screens: controls in a column beside the
+         stage, so the stage keeps the full height and nothing overlaps. -->
+    <div class="relative z-10 mx-auto flex min-h-0 w-full max-w-[110rem] flex-1 flex-col lg:flex-row lg:gap-4 lg:px-6">
+      <main class="relative z-10 flex min-h-0 min-w-0 flex-1 flex-col px-3 sm:px-4 lg:px-0">
+        <!-- round strip: number/phase, recent crash points, sound toggle -->
+        <div class="flex items-center gap-2">
+          <p class="shrink-0 text-[0.625rem] uppercase tracking-[0.24em] text-muted-foreground sm:text-xs sm:tracking-[0.3em]">
+            #{{ gameStore.roundNumber ?? '—' }}<span class="hidden sm:inline"> · {{ phaseLabel }}</span>
           </p>
-          <p
-            v-else-if="crashed"
-            class="animate-sky-pop mt-2 font-display text-sm font-black uppercase tracking-[0.24em] text-danger [text-shadow:0_0_16px_color-mix(in_oklab,var(--neon-red)_85%,transparent)] sm:text-lg"
+          <ul class="flex min-w-0 flex-1 gap-1.5 overflow-hidden [mask-image:linear-gradient(90deg,black_85%,transparent)]" aria-label="Recent crash points">
+            <li
+              v-for="(p, i) in gameStore.lastCrashPoints"
+              :key="`${i}-${p}`"
+              :class="['clip-hud shrink-0 border bg-void/60 px-2 py-0.5 font-arcade text-[0.5rem]', crashChipClass(p)]"
+            >
+              {{ p.toFixed(2) }}x
+            </li>
+          </ul>
+          <LobbyFlightBoard
+            mode="chip"
+            :me="lobbyFlight.me.value"
+            :mates="lobbyFlight.mates.value"
+            :in-lobby="lobbyFlight.inLobby.value"
+            :lobby-name="lobbyFlight.lobbyName.value"
+            :multiplier="gameStore.currentMultiplier"
+          />
+          <button
+            type="button"
+            aria-label="How to play: replay the tutorial"
+            title="How to play"
+            class="grid h-8 w-8 shrink-0 place-items-center border-2 border-violet/50 bg-void/70 text-muted-foreground clip-hud transition-colors hover:border-electric hover:text-electric"
+            @click="tutorial.open()"
           >
-            {{ hasActiveBet ? 'Flight Over' : 'Round Over' }}
-          </p>
-        </template>
-
-        <!-- me + my lobby-mates this round: panel on larger screens, tap-to-open chip on phones -->
-        <LobbyFlightBoard
-          :me="lobbyFlight.me.value"
-          :mates="lobbyFlight.mates.value"
-          :in-lobby="lobbyFlight.inLobby.value"
-          :lobby-name="lobbyFlight.lobbyName.value"
-          :multiplier="gameStore.currentMultiplier"
-        />
-      </FlightStage>
-    </main>
-
-    <!-- controls: one compact panel for every phase; bottom padding clears the nav dock's peek tab -->
-    <div class="relative z-20 px-3 pb-[calc(env(safe-area-inset-bottom)+2.25rem)] pt-2 sm:px-4">
-      <NeonPanel accent="magenta" class="mx-auto w-full max-w-4xl [&>div]:p-3 sm:[&>div]:p-4">
-        <div class="grid gap-3 md:grid-cols-[minmax(0,1fr)_minmax(240px,300px)] md:items-center md:gap-6">
-          <div class="min-w-0">
-            <div class="flex flex-wrap items-center gap-3">
-              <p class="hidden font-display text-sm font-black uppercase tracking-[0.2em] text-magenta text-glow-magenta sm:block">
-                New Flight
-              </p>
-              <RouterLink
-                to="/hangar"
-                :aria-label="`Your plane: ${getCraft(craft).name}. Open the hangar to change plane and sky`"
-                class="clip-hud ml-auto flex items-center gap-1.5 border-2 border-electric bg-void/70 py-1 pl-1 pr-2.5 text-electric transition-all hover:[box-shadow:var(--glow-blue)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-electric"
-              >
-                <img
-                  :src="getCraft(craft).src"
-                  alt=""
-                  width="1024"
-                  height="1024"
-                  class="h-6 w-6 object-contain"
-                  :style="{ transform: `rotate(${getCraft(craft).rotate}deg)` }"
-                />
-                <span class="flex flex-col leading-tight">
-                  <span class="font-arcade text-[7px] uppercase tracking-[0.15em] text-muted-foreground">Your plane</span>
-                  <span class="text-sm font-bold text-foreground">{{ getCraft(craft).name }} <span class="text-electric">· Change</span></span>
-                </span>
-              </RouterLink>
-              <SpinTimerChip />
-              <button
-                v-if="prompts.outOfCredits.value"
-                type="button"
-                class="flex items-center gap-1.5 border-2 border-ember px-2 py-1 font-arcade text-[8px] uppercase tracking-[0.15em] text-foreground [box-shadow:var(--glow-ember)] hover:bg-ember/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ember"
-                @click="prompts.openWheel"
-              >
-                <RotateCw class="h-3 w-3" aria-hidden="true" /> Out of credits?
-              </button>
-            </div>
-
-            <!-- quick amounts: single scrollable row so it never wraps onto extra lines -->
-            <div class="-mx-1 mt-1 flex gap-3 overflow-x-auto px-1 pb-0.5 [scrollbar-width:none] sm:mt-2 [&::-webkit-scrollbar]:hidden">
-              <button
-                v-for="v in BET_STEPS"
-                :key="v"
-                type="button"
-                :class="[
-                  'clip-hud shrink-0 border-2 px-3 py-1.5 font-arcade text-[9px] transition-all duration-150 active:translate-y-[1px]',
-                  betAmountInput === v
-                    ? 'border-ember text-ember [box-shadow:var(--glow-ember)]'
-                    : 'border-violet/50 text-muted-foreground hover:border-electric hover:text-electric',
-                ]"
-                @click="betAmountInput = v"
-              >
-                {{ formatBet(v) }}
-              </button>
-              <button
-                type="button"
-                class="clip-hud shrink-0 border-2 border-magenta/60 px-3 py-1.5 font-arcade text-[9px] text-magenta transition-all hover:[box-shadow:var(--glow-magenta)]"
-                @click="betAmountInput = credits"
-              >
-                Max
-              </button>
-            </div>
-
-            <div class="mt-2.5 flex flex-wrap items-end gap-x-6 gap-y-2">
-              <label class="block">
-                <span class="font-arcade text-[7px] uppercase tracking-[0.3em] text-muted-foreground">Bet Amount</span>
-                <input
-                  v-model.number="betAmountInput"
-                  type="number"
-                  inputmode="numeric"
-                  min="1"
-                  :max="credits"
-                  class="mt-1 block w-28 border-2 border-violet/50 bg-void/70 px-2 py-1 font-arcade text-base text-ember text-glow-ember focus:border-magenta focus:outline-none"
-                />
-              </label>
-              <AutoCashOutControl
-                v-model:enabled="autoCashoutEnabled"
-                v-model:target="autoCashoutTarget"
-                :locked="hasActiveBet"
-                :armed-target="gameStore.myAutoCashoutTarget"
-                :error="autoCashoutError"
-              />
-            </div>
-
-            <p v-if="gameStore.myBetStatus === 'Rejected'" class="mt-1.5 text-sm text-danger">
-              {{ gameStore.betRejectionReason }}
-            </p>
-            <p v-if="gameStore.cashOutStatus === 'Rejected'" class="mt-1.5 text-sm text-danger">
-              {{ gameStore.cashOutRejectionReason }}
-            </p>
-          </div>
-
-          <!-- the one button that matters, adapting to the round phase -->
-          <div class="flex flex-col gap-1.5">
-            <ArcadeButton
-              v-if="primaryAction === 'cashout'"
-              variant="cash"
-              size="xl"
-              class="w-full flex-col !gap-0 py-4"
-              :disabled="isCashingOut"
-              @click="runPrimaryAction"
-            >
-              <span>{{ isCashingOut ? 'Cashing out…' : 'Cash Out' }}</span>
-              <span class="font-arcade text-base sm:text-xl">+{{ potentialPayout.toLocaleString() }}</span>
-            </ArcadeButton>
-
-            <ArcadeButton
-              v-else-if="primaryAction === 'bet'"
-              size="xl"
-              variant="primary"
-              class="w-full"
-              :disabled="betInvalid || isPlacingBet"
-              @click="runPrimaryAction"
-            >
-              {{ isPlacingBet ? 'Placing…' : `Bet ${betAmountInput > 0 ? betAmountInput.toLocaleString() : ''}` }}
-            </ArcadeButton>
-
-            <div v-else-if="primaryAction === 'locked'" class="neon-panel clip-hud px-3 py-3 text-center">
-              <StatusBadge status="LIVE" />
-              <p class="mt-1.5 font-arcade text-xs text-ember text-glow-ember">{{ gameStore.myBetAmount }} locked in</p>
-              <p v-if="gameStore.myAutoCashoutTarget" class="mt-1 font-arcade text-[7px] uppercase tracking-[0.2em] text-electric">
-                Auto cashout at {{ gameStore.myAutoCashoutTarget.toFixed(2) }}x
-              </p>
-            </div>
-
-            <ArcadeButton
-              v-else
-              :variant="queuedForNextRound ? 'ghost' : 'magenta'"
-              size="lg"
-              class="w-full flex-col !gap-0.5"
-              :disabled="!queuedForNextRound && betInvalid"
-              @click="runPrimaryAction"
-            >
-              <span>{{ queuedForNextRound ? 'Cancel' : `Bet ${betAmountInput > 0 ? betAmountInput.toLocaleString() : ''}` }}</span>
-              <span class="font-arcade text-[8px] tracking-[0.2em]">
-                {{ queuedForNextRound ? 'Queued for next round' : 'Next round' }}
-              </span>
-            </ArcadeButton>
-
-            <p v-if="finePointer && primaryAction !== 'locked'" class="hidden text-center font-arcade text-[7px] uppercase tracking-[0.3em] text-muted-foreground md:block">
-              Press <kbd class="border border-violet/50 px-1">Space</kbd>
-            </p>
-          </div>
+            <CircleHelp class="h-3.5 w-3.5" aria-hidden="true" />
+          </button>
+          <button
+            type="button"
+            :aria-label="audioStore.effectsEnabled ? 'Mute plane and game sounds' : 'Unmute plane and game sounds'"
+            :aria-pressed="!audioStore.effectsEnabled"
+            :title="audioStore.effectsEnabled ? 'Mute plane and game sounds' : 'Unmute plane and game sounds'"
+            class="grid h-8 w-8 shrink-0 place-items-center border-2 border-violet/50 bg-void/70 text-muted-foreground clip-hud transition-colors hover:border-electric hover:text-electric"
+            @click="audioStore.toggleEffects()"
+          >
+            <Volume2 v-if="audioStore.effectsEnabled" class="h-3.5 w-3.5" aria-hidden="true" />
+            <VolumeX v-else class="h-3.5 w-3.5" aria-hidden="true" />
+          </button>
         </div>
-      </NeonPanel>
+
+        <HowToPlay compact class="mt-1.5" />
+
+        <FlightStage :craft="craft" :wingmen="lobbyFlight.mates.value" class="mt-1 min-h-[11.25rem] flex-1">
+          <template #readout>
+            <div v-if="cashedOutThisRound" class="animate-sky-pop mt-3 text-center">
+              <p class="font-display text-xs font-black uppercase tracking-[0.3em] text-lime text-glow-lime sm:text-sm">
+                Cashed Out{{ gameStore.cashOutResult?.auto ? ' (Auto)' : '' }}
+              </p>
+              <p class="mt-1 font-arcade text-xl text-lime text-glow-lime sm:text-2xl">
+                +{{ (gameStore.cashOutResult?.payout ?? 0).toLocaleString() }}
+              </p>
+              <p class="font-arcade text-[0.5rem] uppercase tracking-[0.4em] text-ember">
+                at {{ gameStore.cashOutResult?.cashOutMultiplier.toFixed(2) }}x
+              </p>
+            </div>
+            <p
+              v-else-if="flying && hasActiveBet && gameStore.myAutoCashoutTarget"
+              class="mt-2 inline-flex items-center gap-1.5 border border-electric/70 bg-void/70 px-2 py-0.5 font-arcade text-[0.5rem] uppercase tracking-[0.2em] text-electric"
+            >
+              <Zap class="h-3 w-3" aria-hidden="true" /> Auto Cash Out at {{ gameStore.myAutoCashoutTarget.toFixed(2) }}x
+            </p>
+            <p
+              v-else-if="crashed"
+              class="animate-sky-pop mt-2 font-display text-sm font-black uppercase tracking-[0.24em] text-danger [text-shadow:0_0_16px_color-mix(in_oklab,var(--neon-red)_85%,transparent)] sm:text-lg"
+            >
+              {{ hasActiveBet ? 'Flight Over' : 'Round Over' }}
+            </p>
+          </template>
+
+          <!-- me + my lobby-mates this round: panel on larger screens, tap-to-open chip on phones -->
+          <LobbyFlightBoard
+            :me="lobbyFlight.me.value"
+            :mates="lobbyFlight.mates.value"
+            :in-lobby="lobbyFlight.inLobby.value"
+            :lobby-name="lobbyFlight.lobbyName.value"
+            :multiplier="gameStore.currentMultiplier"
+          />
+        </FlightStage>
+      </main>
+
+      <!-- controls: one compact panel for every phase; bottom padding clears the nav dock's peek tab -->
+      <div class="relative z-20 px-3 pb-[calc(env(safe-area-inset-bottom)+2.25rem)] pt-2 sm:px-4 lg:flex lg:w-[24rem] lg:shrink-0 lg:flex-col lg:justify-center lg:overflow-y-auto lg:px-0 lg:pb-2 xl:w-[26rem]">
+        <NeonPanel accent="magenta" class="mx-auto w-full max-w-4xl lg:max-w-none [&>div]:p-3 sm:[&>div]:p-4">
+          <div class="grid gap-3 md:grid-cols-[minmax(0,1fr)_minmax(15rem,18.75rem)] md:items-center md:gap-6 lg:grid-cols-1 lg:gap-4">
+            <div class="min-w-0">
+              <div class="flex flex-wrap items-center gap-3">
+                <p class="hidden font-display text-sm font-black uppercase tracking-[0.2em] text-magenta text-glow-magenta sm:block">
+                  New Flight
+                </p>
+                <RouterLink
+                  to="/hangar"
+                  :aria-label="`Your plane: ${getCraft(craft).name}. Open the hangar to change plane and sky`"
+                  class="clip-hud ml-auto flex items-center gap-1.5 border-2 border-electric bg-void/70 py-1 pl-1 pr-2.5 text-electric transition-all hover:[box-shadow:var(--glow-blue)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-electric"
+                >
+                  <img
+                    :src="getCraft(craft).src"
+                    alt=""
+                    width="1024"
+                    height="1024"
+                    class="h-6 w-6 object-contain"
+                    :style="{ transform: `rotate(${getCraft(craft).rotate}deg)` }"
+                  />
+                  <span class="flex flex-col leading-tight">
+                    <span class="font-arcade text-[0.4375rem] uppercase tracking-[0.15em] text-muted-foreground">Your plane</span>
+                    <span class="text-sm font-bold text-foreground">{{ getCraft(craft).name }} <span class="text-electric">· Change</span></span>
+                  </span>
+                </RouterLink>
+                <SpinTimerChip />
+                <button
+                  v-if="prompts.outOfCredits.value"
+                  type="button"
+                  class="flex items-center gap-1.5 border-2 border-ember px-2 py-1 font-arcade text-[0.5rem] uppercase tracking-[0.15em] text-foreground [box-shadow:var(--glow-ember)] hover:bg-ember/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ember"
+                  @click="prompts.openWheel"
+                >
+                  <RotateCw class="h-3 w-3" aria-hidden="true" /> Out of credits?
+                </button>
+              </div>
+
+              <!-- quick amounts: single scrollable row so it never wraps onto extra lines -->
+              <div class="-mx-1 mt-1 flex gap-3 overflow-x-auto px-1 pb-0.5 [scrollbar-width:none] sm:mt-2 [&::-webkit-scrollbar]:hidden">
+                <button
+                  v-for="v in BET_STEPS"
+                  :key="v"
+                  type="button"
+                  :class="[
+                    'clip-hud shrink-0 border-2 px-3 py-1.5 font-arcade text-[0.5625rem] transition-all duration-150 active:translate-y-[1px]',
+                    betAmountInput === v
+                      ? 'border-ember text-ember [box-shadow:var(--glow-ember)]'
+                      : 'border-violet/50 text-muted-foreground hover:border-electric hover:text-electric',
+                  ]"
+                  @click="betAmountInput = v"
+                >
+                  {{ formatBet(v) }}
+                </button>
+                <button
+                  type="button"
+                  class="clip-hud shrink-0 border-2 border-magenta/60 px-3 py-1.5 font-arcade text-[0.5625rem] text-magenta transition-all hover:[box-shadow:var(--glow-magenta)]"
+                  @click="betAmountInput = credits"
+                >
+                  Max
+                </button>
+              </div>
+
+              <div class="mt-2.5 flex flex-wrap items-end gap-x-6 gap-y-2 lg:flex-col lg:items-stretch lg:gap-y-3">
+                <label class="block">
+                  <span class="font-arcade text-[0.4375rem] uppercase tracking-[0.3em] text-muted-foreground">Bet Amount</span>
+                  <input
+                    v-model.number="betAmountInput"
+                    type="number"
+                    inputmode="numeric"
+                    min="1"
+                    :max="credits"
+                    class="mt-1 block w-28 border-2 lg:w-full border-violet/50 bg-void/70 px-2 py-1 font-arcade text-base text-ember text-glow-ember focus:border-magenta focus:outline-none"
+                  />
+                </label>
+                <AutoCashOutControl
+                  v-model:enabled="autoCashoutEnabled"
+                  v-model:target="autoCashoutTarget"
+                  :locked="hasActiveBet"
+                  :armed-target="gameStore.myAutoCashoutTarget"
+                  :error="autoCashoutError"
+                />
+              </div>
+
+              <p v-if="gameStore.myBetStatus === 'Rejected'" class="mt-1.5 text-sm text-danger">
+                {{ gameStore.betRejectionReason }}
+              </p>
+              <p v-if="gameStore.cashOutStatus === 'Rejected'" class="mt-1.5 text-sm text-danger">
+                {{ gameStore.cashOutRejectionReason }}
+              </p>
+            </div>
+
+            <!-- the one button that matters, adapting to the round phase -->
+            <div class="flex flex-col gap-1.5">
+              <ArcadeButton
+                v-if="primaryAction === 'cashout'"
+                variant="cash"
+                size="xl"
+                class="w-full flex-col !gap-0 py-4"
+                :disabled="isCashingOut"
+                @click="runPrimaryAction"
+              >
+                <span>{{ isCashingOut ? 'Cashing out…' : 'Cash Out' }}</span>
+                <span class="font-arcade text-base sm:text-xl">+{{ potentialPayout.toLocaleString() }}</span>
+              </ArcadeButton>
+
+              <ArcadeButton
+                v-else-if="primaryAction === 'bet'"
+                size="xl"
+                variant="primary"
+                class="w-full"
+                :disabled="betInvalid || isPlacingBet"
+                @click="runPrimaryAction"
+              >
+                {{ isPlacingBet ? 'Placing…' : `Bet ${betAmountInput > 0 ? betAmountInput.toLocaleString() : ''}` }}
+              </ArcadeButton>
+
+              <div v-else-if="primaryAction === 'locked'" class="neon-panel clip-hud px-3 py-3 text-center">
+                <StatusBadge status="LIVE" />
+                <p class="mt-1.5 font-arcade text-xs text-ember text-glow-ember">{{ gameStore.myBetAmount }} locked in</p>
+                <p v-if="gameStore.myAutoCashoutTarget" class="mt-1 font-arcade text-[0.4375rem] uppercase tracking-[0.2em] text-electric">
+                  Auto cashout at {{ gameStore.myAutoCashoutTarget.toFixed(2) }}x
+                </p>
+              </div>
+
+              <ArcadeButton
+                v-else
+                :variant="queuedForNextRound ? 'ghost' : 'magenta'"
+                size="lg"
+                class="w-full flex-col !gap-0.5"
+                :disabled="!queuedForNextRound && betInvalid"
+                @click="runPrimaryAction"
+              >
+                <span>{{ queuedForNextRound ? 'Cancel' : `Bet ${betAmountInput > 0 ? betAmountInput.toLocaleString() : ''}` }}</span>
+                <span class="font-arcade text-[0.5rem] tracking-[0.2em]">
+                  {{ queuedForNextRound ? 'Queued for next round' : 'Next round' }}
+                </span>
+              </ArcadeButton>
+
+              <p v-if="finePointer && primaryAction !== 'locked'" class="hidden text-center font-arcade text-[0.4375rem] uppercase tracking-[0.3em] text-muted-foreground md:block">
+                Press <kbd class="border border-violet/50 px-1">Space</kbd>
+              </p>
+            </div>
+          </div>
+        </NeonPanel>
+      </div>
     </div>
 
     <NavDock />

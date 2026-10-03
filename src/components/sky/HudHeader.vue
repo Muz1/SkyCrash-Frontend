@@ -72,13 +72,13 @@ async function closeSound() {
       <template v-if="!authStore.isAuthenticated">
         <RouterLink
           to="/login"
-          class="clip-hud border-2 border-electric/70 bg-void/70 px-3 py-2 font-display text-[10px] font-black uppercase tracking-[0.18em] text-electric transition-all hover:[box-shadow:var(--glow-blue)]"
+          class="clip-hud border-2 border-electric/70 bg-void/70 px-3 py-2 font-display text-[0.625rem] font-black uppercase tracking-[0.18em] text-electric transition-all hover:[box-shadow:var(--glow-blue)]"
         >
           Login
         </RouterLink>
         <RouterLink
           to="/register"
-          class="clip-hud border-2 border-magenta/70 bg-void/70 px-3 py-2 font-display text-[10px] font-black uppercase tracking-[0.18em] text-magenta transition-all hover:[box-shadow:var(--glow-magenta)]"
+          class="clip-hud border-2 border-magenta/70 bg-void/70 px-3 py-2 font-display text-[0.625rem] font-black uppercase tracking-[0.18em] text-magenta transition-all hover:[box-shadow:var(--glow-magenta)]"
         >
           Create Account
         </RouterLink>
@@ -107,7 +107,7 @@ async function closeSound() {
         class="clip-hud flex h-9 shrink-0 items-center gap-1.5 border-2 border-lime/70 bg-void/70 px-2.5 text-lime transition-all hover:[box-shadow:var(--glow-lime)]"
       >
         <ShoppingCart class="h-4 w-4" aria-hidden="true" />
-        <span class="hidden font-arcade text-[8px] uppercase tracking-[0.15em] sm:inline">Buy credits</span>
+        <span class="hidden font-arcade text-[0.5rem] uppercase tracking-[0.15em] sm:inline">Buy credits</span>
       </RouterLink>
       <RouterLink to="/wallet" aria-label="Wallet" class="transition-transform hover:-translate-y-0.5">
         <CreditDisplay :credits="playerStore.profile?.creditBalance ?? 0" />

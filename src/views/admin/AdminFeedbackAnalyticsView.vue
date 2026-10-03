@@ -157,7 +157,7 @@ async function save() {
                 <input v-model.number="draft.rewardCredits" type="number" min="0" max="10000" class="adm-input adm-num w-full" />
               </label>
             </div>
-            <label class="flex cursor-pointer items-center gap-3 text-[16px] font-bold text-[var(--adm-text)]">
+            <label class="flex cursor-pointer items-center gap-3 text-[1rem] font-bold text-[var(--adm-text)]">
               <input v-model="draft.rewardsEnabled" type="checkbox" class="h-5 w-5 accent-[var(--neon-lime)]" />
               Pay the reward for feedback
               <span class="font-normal text-[var(--adm-text-3)]">{{ draft.rewardsEnabled ? '(on)' : '(off: feedback is still collected, with no credits)' }}</span>

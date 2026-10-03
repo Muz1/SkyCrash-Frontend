@@ -34,6 +34,6 @@ async function exportPdf() {
       <FileDown aria-hidden="true" />
       {{ isExporting ? 'Exporting…' : 'Export PDF' }}
     </AdminButton>
-    <p v-if="error" class="absolute top-full mt-1 whitespace-nowrap text-[13px] font-semibold text-[oklch(0.72_0.19_22)]">{{ error }}</p>
+    <p v-if="error" class="absolute top-full mt-1 whitespace-nowrap text-[0.8125rem] font-semibold text-[oklch(0.72_0.19_22)]">{{ error }}</p>
   </div>
 </template>

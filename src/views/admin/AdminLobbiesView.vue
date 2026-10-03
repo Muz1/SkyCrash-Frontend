@@ -53,7 +53,7 @@ onMounted(load)
               <span class="adm-label">Maximum players</span>
               <div class="flex items-center gap-4">
                 <input v-model.number="maxPlayers" type="range" min="2" max="20" class="flex-1 accent-[var(--neon-blue)]" aria-label="Maximum players per lobby" />
-                <span class="adm-num w-24 text-[26px] font-bold text-[var(--adm-text)]">{{ maxPlayers }} / {{ maxPlayers }}</span>
+                <span class="adm-num w-24 text-[1.625rem] font-bold text-[var(--adm-text)]">{{ maxPlayers }} / {{ maxPlayers }}</span>
               </div>
             </label>
             <p class="adm-note">Players see e.g. “{{ Math.min(3, maxPlayers) }} / {{ maxPlayers }} PLAYERS” and a LOBBY FULL state when it’s reached.</p>

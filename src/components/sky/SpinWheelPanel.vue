@@ -162,7 +162,7 @@ onBeforeUnmount(() => {
           <span
             v-for="(value, i) in prizes"
             :key="i"
-            class="absolute font-arcade text-[10px] text-foreground [text-shadow:0_2px_3px_var(--bg-void)] sm:text-sm"
+            class="absolute font-arcade text-[0.625rem] text-foreground [text-shadow:0_2px_3px_var(--bg-void)] sm:text-sm"
             :style="labelStyle(i)"
             aria-hidden="true"
           >
@@ -190,10 +190,10 @@ onBeforeUnmount(() => {
         >
           +{{ prize.toLocaleString() }} credits!
         </p>
-        <p v-else class="font-arcade text-[10px] uppercase leading-relaxed text-foreground/85">
+        <p v-else class="font-arcade text-[0.625rem] uppercase leading-relaxed text-foreground/85">
           {{ spinning ? 'Spinning…' : 'Spin to earn arcade credits' }}
         </p>
-        <p class="mt-2 font-arcade text-[10px] uppercase text-ember">
+        <p class="mt-2 font-arcade text-[0.625rem] uppercase text-ember">
           Balance {{ (playerStore.profile?.creditBalance ?? 0).toLocaleString() }}
         </p>
       </div>
@@ -230,7 +230,7 @@ onBeforeUnmount(() => {
 
       <!-- what's on the wheel, and how likely each prize is -->
       <div v-if="prizeTable.length" class="mt-3 w-full text-left md:mt-6">
-        <p class="font-arcade text-[8px] uppercase tracking-[0.25em] text-muted-foreground">
+        <p class="font-arcade text-[0.5rem] uppercase tracking-[0.25em] text-muted-foreground">
           Prizes &amp; odds per spin
         </p>
         <ul class="mt-1 grid grid-cols-2 gap-x-4">
@@ -241,7 +241,7 @@ onBeforeUnmount(() => {
           >
             <span
               :class="[
-                'font-arcade text-[10px] tabular-nums',
+                'font-arcade text-[0.625rem] tabular-nums',
                 row.prize >= 2500 ? 'text-ember' : 'text-foreground',
               ]"
               >{{ row.prize.toLocaleString() }}</span

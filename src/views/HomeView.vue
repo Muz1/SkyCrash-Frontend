@@ -100,12 +100,12 @@ onMounted(() => {
       <HowToPlay class="mt-[clamp(0.75rem,3dvh,1.5rem)]" />
       <RouterLink
         to="/game?tutorial=1"
-        class="mt-2 font-arcade text-[9px] uppercase tracking-[0.2em] text-electric underline-offset-4 hover:text-foreground hover:underline"
+        class="mt-2 font-arcade text-[0.5625rem] uppercase tracking-[0.2em] text-electric underline-offset-4 hover:text-foreground hover:underline"
       >
         Watch the full tutorial
       </RouterLink>
 
-      <p class="mt-4 font-arcade text-[8px] uppercase tracking-[0.3em] text-violet [@media(max-height:900px)]:hidden">
+      <p class="mt-4 font-arcade text-[0.5rem] uppercase tracking-[0.3em] text-violet [@media(max-height:900px)]:hidden">
         High risk. High thrill. Beat the sky.
       </p>
     </div>

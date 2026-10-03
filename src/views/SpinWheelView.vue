@@ -18,7 +18,7 @@ import SpinWheelPanel from '@/components/sky/SpinWheelPanel.vue'
       <SpinWheelPanel class="mt-2 sm:mt-4" />
       <RouterLink
         to="/game"
-        class="mt-2 font-arcade text-[10px] uppercase tracking-[0.2em] text-electric hover:text-foreground sm:mt-4"
+        class="mt-2 font-arcade text-[0.625rem] uppercase tracking-[0.2em] text-electric hover:text-foreground sm:mt-4"
       >
         ← Back to the game
       </RouterLink>

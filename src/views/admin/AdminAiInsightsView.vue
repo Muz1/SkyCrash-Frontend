@@ -46,7 +46,7 @@ const sentimentTone = { Positive: 'success', Negative: 'danger', Mixed: 'warning
           <RouterLink
             v-if="data.insights.source !== 'gemini'"
             to="/admin/feedback/keywords"
-            class="text-[14px] font-bold text-[var(--adm-accent)] underline-offset-2 hover:underline"
+            class="text-[0.875rem] font-bold text-[var(--adm-accent)] underline-offset-2 hover:underline"
           >
             Edit keywords
           </RouterLink>
@@ -56,7 +56,7 @@ const sentimentTone = { Positive: 'success', Negative: 'danger', Mixed: 'warning
           You can change the themes and keywords on the Feedback Keywords page.
         </p>
         <p v-if="data.insights.warning" class="adm-callout mb-4"><CircleAlert aria-hidden="true" />{{ data.insights.warning }}</p>
-        <p class="flex gap-3 text-[18px] font-semibold leading-relaxed text-[var(--adm-text)]">
+        <p class="flex gap-3 text-[1.125rem] font-semibold leading-relaxed text-[var(--adm-text)]">
           <Sparkles class="mt-1 h-5 w-5 shrink-0 text-[var(--neon-magenta)]" aria-hidden="true" />
           {{ data.insights.summary || 'No written feedback in this range yet.' }}
         </p>
@@ -76,9 +76,9 @@ const sentimentTone = { Positive: 'success', Negative: 'danger', Mixed: 'warning
       <div v-if="data.insights.clusters.length" class="adm-grid-2">
         <AdminPanel v-for="c in data.insights.clusters" :key="c.title" :title="c.title" :caption="plural(c.mentions, 'mention')" accent="violet">
           <template #actions><AdminPill :label="c.sentiment" :tone="sentimentTone[c.sentiment]" /></template>
-          <p class="text-[16px] leading-relaxed text-[var(--adm-text)]"><strong>Suggested action:</strong> {{ c.suggestion }}</p>
+          <p class="text-[1rem] leading-relaxed text-[var(--adm-text)]"><strong>Suggested action:</strong> {{ c.suggestion }}</p>
           <ul v-if="c.examples.length" class="mt-3 space-y-2">
-            <li v-for="ex in c.examples" :key="ex" class="flex gap-2 text-[15px] italic leading-relaxed text-[var(--adm-text-2)]">
+            <li v-for="ex in c.examples" :key="ex" class="flex gap-2 text-[0.9375rem] italic leading-relaxed text-[var(--adm-text-2)]">
               <Quote class="mt-1 h-4 w-4 shrink-0 opacity-60" aria-hidden="true" /> {{ ex }}
             </li>
           </ul>

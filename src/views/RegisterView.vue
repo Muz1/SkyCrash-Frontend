@@ -113,20 +113,20 @@ async function handleSubmit() {
         <div class="mt-7 space-y-4">
           <div>
             <ArcadeField v-model="username" label="Username" placeholder="pilot_name" required />
-            <p v-if="usernameStatus === 'checking'" class="mt-1 text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+            <p v-if="usernameStatus === 'checking'" class="mt-1 text-[0.625rem] uppercase tracking-[0.2em] text-muted-foreground">
               Checking availability…
             </p>
-            <p v-else-if="usernameStatus === 'available'" class="mt-1 text-[10px] uppercase tracking-[0.2em] text-lime">
+            <p v-else-if="usernameStatus === 'available'" class="mt-1 text-[0.625rem] uppercase tracking-[0.2em] text-lime">
               Available
             </p>
             <div v-else-if="usernameStatus === 'taken'" class="mt-1.5">
-              <p class="text-[10px] uppercase tracking-[0.2em] text-danger">That username is already taken.</p>
+              <p class="text-[0.625rem] uppercase tracking-[0.2em] text-danger">That username is already taken.</p>
               <div v-if="usernameSuggestions.length > 0" class="mt-1.5 flex flex-wrap gap-1.5">
                 <button
                   v-for="suggestion in usernameSuggestions"
                   :key="suggestion"
                   type="button"
-                  class="clip-hud border border-electric/50 px-2 py-1 text-[10px] text-electric transition-all hover:[box-shadow:var(--glow-blue)]"
+                  class="clip-hud border border-electric/50 px-2 py-1 text-[0.625rem] text-electric transition-all hover:[box-shadow:var(--glow-blue)]"
                   @click="applySuggestion(suggestion)"
                 >
                   {{ suggestion }}
@@ -153,7 +153,7 @@ async function handleSubmit() {
           </button>
         </div>
 
-        <p v-if="errorMessage" role="alert" class="mt-4 font-arcade text-[8px] uppercase leading-relaxed text-danger">
+        <p v-if="errorMessage" role="alert" class="mt-4 font-arcade text-[0.5rem] uppercase leading-relaxed text-danger">
           {{ errorMessage }}
         </p>
 
