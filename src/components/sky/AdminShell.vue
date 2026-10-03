@@ -1,5 +1,10 @@
+<script lang="ts">
+/** Sidebar scroll position, kept across admin pages. */
+const sidebarScroll = { top: 0, left: 0 }
+</script>
+
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { LogOut, Moon, Sun } from '@lucide/vue'
 import { useAuthStore } from '@/stores/AuthStore'
@@ -36,6 +41,23 @@ watch(theme, (value) => {
     // Not persisted; the toggle still works for this page view.
   }
 })
+
+// Every admin page renders its own AdminShell, so the sidebar is rebuilt on each navigation.
+// Remember how far it was scrolled (module-level, shared by all instances) and put it back,
+// so picking a report lower down the menu doesn't jump the menu back to the top.
+const sidebar = ref<HTMLElement | null>(null)
+// (On narrow screens the menu becomes a sideways-scrolling row, hence left as well.)
+onMounted(() => {
+  if (!sidebar.value) return
+  sidebar.value.scrollTop = sidebarScroll.top
+  sidebar.value.scrollLeft = sidebarScroll.left
+})
+function rememberSidebarScroll() {
+  if (!sidebar.value) return
+  sidebarScroll.top = sidebar.value.scrollTop
+  sidebarScroll.left = sidebar.value.scrollLeft
+}
+onBeforeUnmount(rememberSidebarScroll)
 
 function handleLogout() {
   authStore.logout()
@@ -78,7 +100,7 @@ function handleLogout() {
     </header>
 
     <div class="adm-layout">
-      <aside class="adm-sidebar">
+      <aside ref="sidebar" class="adm-sidebar" @scroll.passive="rememberSidebarScroll">
         <AdminTabs />
       </aside>
       <main class="adm-main">
