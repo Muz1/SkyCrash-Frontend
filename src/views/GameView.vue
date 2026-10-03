@@ -219,10 +219,10 @@ function crashChipClass(value: number) {
 
     <HudHeader />
 
-    <!-- phones/tablets: stage above controls. Wide screens: controls in a column beside the
-         stage, so the stage keeps the full height and nothing overlaps. -->
-    <div class="relative z-10 mx-auto flex min-h-0 w-full max-w-[110rem] flex-1 flex-col lg:flex-row lg:gap-4 lg:px-6">
-      <main class="relative z-10 flex min-h-0 min-w-0 flex-1 flex-col px-3 sm:px-4 lg:px-0">
+    <!-- stage above, controls below on every device. The stage always keeps at least 40% of the
+         screen height; when space is tight the controls scroll inside themselves instead. -->
+    <div class="relative z-10 mx-auto flex min-h-0 w-full max-w-[90rem] flex-1 flex-col">
+      <main class="relative z-10 flex min-h-[40dvh] min-w-0 flex-1 flex-col px-3 sm:px-4">
         <!-- round strip: number/phase, recent crash points, sound toggle -->
         <div class="flex items-center gap-2">
           <p class="shrink-0 text-[0.625rem] uppercase tracking-[0.24em] text-muted-foreground sm:text-xs sm:tracking-[0.3em]">
@@ -308,32 +308,57 @@ function crashChipClass(value: number) {
       </main>
 
       <!-- controls: one compact panel for every phase; bottom padding clears the nav dock's peek tab -->
-      <div class="relative z-20 px-3 pb-[calc(env(safe-area-inset-bottom)+2.25rem)] pt-2 sm:px-4 lg:flex lg:w-[24rem] lg:shrink-0 lg:flex-col lg:justify-center lg:overflow-y-auto lg:px-0 lg:pb-2 xl:w-[26rem]">
-        <NeonPanel accent="magenta" class="mx-auto w-full max-w-4xl lg:max-w-none [&>div]:p-3 sm:[&>div]:p-4">
-          <div class="grid gap-3 md:grid-cols-[minmax(0,1fr)_minmax(15rem,18.75rem)] md:items-center md:gap-6 lg:grid-cols-1 lg:gap-4">
-            <div class="min-w-0">
-              <div class="flex flex-wrap items-center gap-3">
-                <p class="hidden font-display text-sm font-black uppercase tracking-[0.2em] text-magenta text-glow-magenta sm:block">
-                  New Flight
-                </p>
-                <RouterLink
-                  to="/hangar"
-                  :aria-label="`Your plane: ${getCraft(craft).name}. Open the hangar to change plane and sky`"
-                  class="clip-hud ml-auto flex items-center gap-1.5 border-2 border-electric bg-void/70 py-1 pl-1 pr-2.5 text-electric transition-all hover:[box-shadow:var(--glow-blue)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-electric"
-                >
-                  <img
-                    :src="getCraft(craft).src"
-                    alt=""
-                    width="1024"
-                    height="1024"
-                    class="h-6 w-6 object-contain"
-                    :style="{ transform: `rotate(${getCraft(craft).rotate}deg)` }"
+      <div class="relative z-20 min-h-0 overflow-y-auto px-3 pb-[calc(env(safe-area-inset-bottom)+2.25rem)] pt-2 sm:px-4">
+        <NeonPanel accent="magenta" class="mx-auto w-full max-w-[64rem] [&>div]:p-2.5 sm:[&>div]:p-3">
+          <div class="grid gap-2.5 md:grid-cols-[minmax(0,1fr)_minmax(13rem,16rem)] md:items-center md:gap-5">
+            <div class="min-w-0 space-y-2">
+              <!-- bet amount + quick amounts on one line; the chips scroll rather than wrap -->
+              <div class="flex items-center gap-2">
+                <label class="shrink-0">
+                  <span class="sr-only">Bet amount</span>
+                  <input
+                    v-model.number="betAmountInput"
+                    type="number"
+                    inputmode="numeric"
+                    min="1"
+                    :max="credits"
+                    class="block w-24 border-2 border-violet/50 bg-void/70 px-2 py-1 font-arcade text-sm text-ember text-glow-ember focus:border-magenta focus:outline-none sm:w-28 sm:text-base"
                   />
-                  <span class="flex flex-col leading-tight">
-                    <span class="font-arcade text-[0.4375rem] uppercase tracking-[0.15em] text-muted-foreground">Your plane</span>
-                    <span class="text-sm font-bold text-foreground">{{ getCraft(craft).name }} <span class="text-electric">· Change</span></span>
-                  </span>
-                </RouterLink>
+                </label>
+                <div class="-my-1 flex min-w-0 flex-1 gap-2 overflow-x-auto py-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                  <button
+                    v-for="v in BET_STEPS"
+                    :key="v"
+                    type="button"
+                    :class="[
+                      'clip-hud shrink-0 border-2 px-2.5 py-1.5 font-arcade text-[0.5625rem] transition-all duration-150 active:translate-y-[1px]',
+                      betAmountInput === v
+                        ? 'border-ember text-ember [box-shadow:var(--glow-ember)]'
+                        : 'border-violet/50 text-muted-foreground hover:border-electric hover:text-electric',
+                    ]"
+                    @click="betAmountInput = v"
+                  >
+                    {{ formatBet(v) }}
+                  </button>
+                  <button
+                    type="button"
+                    class="clip-hud shrink-0 border-2 border-magenta/60 px-2.5 py-1.5 font-arcade text-[0.5625rem] text-magenta transition-all hover:[box-shadow:var(--glow-magenta)]"
+                    @click="betAmountInput = credits"
+                  >
+                    Max
+                  </button>
+                </div>
+              </div>
+
+              <!-- auto cash out, free-spin status and plane on the second line -->
+              <div class="flex flex-wrap items-center gap-2">
+                <AutoCashOutControl
+                  v-model:enabled="autoCashoutEnabled"
+                  v-model:target="autoCashoutTarget"
+                  :locked="hasActiveBet"
+                  :armed-target="gameStore.myAutoCashoutTarget"
+                  :error="autoCashoutError"
+                />
                 <SpinTimerChip />
                 <button
                   v-if="prompts.outOfCredits.value"
@@ -343,58 +368,27 @@ function crashChipClass(value: number) {
                 >
                   <RotateCw class="h-3 w-3" aria-hidden="true" /> Out of credits?
                 </button>
-              </div>
-
-              <!-- quick amounts: single scrollable row so it never wraps onto extra lines -->
-              <div class="-mx-1 mt-1 flex gap-3 overflow-x-auto px-1 pb-0.5 [scrollbar-width:none] sm:mt-2 [&::-webkit-scrollbar]:hidden">
-                <button
-                  v-for="v in BET_STEPS"
-                  :key="v"
-                  type="button"
-                  :class="[
-                    'clip-hud shrink-0 border-2 px-3 py-1.5 font-arcade text-[0.5625rem] transition-all duration-150 active:translate-y-[1px]',
-                    betAmountInput === v
-                      ? 'border-ember text-ember [box-shadow:var(--glow-ember)]'
-                      : 'border-violet/50 text-muted-foreground hover:border-electric hover:text-electric',
-                  ]"
-                  @click="betAmountInput = v"
+                <RouterLink
+                  to="/hangar"
+                  :aria-label="`Your plane: ${getCraft(craft).name}. Open the hangar to change plane and sky`"
+                  class="clip-hud ml-auto hidden items-center gap-1.5 border-2 border-electric bg-void/70 py-0.5 pl-1 pr-2.5 text-electric transition-all hover:[box-shadow:var(--glow-blue)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-electric sm:flex"
                 >
-                  {{ formatBet(v) }}
-                </button>
-                <button
-                  type="button"
-                  class="clip-hud shrink-0 border-2 border-magenta/60 px-3 py-1.5 font-arcade text-[0.5625rem] text-magenta transition-all hover:[box-shadow:var(--glow-magenta)]"
-                  @click="betAmountInput = credits"
-                >
-                  Max
-                </button>
-              </div>
-
-              <div class="mt-2.5 flex flex-wrap items-end gap-x-6 gap-y-2 lg:flex-col lg:items-stretch lg:gap-y-3">
-                <label class="block">
-                  <span class="font-arcade text-[0.4375rem] uppercase tracking-[0.3em] text-muted-foreground">Bet Amount</span>
-                  <input
-                    v-model.number="betAmountInput"
-                    type="number"
-                    inputmode="numeric"
-                    min="1"
-                    :max="credits"
-                    class="mt-1 block w-28 border-2 lg:w-full border-violet/50 bg-void/70 px-2 py-1 font-arcade text-base text-ember text-glow-ember focus:border-magenta focus:outline-none"
+                  <img
+                    :src="getCraft(craft).src"
+                    alt=""
+                    width="1024"
+                    height="1024"
+                    class="h-5 w-5 object-contain"
+                    :style="{ transform: `rotate(${getCraft(craft).rotate}deg)` }"
                   />
-                </label>
-                <AutoCashOutControl
-                  v-model:enabled="autoCashoutEnabled"
-                  v-model:target="autoCashoutTarget"
-                  :locked="hasActiveBet"
-                  :armed-target="gameStore.myAutoCashoutTarget"
-                  :error="autoCashoutError"
-                />
+                  <span class="text-sm font-bold text-foreground">{{ getCraft(craft).name }} <span class="text-electric">· Change</span></span>
+                </RouterLink>
               </div>
 
-              <p v-if="gameStore.myBetStatus === 'Rejected'" class="mt-1.5 text-sm text-danger">
+              <p v-if="gameStore.myBetStatus === 'Rejected'" class="text-sm text-danger">
                 {{ gameStore.betRejectionReason }}
               </p>
-              <p v-if="gameStore.cashOutStatus === 'Rejected'" class="mt-1.5 text-sm text-danger">
+              <p v-if="gameStore.cashOutStatus === 'Rejected'" class="text-sm text-danger">
                 {{ gameStore.cashOutRejectionReason }}
               </p>
             </div>
@@ -405,7 +399,7 @@ function crashChipClass(value: number) {
                 v-if="primaryAction === 'cashout'"
                 variant="cash"
                 size="xl"
-                class="w-full flex-col !gap-0 py-4"
+                class="w-full flex-col !gap-0 py-2 sm:py-3"
                 :disabled="isCashingOut"
                 @click="runPrimaryAction"
               >

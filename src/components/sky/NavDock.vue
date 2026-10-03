@@ -33,7 +33,7 @@ function glows(to: string) {
     aria-label="Sky Crash navigation"
     class="relative z-30 flex shrink-0 justify-center px-2 pb-[max(0.6rem,env(safe-area-inset-bottom))] pt-2 sm:pb-4"
   >
-    <ul class="flex items-end gap-1 sm:gap-3">
+    <ul class="flex items-end gap-0.5 min-[400px]:gap-1 sm:gap-3">
       <li v-for="item in items" :key="item.to" :class="glows(item.to) ? 'hangar-glow' : undefined">
         <RouterLink
           :to="item.to"
@@ -43,7 +43,7 @@ function glows(to: string) {
               'group grid place-items-center gap-1 border-2 transition-all duration-150 clip-hud',
               item.hero
                 ? 'h-14 w-14 border-[oklch(0.98_0.05_90)] bg-[image:var(--grad-sunset)] text-void [text-shadow:0_1px_0_color-mix(in_oklab,white_50%,transparent)] [box-shadow:var(--glow-ember),0_0_0_4px_oklch(0.11_0.06_285_/_0.85)] hover:brightness-125 sm:h-[4.5rem] sm:w-[4.5rem]'
-                : 'h-11 w-12 border-violet/60 bg-void/70 text-muted-foreground hover:border-electric hover:text-electric hover:[box-shadow:var(--glow-blue)] sm:h-14 sm:w-16',
+                : 'h-11 w-11 border-violet/60 bg-void/70 text-muted-foreground hover:border-electric hover:text-electric hover:[box-shadow:var(--glow-blue)] min-[400px]:w-12 sm:h-14 sm:w-16',
               glows(item.to) && !isActive(item.to) ? 'border-lime text-lime' : '',
               isActive(item.to) ? '!border-magenta !text-magenta [box-shadow:var(--glow-magenta)]' : '',
             )

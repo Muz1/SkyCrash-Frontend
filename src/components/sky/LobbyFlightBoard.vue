@@ -68,8 +68,8 @@ function statusClass(row: FlightRow) {
   <div
     :class="
       mode === 'panel'
-        ? 'absolute left-0 top-24 z-10 hidden max-h-[calc(100%-7rem)] flex-col sm:flex'
-        : 'shrink-0 sm:hidden'
+        ? 'absolute left-0 top-24 z-10 hidden max-h-[calc(100%-7rem)] flex-col lg:flex'
+        : 'shrink-0 lg:hidden'
     "
   >
     <button
