@@ -1,4 +1,5 @@
 import api from './api'
+import type { PlayerInsightsReport, PlayerRetentionReport } from '@/types/retention'
 import type {
   ActiveLobby,
   AdminInvitation,
@@ -128,4 +129,13 @@ export async function getAdvisorRecommendations(query: ReportQuery): Promise<Adv
 
 export async function askAdvisor(messages: AdvisorChatMessage[], query: ReportQuery): Promise<string> {
   return (await api.post<{ reply: string }>('/admin/advisor/chat', { messages }, { params: params(query) })).data.reply
+}
+
+// Player Retention and Player Insights: computed "as of now" across all players (no range).
+export async function getPlayerRetention(): Promise<PlayerRetentionReport> {
+  return (await api.get<PlayerRetentionReport>('/admin/analytics/retention')).data
+}
+
+export async function getPlayerInsights(): Promise<PlayerInsightsReport> {
+  return (await api.get<PlayerInsightsReport>('/admin/analytics/player-insights')).data
 }

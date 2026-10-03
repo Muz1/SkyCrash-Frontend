@@ -1,18 +1,31 @@
 <script setup lang="ts">
-import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
-import { Star, X, Gift, Check, Coins } from '@lucide/vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
+import { Star, X, Gift, Check, Coins, Plane, ShieldCheck } from '@lucide/vue'
 import ArcadeButton from './ArcadeButton.vue'
+import ChoiceCards from './ChoiceCards.vue'
+import PilotProfileStep from './PilotProfileStep.vue'
 import { cn } from '@/lib/cn'
-import { FEATURE_REQUESTS, type FeatureRequestTag } from '@/types/feedback'
+import {
+  FEATURE_REQUESTS,
+  INSIGHT_OPTIONS,
+  type FeatureRequestTag,
+  type PilotStep,
+  type PlayerInsightAnswers,
+} from '@/types/feedback'
+import { getMyInsightAnswers } from '@/services/feedbackService'
 import type { useFeedbackForm } from '@/composables/useFeedbackPrompt'
 
 /**
  * The feedback dialog, in three stages:
  *   ask  — a small yes/no box ("Would you like to give us some feedback?")
- *   form — 1–5 stars (required), two free-text answers, feature wishes, a comment
+ *   form — a short "flight" of steps:
+ *            1. Your feedback: 1–5 stars (required), likes, what to improve, wishes, a comment,
+ *               would you recommend us
+ *            2. Tell us about you: an optional intro the player can skip straight past
+ *            3–9. Optional pilot-profile steps (PilotProfileStep), each with Skip
  *   done — thank-you screen, with the credits earned when there were any
- * Credits are only promised while the server says a reward is available.
- * useFeedbackForm / useFeedbackPrompt decide when it opens and handle submission.
+ * The reward never depends on the optional steps. Credits are only promised while the server
+ * says a reward is available. useFeedbackForm / useFeedbackPrompt decide when it opens.
  */
 const props = withDefaults(
   defineProps<{
@@ -25,6 +38,20 @@ const props = withDefaults(
 
 const MAX_TEXT = 1000
 const RATING_LABELS = ['Poor', 'Meh', 'Okay', 'Good', 'Excellent']
+
+type StepKey = 'feedback' | 'intro' | PilotStep
+const STEPS: { key: StepKey; kicker: string; title: string }[] = [
+  { key: 'feedback', kicker: 'Pre-flight check', title: 'Your feedback' },
+  { key: 'intro', kicker: 'Optional', title: 'Tell us about you ✈️' },
+  { key: 'pilot', kicker: 'Get to know your pilot', title: 'Pilot profile' },
+  { key: 'style', kicker: 'Get to know your pilot', title: 'Your gaming style 🎮' },
+  { key: 'motivation', kicker: 'Get to know your pilot', title: 'What makes you play? 🚀' },
+  { key: 'features', kicker: 'Get to know your pilot', title: "What's your favourite part of Sky Crash?" },
+  { key: 'discovery', kicker: 'Get to know your pilot', title: 'How did you find us? 📣' },
+  { key: 'hook', kicker: 'Get to know your pilot', title: 'What would make you stop scrolling? 👀' },
+  { key: 'optin', kicker: 'Last stop', title: 'Want to hear from us? ✈️' },
+]
+const LAST = STEPS.length - 1
 
 const fb = props.controller
 const stage = computed(() => fb.stage.value)
@@ -39,8 +66,51 @@ const likedText = ref('')
 const improveText = ref('')
 const wishes = ref<FeatureRequestTag[]>([])
 const additionalComment = ref('')
+const recommend = ref<string | null>(null)
 const showRatingHint = ref(false)
 const root = ref<HTMLElement | null>(null)
+
+const stepIndex = ref(0)
+const step = computed(() => STEPS[stepIndex.value]!)
+const pilotStep = computed(() => step.value.key as PilotStep)
+const sharedProfile = ref(false)
+
+function emptyAnswers(): PlayerInsightAnswers {
+  return {
+    ageRange: null, gender: null, genderSelfDescribe: null, country: null, region: null, occupation: null,
+    playFrequency: null, devices: [], sessionLength: null, gameGenres: [], motivations: [], triedBecause: null,
+    favouriteFeatures: [], wantNext: [], wantNextText: null, discoverySource: null, socialPlatforms: [],
+    scrollHooks: [], marketingOptIn: null, marketingContact: null,
+  }
+}
+const answers = reactive<PlayerInsightAnswers>(emptyAnswers())
+
+// Which answers each optional step owns (for Skip, which clears them).
+const STEP_FIELDS: Record<PilotStep, (keyof PlayerInsightAnswers)[]> = {
+  pilot: ['ageRange', 'gender', 'genderSelfDescribe', 'country', 'region', 'occupation'],
+  style: ['playFrequency', 'devices', 'sessionLength', 'gameGenres'],
+  motivation: ['motivations', 'triedBecause'],
+  features: ['favouriteFeatures', 'wantNext', 'wantNextText'],
+  discovery: ['discoverySource', 'socialPlatforms'],
+  hook: ['scrollHooks'],
+  optin: ['marketingOptIn', 'marketingContact'],
+}
+
+// Pre-fill with the player's own earlier answers (only ever their own row).
+onMounted(async () => {
+  try {
+    const saved = await getMyInsightAnswers()
+    if (saved) {
+      for (const [k, v] of Object.entries(saved)) {
+        const key = k as keyof PlayerInsightAnswers
+        if (v === null || v === undefined) continue
+        ;(answers as Record<string, unknown>)[key] = Array.isArray(v) ? [...v] : v
+      }
+    }
+  } catch {
+    // Pre-filling is a nicety; the form works without it.
+  }
+})
 
 const shownRating = computed(() => hoverRating.value || rating.value)
 
@@ -54,26 +124,87 @@ function onStarKey(e: KeyboardEvent) {
   root.value?.querySelector<HTMLElement>(`[data-star="${rating.value}"]`)?.focus()
 }
 
-function submit() {
-  if (submitting.value) return
+/** Step 1 → 2. The rating is the one required answer: point at it rather than silently refusing. */
+function continueFromFeedback() {
   if (rating.value === 0) {
-    // The rating is the one required answer: point at it rather than silently refusing.
     showRatingHint.value = true
     root.value?.querySelector<HTMLElement>('[data-star="1"]')?.focus()
     return
   }
+  stepIndex.value = 1
+}
+
+function next() {
+  if (stepIndex.value >= LAST) submit(true)
+  else stepIndex.value++
+}
+
+function back() {
+  if (stepIndex.value > 0) stepIndex.value--
+}
+
+function skipStep() {
+  for (const field of STEP_FIELDS[pilotStep.value]) {
+    const current = answers[field]
+    ;(answers as Record<string, unknown>)[field] = Array.isArray(current) ? [] : null
+  }
+  next()
+}
+
+function hasAnyAnswer(a: PlayerInsightAnswers) {
+  return Object.values(a).some((v) => (Array.isArray(v) ? v.length > 0 : v !== null && v !== undefined && v !== ''))
+}
+
+function cleanAnswers(): PlayerInsightAnswers {
+  const trim = (v: string | null | undefined) => v?.trim() || null
+  return {
+    ...answers,
+    genderSelfDescribe: answers.gender === 'self-describe' ? trim(answers.genderSelfDescribe) : null,
+    country: trim(answers.country),
+    region: trim(answers.region),
+    wantNextText: trim(answers.wantNextText),
+    marketingContact: answers.marketingOptIn === true ? trim(answers.marketingContact) : null,
+  }
+}
+
+function submit(includeProfile: boolean) {
+  if (submitting.value) return
+  if (rating.value === 0) {
+    stepIndex.value = 0
+    showRatingHint.value = true
+    return
+  }
+  const profile = includeProfile ? cleanAnswers() : undefined
+  sharedProfile.value = !!profile && hasAnyAnswer(profile)
   void fb.submit({
     rating: rating.value,
     likedText: likedText.value.trim() || undefined,
     improveText: improveText.value.trim() || undefined,
     tags: wishes.value,
     additionalComment: additionalComment.value.trim() || undefined,
+    recommend: recommend.value ?? undefined,
+    profile: sharedProfile.value ? profile : undefined,
   })
 }
 
 watch(rating, (r) => {
   if (r > 0) showRatingHint.value = false
 })
+
+// "Got it!" — a quick acknowledgement each time an answer is picked.
+const gotIt = ref(0)
+let gotItTimer: ReturnType<typeof setTimeout> | undefined
+function acknowledge() {
+  gotIt.value++
+  clearTimeout(gotItTimer)
+  gotItTimer = setTimeout(() => (gotIt.value = 0), 1100)
+}
+
+// Flight-path progress: the plane travels from the first step to the last.
+const progress = computed(() => stepIndex.value / LAST)
+const counter = computed(
+  () => `${String(stepIndex.value + 1).padStart(2, '0')} / ${String(STEPS.length).padStart(2, '0')}`,
+)
 
 // Keep Tab inside the dialog; Escape is "maybe later" (or just closes the thank-you screen).
 function onKeyDown(e: KeyboardEvent) {
@@ -100,20 +231,28 @@ function onKeyDown(e: KeyboardEvent) {
   }
 }
 
-/** Puts focus on the natural first control of each stage. */
+/** Puts focus on the natural first control of each stage/step. */
 async function focusStage() {
   await nextTick()
-  const selector = stage.value === 'form' ? '[data-star="1"]' : '[data-autofocus]'
-  root.value?.querySelector<HTMLElement>(selector)?.focus()
+  const selector =
+    stage.value === 'form'
+      ? stepIndex.value === 0
+        ? '[data-star="1"]'
+        : '[data-step-body] button, [data-step-body] input, [data-autofocus]'
+      : '[data-autofocus]'
+  root.value?.querySelector<HTMLElement>(selector)?.focus({ preventScroll: true })
   root.value?.scrollTo?.({ top: 0 })
 }
 
-watch(stage, focusStage)
+watch([stage, stepIndex], focusStage)
 onMounted(() => {
   document.addEventListener('keydown', onKeyDown)
   void focusStage()
 })
-onBeforeUnmount(() => document.removeEventListener('keydown', onKeyDown))
+onBeforeUnmount(() => {
+  document.removeEventListener('keydown', onKeyDown)
+  clearTimeout(gotItTimer)
+})
 
 const fieldClass =
   'mt-1 w-full resize-y border-2 border-violet/50 bg-[oklch(0.15_0.05_285)] px-3 py-1.5 text-base leading-relaxed text-foreground placeholder:text-foreground/50 focus:border-electric focus:outline-none'
@@ -156,7 +295,7 @@ const questionClass = 'block text-base font-bold leading-snug text-foreground'
         It's worth {{ rewardCredits.toLocaleString() }} credits
       </p>
       <p v-else id="feedback-ask-sub" class="mt-3 text-base text-foreground/90">
-        Help us improve Sky Crash.
+        Help us make Sky Crash better.
       </p>
       <div class="mt-5 grid grid-cols-2 gap-3">
         <ArcadeButton variant="ghost" size="md" @click="fb.dismiss()">No</ArcadeButton>
@@ -172,37 +311,76 @@ const questionClass = 'block text-base font-bold leading-snug text-foreground'
       role="dialog"
       aria-modal="true"
       :aria-labelledby="stage === 'form' ? 'feedback-title' : 'feedback-done-title'"
-      :class="stage === 'form' ? 'w-[min(56rem,100%)]' : 'w-[min(36rem,100%)]'"
+      :class="stage === 'form' ? (stepIndex === 0 ? 'w-[min(56rem,100%)]' : 'w-[min(48rem,100%)]') : 'w-[min(36rem,100%)]'"
       class="clip-hud relative max-h-[calc(100dvh-1rem)] overflow-y-auto border-2 border-electric bg-void p-4 text-foreground [box-shadow:var(--glow-blue),inset_0_0_32px_color-mix(in_oklab,var(--neon-blue)_14%,transparent)] sm:p-5"
     >
-      <!-- 2. The form -->
+      <!-- 2. The form: a short flight of steps -->
       <template v-if="stage === 'form'">
         <button
           type="button"
           aria-label="Maybe later"
-          class="absolute right-3 top-3 grid h-9 w-9 place-items-center border-2 border-violet/60 text-foreground transition-colors hover:border-electric hover:text-electric focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-electric"
+          class="absolute right-3 top-3 z-10 grid h-9 w-9 place-items-center border-2 border-violet/60 text-foreground transition-colors hover:border-electric hover:text-electric focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-electric"
           @click="fb.dismiss()"
         >
           <X class="h-4 w-4" aria-hidden="true" />
         </button>
 
-        <h2
-          id="feedback-title"
-          class="pr-10 font-display text-lg font-black uppercase tracking-[0.14em] text-electric sm:text-xl"
-        >
-          Your Feedback
-        </h2>
-        <p
-          v-if="rewardAvailable"
-          class="mt-2 inline-flex items-center gap-2 border-2 border-lime/70 bg-lime/10 px-3 py-1 text-sm font-bold text-lime"
-        >
-          <Gift class="h-4 w-4" aria-hidden="true" />
-          Earn {{ rewardCredits.toLocaleString() }} credits for sending it
-        </p>
-        <p v-else class="mt-1 text-base text-foreground/90">Help us improve Sky Crash.</p>
+        <!-- header: kicker, step counter, title, flight-path progress -->
+        <div class="pr-12">
+          <p class="flex flex-wrap items-center gap-x-3 gap-y-1 font-arcade text-[0.5rem] uppercase tracking-[0.2em] text-ember">
+            <span>{{ step.kicker }}</span>
+            <span class="whitespace-nowrap text-foreground/70" :aria-label="`Step ${stepIndex + 1} of ${STEPS.length}`">{{ counter }}</span>
+            <span
+              v-if="gotIt"
+              :key="gotIt"
+              class="animate-sky-pop rounded-full border border-lime/70 bg-lime/15 px-2 py-0.5 text-lime"
+              role="status"
+              >Got it!</span
+            >
+          </p>
+          <h2
+            id="feedback-title"
+            class="mt-1.5 font-display text-lg font-black uppercase tracking-[0.12em] text-electric text-glow-blue sm:text-xl"
+          >
+            {{ step.title }}
+          </h2>
+        </div>
+        <div class="relative mt-3 h-6" aria-hidden="true">
+          <div class="absolute inset-x-0 top-1/2 border-t-2 border-dashed border-violet/40" />
+          <div
+            class="absolute left-0 top-1/2 h-0.5 -translate-y-1/2 bg-[image:var(--grad-sunset)] transition-[width] duration-500 ease-out [box-shadow:var(--glow-ember)]"
+            :style="{ width: `${progress * 100}%` }"
+          />
+          <span
+            v-for="(s, i) in STEPS"
+            :key="s.key"
+            :class="[
+              'absolute top-1/2 h-2 w-2 -translate-x-1/2 -translate-y-1/2 rotate-45 transition-colors',
+              i <= stepIndex ? 'bg-ember' : 'bg-violet/50',
+            ]"
+            :style="{ left: `${(i / LAST) * 100}%` }"
+          />
+          <Plane
+            class="absolute top-1/2 h-5 w-5 -translate-x-1/2 -translate-y-1/2 rotate-45 text-foreground transition-[left] duration-500 ease-out [filter:drop-shadow(0_0_6px_var(--neon-orange))]"
+            :style="{ left: `${progress * 100}%` }"
+          />
+        </div>
 
-        <!-- Two columns on wider screens so the whole form fits on one screen without scrolling. -->
-        <form class="mt-3 grid gap-x-6 gap-y-3 md:grid-cols-2" novalidate @submit.prevent="submit">
+        <!-- Step 1: the main feedback (two columns on wider screens) -->
+        <form
+          v-if="step.key === 'feedback'"
+          class="mt-4 grid gap-x-6 gap-y-3 md:grid-cols-2"
+          novalidate
+          @submit.prevent="continueFromFeedback"
+        >
+          <p
+            v-if="rewardAvailable"
+            class="inline-flex items-center gap-2 justify-self-start border-2 border-lime/70 bg-lime/10 px-3 py-1 text-sm font-bold text-lime md:col-span-2"
+          >
+            <Gift class="h-4 w-4" aria-hidden="true" />
+            Earn {{ rewardCredits.toLocaleString() }} credits for sending it
+          </p>
+
           <div class="space-y-3">
             <fieldset>
               <legend :class="questionClass">
@@ -272,12 +450,12 @@ const questionClass = 'block text-base font-bold leading-snug text-foreground'
             </label>
 
             <label class="block">
-              <span :class="questionClass">What could we improve?</span>
+              <span :class="questionClass">What should we improve?</span>
               <textarea
                 v-model="improveText"
                 :maxlength="MAX_TEXT"
-                rows="2"
-                placeholder="e.g. make the bet buttons bigger on my phone"
+                rows="4"
+                placeholder="Anything at all: controls, rewards, sounds, how it plays on your phone…"
                 :class="fieldClass"
               />
             </label>
@@ -321,6 +499,16 @@ const questionClass = 'block text-base font-bold leading-snug text-foreground'
                 :class="fieldClass"
               />
             </label>
+
+            <fieldset>
+              <legend :class="questionClass">Would you recommend Sky Crash to a friend?</legend>
+              <ChoiceCards
+                v-model:value="recommend"
+                :options="INSIGHT_OPTIONS.recommend"
+                label="Would you recommend Sky Crash to a friend?"
+                class="mt-1.5"
+              />
+            </fieldset>
           </div>
 
           <p
@@ -333,11 +521,77 @@ const questionClass = 'block text-base font-bold leading-snug text-foreground'
 
           <div class="grid grid-cols-2 gap-3 md:col-span-2 md:flex md:justify-end">
             <ArcadeButton variant="ghost" @click="fb.dismiss()">Maybe later</ArcadeButton>
-            <ArcadeButton type="submit" variant="primary" :disabled="submitting">
-              {{ submitting ? 'Sending…' : 'Submit Feedback' }}
-            </ArcadeButton>
+            <ArcadeButton type="submit" variant="primary">Continue</ArcadeButton>
           </div>
         </form>
+
+        <!-- Step 2: the optional section's intro -->
+        <div v-else-if="step.key === 'intro'" class="mt-4" data-step-body>
+          <p class="text-lg font-bold leading-snug text-foreground">
+            Help us understand who plays Sky Crash so we can create better features, events and content.
+          </p>
+          <p class="mt-3 flex items-start gap-2 border-2 border-violet/40 bg-violet/10 px-3 py-2 text-sm text-foreground/85">
+            <ShieldCheck class="mt-0.5 h-4 w-4 shrink-0 text-lime" aria-hidden="true" />
+            <span>
+              These questions are optional and help us understand our player community and improve Sky Crash. Please
+              don't provide sensitive personal information. Skipping them doesn't change your reward.
+            </span>
+          </p>
+          <ul class="mt-4 grid grid-cols-2 gap-2 text-sm font-bold sm:grid-cols-4" aria-label="What we'll ask about">
+            <li class="clip-hud border border-violet/40 bg-void/60 px-3 py-2">🧑‍✈️ Your pilot profile</li>
+            <li class="clip-hud border border-violet/40 bg-void/60 px-3 py-2">🎮 How you play</li>
+            <li class="clip-hud border border-violet/40 bg-void/60 px-3 py-2">🚀 What you love</li>
+            <li class="clip-hud border border-violet/40 bg-void/60 px-3 py-2">📣 How you found us</li>
+          </ul>
+          <p v-if="fb.error.value" role="alert" class="mt-3 border-2 border-danger bg-danger/15 px-3 py-2 text-sm font-semibold">
+            {{ fb.error.value }}
+          </p>
+          <div class="mt-5 grid gap-3 sm:flex sm:items-center sm:justify-between">
+            <ArcadeButton variant="ghost" @click="back()">Back</ArcadeButton>
+            <div class="grid grid-cols-2 gap-3 sm:flex">
+              <ArcadeButton variant="blue" :disabled="submitting" @click="submit(false)">
+                {{ submitting ? 'Sending…' : 'Skip & send' }}
+              </ArcadeButton>
+              <ArcadeButton variant="primary" data-autofocus @click="next()">Let's go</ArcadeButton>
+            </div>
+          </div>
+        </div>
+
+        <!-- Steps 3–9: optional pilot-profile questions -->
+        <div v-else class="mt-4" data-step-body>
+          <!-- Keyed, so each step mounts fresh and slides in. -->
+          <PilotProfileStep
+            :key="pilotStep"
+            v-model:answers="answers"
+            :step="pilotStep"
+            class="step-slide-in"
+            @pick="acknowledge"
+          />
+
+          <p v-if="fb.error.value" role="alert" class="mt-3 border-2 border-danger bg-danger/15 px-3 py-2 text-sm font-semibold">
+            {{ fb.error.value }}
+          </p>
+
+          <div class="mt-5 grid gap-3 sm:flex sm:items-center sm:justify-between">
+            <div class="flex gap-3">
+              <ArcadeButton variant="ghost" @click="back()">Back</ArcadeButton>
+              <button
+                type="button"
+                class="text-sm font-bold text-foreground/70 underline-offset-4 hover:text-electric hover:underline"
+                :disabled="submitting"
+                @click="submit(true)"
+              >
+                Finish now &amp; send
+              </button>
+            </div>
+            <div class="grid grid-cols-2 gap-3 sm:flex">
+              <ArcadeButton variant="ghost" :disabled="submitting" @click="skipStep()">Skip</ArcadeButton>
+              <ArcadeButton variant="primary" :disabled="submitting" @click="next()">
+                {{ stepIndex === LAST ? (submitting ? 'Sending…' : 'Send feedback') : 'Next' }}
+              </ArcadeButton>
+            </div>
+          </div>
+        </div>
       </template>
 
       <!-- 3. Thank-you / reward -->
@@ -378,6 +632,9 @@ const questionClass = 'block text-base font-bold leading-snug text-foreground'
           </h2>
           <p class="mt-3 text-base text-foreground">It helps us make Sky Crash better.</p>
         </template>
+        <p v-if="sharedProfile" class="mt-2 text-sm text-foreground/80">
+          ✈️ And thanks for telling us about yourself: you're helping shape what we build next.
+        </p>
         <ArcadeButton variant="primary" size="lg" class="mt-6" data-autofocus @click="fb.close()">
           {{ doneLabel }}
         </ArcadeButton>
@@ -385,3 +642,20 @@ const questionClass = 'block text-base font-bold leading-snug text-foreground'
     </div>
   </div>
 </template>
+
+<style scoped>
+.step-slide-in {
+  animation: step-slide-in 0.24s ease-out both;
+}
+@keyframes step-slide-in {
+  from {
+    opacity: 0;
+    transform: translateX(1rem);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .step-slide-in {
+    animation: none;
+  }
+}
+</style>

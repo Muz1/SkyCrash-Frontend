@@ -64,6 +64,32 @@ export const ABOUT: Record<string, AboutContent> = {
     charts: 'The daily chart shows active and new players on one axis (both are player counts). Session lengths groups completed sessions by duration.',
     useFor: 'Track growth, see whether new players come back, and measure the effect of features like challenges or lobbies.',
   },
+  retention: {
+    measures: 'Whether players come back after their first session, how that is changing for newer groups of players, and which features returning players use. Calculated across all players as of now, from real game sessions, bets and recorded logins.',
+    numbers: [
+      { term: 'First session', definition: 'A player\'s first active day (UTC): the first day they opened the game, placed a bet or logged in.' },
+      { term: 'Day 1 / 3 / 7 / 14 / 30 retention', definition: 'Of the players who have had the whole window to return, the share active again in it: Day 1 = the next day; Day 3 = days 2–4; Day 7 = days 6–8; Day 14 = days 12–16; Day 30 = days 27–33. Shown as — until anyone is old enough.' },
+      { term: 'New', definition: 'First active within the last 7 days (or signed up in that time and not played yet).' },
+      { term: 'Active', definition: 'Active on 3 or more of the last 7 days.' },
+      { term: 'Returning', definition: 'Came back on more than one day and was active in the last 14 days.' },
+      { term: 'Long-term', definition: 'First active 30+ days ago and still active in the last 14 days.' },
+      { term: 'Inactive', definition: 'No activity in the last 14 days, or only ever played on one day. "Recently inactive" = last active 14–29 days ago.' },
+      { term: 'Return rate', definition: 'Share of players active on more than one day.' },
+    ],
+    charts: 'The retention bars compare the five windows. The cohort table groups players by the week of their first session; darker cells mean more of that week\'s players came back. The feature table compares players who used each feature with those who didn\'t.',
+    useFor: 'See whether new releases keep players better than older ones, spot when players drop off, and find features associated with players returning. These are observed relationships, not proof that a feature causes players to stay.',
+  },
+  playerInsights: {
+    measures: 'Who your players are, why they play, how they found Sky Crash and what they want, from the optional "Tell us about you" questions on the feedback form. Only totals are shown, never an individual\'s answers.',
+    numbers: [
+      { term: 'Respondents', definition: 'Players who answered at least one optional question. Each player counts once, with their latest answers.' },
+      { term: 'Percentages', definition: 'Share of players who answered that question. Multi-choice questions can add up to more than 100%.' },
+      { term: 'Retention by answer', definition: 'Return rate, Day 7 retention and average sessions/flights for players who gave each answer. Groups smaller than 5 players are hidden so nobody can be identified.' },
+      { term: 'Marketing opt-ins', definition: 'Players who asked to hear about new features and events.' },
+    ],
+    charts: 'Each bar chart shows how players answered one question. The "stop scrolling" table shows which social-media hooks appeal to each age group (groups under 5 players are hidden).',
+    useFor: 'Shape features, events and marketing around the players you actually have, and pick the social platforms and messages most likely to bring in players like them.',
+  },
   lobbies: {
     measures: 'Use of private lobbies: how many there are, how full they get and how often players join.',
     numbers: [

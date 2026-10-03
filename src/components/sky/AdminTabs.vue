@@ -20,6 +20,8 @@ import {
   CreditCard,
   Palette,
   ShieldCheck,
+  Repeat,
+  UserSearch,
 } from '@lucide/vue'
 import { usePlayerStore } from '@/stores/playerStore'
 
@@ -35,6 +37,8 @@ const groups = computed(() => [
       { to: '/admin/game-performance', label: 'Game Performance', icon: Gauge },
       { to: '/admin/player-activity', label: 'Player Activity', icon: Users },
       { to: '/admin/lobby-analytics', label: 'Lobby Analytics', icon: Boxes },
+      { to: '/admin/retention', label: 'Player Retention', icon: Repeat },
+      { to: '/admin/player-insights', label: 'Player Insights', icon: UserSearch },
     ],
   },
   {

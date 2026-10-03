@@ -173,6 +173,7 @@ export interface FeedbackSubmissionItem {
   likedText: string | null
   improveText: string | null
   additionalComment: string | null
+  recommend?: string | null
   rewardReceived: boolean
   creditsAwarded: number
   roundsPlayedAtSubmit: number

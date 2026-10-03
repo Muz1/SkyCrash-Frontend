@@ -10,6 +10,7 @@ import { getFeedbackSubmissions } from '@/services/adminAnalyticsService'
 import { ABOUT } from '@/lib/reportAbout'
 import { dateTime } from '@/lib/reportFormat'
 import type { FeedbackSubmissionFilters } from '@/types/insights'
+import { insightLabel } from '@/types/feedback'
 
 const CATEGORIES = [
   { id: 'PlaneSkins', label: 'New plane skins' },
@@ -110,6 +111,10 @@ const sentimentTone = { Positive: 'success', Neutral: 'neutral', Negative: 'dang
             <div v-if="f.additionalComment">
               <dt class="text-[0.8125rem] font-bold uppercase tracking-wider text-[var(--adm-text-3)]">Anything else</dt>
               <dd class="m-0 text-[var(--adm-text)]">{{ f.additionalComment }}</dd>
+            </div>
+            <div v-if="f.recommend">
+              <dt class="text-[0.8125rem] font-bold uppercase tracking-wider text-[var(--adm-text-3)]">Would recommend to a friend</dt>
+              <dd class="m-0 text-[var(--adm-text)]">{{ insightLabel('recommend', f.recommend) }}</dd>
             </div>
             <div v-if="f.categories.length">
               <dt class="text-[0.8125rem] font-bold uppercase tracking-wider text-[var(--adm-text-3)]">Wants us to add</dt>
