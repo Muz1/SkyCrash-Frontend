@@ -84,36 +84,37 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
 </script>
 
 <template>
-  <div class="fixed inset-0 z-[90] grid place-items-center bg-void/80 p-4 backdrop-blur-sm">
+  <!-- Centred, and scrollable as a whole if a very short screen still can't fit it. -->
+  <div class="fixed inset-0 z-[90] flex overflow-y-auto bg-void/80 p-3 backdrop-blur-sm sm:p-4">
     <section
       ref="dialog"
       role="dialog"
       aria-modal="true"
       aria-labelledby="tutorial-title"
       tabindex="-1"
-      class="neon-panel clip-hud relative w-full max-w-lg p-5 focus:outline-none sm:p-6"
+      class="tut-card neon-panel clip-hud relative m-auto w-full min-w-0 max-w-lg p-4 focus:outline-none sm:p-6"
     >
-      <div class="flex items-center gap-3">
-        <p class="font-arcade text-[0.5rem] uppercase tracking-[0.3em] text-ember">
-          Pre-flight briefing · {{ index + 1 }}/{{ STEPS.length }}
+      <div class="flex items-center gap-2 sm:gap-3">
+        <p class="min-w-0 font-arcade text-[0.5rem] uppercase leading-relaxed tracking-[0.2em] text-ember sm:tracking-[0.3em]">
+          <span class="hidden min-[400px]:inline">Pre-flight briefing · </span>{{ index + 1 }}/{{ STEPS.length }}
         </p>
         <button
           type="button"
-          class="ml-auto flex items-center gap-1.5 border-2 border-violet/60 px-2 py-1 font-arcade text-[0.5rem] uppercase tracking-[0.15em] text-foreground hover:border-magenta hover:text-magenta focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-magenta"
+          class="ml-auto flex shrink-0 items-center gap-1.5 border-2 border-violet/60 px-2 py-1 font-arcade text-[0.5rem] uppercase tracking-[0.15em] text-foreground hover:border-magenta hover:text-magenta focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-magenta"
           @click="emit('close')"
         >
-          <X class="h-3 w-3" aria-hidden="true" /> Skip tutorial
+          <X class="h-3 w-3" aria-hidden="true" /> Skip<span class="hidden min-[400px]:inline">&nbsp;tutorial</span>
         </button>
       </div>
 
       <!-- picture for this step -->
       <div
-        class="relative mt-4 grid h-40 place-items-center overflow-hidden border-2 border-violet/40 bg-deep/70"
+        class="tut-pic relative mt-3 grid h-36 place-items-center overflow-hidden border-2 border-violet/40 bg-deep/70 sm:mt-4 sm:h-40"
         aria-hidden="true"
       >
         <template v-if="step.key === 'bet'">
           <div class="flex flex-col items-center gap-2">
-            <div class="flex gap-1.5">
+            <div class="flex flex-wrap justify-center gap-1.5">
               <span
                 v-for="v in ['100', '250', '500', '1K']"
                 :key="v"
@@ -137,7 +138,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
         </template>
         <template v-else-if="step.key === 'multiplier'">
           <div class="text-center">
-            <p class="font-arcade text-5xl text-electric text-glow-blue">2.37x</p>
+            <p class="font-arcade text-4xl text-electric text-glow-blue sm:text-5xl">2.37x</p>
             <p class="mt-2 text-sm text-foreground">
               500 bet × 2.37 = <span class="font-bold text-lime">1,185</span>
             </p>
@@ -185,7 +186,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
         </template>
         <template v-else-if="step.key === 'crash'">
           <div class="text-center">
-            <p class="font-arcade text-4xl text-danger [text-shadow:0_0_16px_var(--neon-red)]">
+            <p class="font-arcade text-3xl text-danger [text-shadow:0_0_16px_var(--neon-red)] sm:text-4xl">
               1.84x
             </p>
             <p class="mt-2 font-display text-sm font-black uppercase tracking-[0.25em] text-danger">
@@ -194,7 +195,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
           </div>
         </template>
         <template v-else-if="step.key === 'lobby'">
-          <ul class="flex w-64 flex-col gap-1.5 text-sm">
+          <ul class="flex w-full max-w-64 flex-col gap-1.5 px-3 text-sm">
             <li
               v-for="(p, i) in [
                 { n: 'You', s: 'Flying 2.37x', c: 'text-electric' },
@@ -210,21 +211,21 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
                 class="h-5 w-5 object-contain"
                 :style="{ transform: `rotate(${CRAFTS[i % CRAFTS.length]!.rotate}deg)` }"
               />
-              <span class="font-semibold text-foreground">{{ p.n }}</span>
-              <span :class="['ml-auto font-arcade text-[0.5rem] uppercase', p.c]">{{ p.s }}</span>
+              <span class="min-w-0 truncate font-semibold text-foreground">{{ p.n }}</span>
+              <span :class="['ml-auto shrink-0 font-arcade text-[0.5rem] uppercase', p.c]">{{ p.s }}</span>
             </li>
           </ul>
           <Users class="absolute right-3 top-3 h-5 w-5 text-magenta" />
         </template>
         <template v-else>
-          <div class="flex items-center gap-4">
+          <div class="flex items-center gap-3 sm:gap-4">
             <img
               v-for="c in CRAFTS.slice(0, 3)"
               :key="c.id"
               :src="c.src"
               alt=""
               :class="[
-                'h-14 w-14 object-contain',
+                'h-12 w-12 object-contain sm:h-14 sm:w-14',
                 c.id === plane.id
                   ? 'scale-125 [filter:drop-shadow(0_0_10px_var(--neon-blue))]'
                   : 'opacity-60',
@@ -238,34 +239,35 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
 
       <h2
         id="tutorial-title"
-        class="mt-4 font-display text-xl font-black uppercase tracking-[0.12em] text-foreground sm:text-2xl"
+        class="mt-3 font-display text-lg font-black uppercase tracking-[0.1em] text-foreground sm:mt-4 sm:text-2xl sm:tracking-[0.12em]"
       >
         {{ step.title }}
       </h2>
-      <p class="mt-2 text-base leading-relaxed text-foreground/90" aria-live="polite">
+      <p class="mt-2 text-[0.9375rem] leading-relaxed text-foreground/90 sm:text-base" aria-live="polite">
         {{ step.body }}
       </p>
 
-      <div class="mt-5 flex items-center gap-3">
+      <div class="mt-4 flex items-center gap-2 sm:mt-5 sm:gap-3">
         <button
           type="button"
-          class="flex items-center gap-1 border-2 border-violet/50 px-3 py-2 font-arcade text-[0.5625rem] uppercase text-foreground disabled:opacity-30"
+          aria-label="Back"
+          class="flex shrink-0 items-center gap-1 border-2 border-violet/50 px-3 py-2 font-arcade text-[0.5625rem] uppercase text-foreground disabled:opacity-30"
           :disabled="index === 0"
           @click="back"
         >
-          <ChevronLeft class="h-3.5 w-3.5" aria-hidden="true" /> Back
+          <ChevronLeft class="h-3.5 w-3.5" aria-hidden="true" /><span class="hidden min-[400px]:inline">Back</span>
         </button>
-        <div class="flex flex-1 justify-center gap-1.5" aria-hidden="true">
+        <div class="flex min-w-0 flex-1 justify-center gap-1" aria-hidden="true">
           <span
             v-for="(_, i) in STEPS"
             :key="i"
             :class="[
-              'h-1.5 w-4 transition-colors',
+              'h-1.5 w-2.5 shrink transition-colors min-[400px]:w-4',
               i === index ? 'bg-ember' : i < index ? 'bg-magenta/70' : 'bg-violet/40',
             ]"
           />
         </div>
-        <ArcadeButton type="button" size="md" :variant="last ? 'primary' : 'magenta'" @click="next">
+        <ArcadeButton type="button" size="md" class="shrink-0" :variant="last ? 'primary' : 'magenta'" @click="next">
           {{ last ? "Let's fly" : 'Next' }}
           <ChevronRight v-if="!last" class="h-4 w-4" aria-hidden="true" />
         </ArcadeButton>
@@ -286,6 +288,32 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
   100% {
     left: 78%;
     top: 4%;
+  }
+}
+/* Short screens (phones held sideways): a smaller picture so the whole card fits. */
+@media (max-height: 520px) {
+  .tut-pic {
+    height: 6.5rem;
+  }
+  .tut-pic > :not(svg):not(img) {
+    transform: scale(0.78);
+  }
+  .tut-card {
+    padding: 0.875rem 1rem;
+  }
+  .tut-card > .tut-pic {
+    margin-top: 0.5rem;
+  }
+  .tut-card > h2 {
+    margin-top: 0.5rem;
+    font-size: 1.05rem;
+  }
+  .tut-card > p {
+    margin-top: 0.25rem;
+    line-height: 1.45;
+  }
+  .tut-card > div:last-child {
+    margin-top: 0.625rem;
   }
 }
 @media (prefers-reduced-motion: reduce) {
