@@ -1,4 +1,4 @@
-import { expect, type Page } from '@playwright/test'
+import { expect, type Locator, type Page } from '@playwright/test'
 import playerFixtures from '../fixtures/player.json' with { type: 'json' }
 import { mockApi, type MockOptions } from './mockApi'
 
@@ -8,7 +8,11 @@ export interface Screen {
   mock?: MockOptions
   /** Runs after navigation: open a dialog, wait for content, etc. */
   prepare?: (page: Page) => Promise<void>
+  /** The screen's main control: must be fully on screen and uncovered at every size. */
+  critical?: (page: Page) => Locator
 }
+
+const betButton = (page: Page) => page.getByRole('button', { name: /^bet\b/i })
 
 const playerId = (playerFixtures['/players/me'] as { playerId: string }).playerId
 const today = new Date().toISOString().slice(0, 10)
@@ -54,13 +58,19 @@ export const PLAYER_SCREENS: Screen[] = [
     name: 'tutorial last step',
     path: '/game?tutorial=1',
     prepare: async (p) => {
-      for (let i = 0; i < 7; i++) await p.getByRole('dialog').getByRole('button', { name: /^next/i }).click()
+      // Wait for each card before the next tap: the card changes height between steps.
+      const dialog = p.getByRole('dialog')
+      for (let step = 2; step <= 8; step++) {
+        await dialog.getByRole('button', { name: /^next/i }).click()
+        await expect(dialog).toContainText(`${step}/8`)
+      }
       await expect(p.getByRole('dialog', { name: /your hangar/i })).toBeVisible()
     },
   },
   {
     name: 'game (betting open)',
     path: '/game',
+    critical: betButton,
     prepare: async (p) => {
       await skipDailyBriefing(p)
       await p.reload()
@@ -68,8 +78,20 @@ export const PLAYER_SCREENS: Screen[] = [
     },
   },
   {
+    name: 'game (first visit, how-to strip)',
+    path: '/game',
+    mock: { showHowTo: true },
+    critical: betButton,
+    prepare: async (p) => {
+      await skipDailyBriefing(p)
+      await p.reload()
+      await expect(p.getByRole('note', { name: 'How to play' })).toBeVisible()
+    },
+  },
+  {
     name: 'game (in flight)',
     path: '/game',
+    critical: betButton,
     mock: { phase: 'Running' },
     prepare: async (p) => {
       await skipDailyBriefing(p)
@@ -80,6 +102,7 @@ export const PLAYER_SCREENS: Screen[] = [
   {
     name: 'daily challenges bar',
     path: '/game',
+    critical: betButton,
     prepare: async (p) => {
       await expect(p.getByText(/challenge/i).first()).toBeVisible()
     },
@@ -170,11 +193,15 @@ export const ADMIN_SCREENS: Screen[] = [
   ['volatility', '/volatility'],
 ].map(([name, path]) => ({ name: `admin ${name}`, path: path!, mock: admin }))
 
-/** Mocks the API, opens the screen and waits until it has rendered. */
-export async function openScreen(page: Page, screen: Screen) {
-  await mockApi(page, screen.mock)
+/**
+ * Mocks the API, opens the screen and waits until it has rendered. Returns the API calls that
+ * had no fixture (the specs fail on any, so a new endpoint can't silently break CI).
+ */
+export async function openScreen(page: Page, screen: Screen): Promise<{ unknown: string[] }> {
+  const mocks = await mockApi(page, screen.mock)
   await page.goto(screen.path)
   // Router guards resolve the profile first; then the page has rendered something.
   await page.waitForLoadState('networkidle').catch(() => undefined)
   if (screen.prepare) await screen.prepare(page)
+  return mocks
 }

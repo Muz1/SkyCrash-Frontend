@@ -1,6 +1,6 @@
 import { test } from '@playwright/test'
 import { ADMIN_SCREENS, PLAYER_SCREENS, openScreen } from './support/screens'
-import { expectCleanLayout, settle } from './support/layout'
+import { expectCleanLayout, expectUncovered, settle } from './support/layout'
 
 /** Widths from the mobile test matrix, each with a typical portrait height. */
 export const MATRIX = [
@@ -16,6 +16,8 @@ export const MATRIX = [
 ]
 
 // One navigation per screen, then every width in portrait and landscape.
+test.describe.configure({ timeout: 240_000 })
+
 for (const screen of [...PLAYER_SCREENS, ...ADMIN_SCREENS]) {
   test(`${screen.name} at every matrix width`, async ({ page }) => {
     await page.setViewportSize(MATRIX[0]!)
@@ -27,7 +29,9 @@ for (const screen of [...PLAYER_SCREENS, ...ADMIN_SCREENS]) {
       ] as const) {
         await page.setViewportSize(vp)
         await settle(page)
-        await expectCleanLayout(page, `${screen.name} ${size.width} ${orientation} (${vp.width}x${vp.height})`)
+        const label = `${screen.name} ${size.width} ${orientation} (${vp.width}x${vp.height})`
+        await expectCleanLayout(page, label)
+        if (screen.critical) await expectUncovered(page, screen.critical(page), label)
       }
     }
   })

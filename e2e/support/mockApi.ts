@@ -26,6 +26,8 @@ export interface MockOptions {
   overrides?: FixtureMap
   /** Round state the fake hub reports. Defaults to a betting countdown. */
   phase?: RoundPhase
+  /** Leave the first-visit "How to play" strip on the game screen (dismissed by default). */
+  showHowTo?: boolean
 }
 
 const FAKE_TOKEN = 'e2e-fake-jwt'
@@ -50,16 +52,16 @@ export async function mockApi(page: Page, opts: MockOptions = {}): Promise<{ unk
 
   if (role !== 'guest') {
     await page.addInitScript(
-      ([token, p]) => {
+      ([token, p, showHowTo]) => {
         const prof = p as { playerId: string; username: string; email: string }
         localStorage.setItem('skycrash_token', token as string)
         localStorage.setItem('skycrash_username', prof.username)
         localStorage.setItem('skycrash_email', prof.email)
         localStorage.setItem('skycrash_player_id', prof.playerId)
-        // Keep the one-off "how to play" strip and audio unlock noise out of layout checks.
-        localStorage.setItem('skycrash_howto_dismissed', '1')
+        // The one-off "how to play" strip has its own screen in the suite.
+        if (!showHowTo) localStorage.setItem('skycrash_howto_dismissed', '1')
       },
-      [FAKE_TOKEN, profile] as const,
+      [FAKE_TOKEN, profile, !!opts.showHowTo] as const,
     )
   }
 
