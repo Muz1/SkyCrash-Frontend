@@ -13,7 +13,7 @@ const accentClass: Record<string, string> = {
 </script>
 
 <template>
-  <div class="pointer-events-none fixed inset-x-0 top-4 z-[100] flex flex-col items-center gap-2 px-4">
+  <div class="pointer-events-none fixed inset-x-0 top-[max(1rem,env(safe-area-inset-top))] z-[100] flex flex-col items-center gap-2 px-4">
     <TransitionGroup name="toast">
       <div
         v-for="toast in toastStore.toasts"

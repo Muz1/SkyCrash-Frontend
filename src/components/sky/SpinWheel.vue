@@ -32,18 +32,19 @@ onBeforeUnmount(() => document.removeEventListener('keydown', onKeyDown))
 </script>
 
 <template>
-  <div class="fixed inset-0 z-[85] grid place-items-center bg-[oklch(0.08_0.04_285/0.82)] p-4 backdrop-blur-sm">
+  <!-- Centred, but scrolls as a whole when a phone held sideways is shorter than the wheel. -->
+  <div class="fixed inset-0 z-[85] flex overflow-y-auto bg-[oklch(0.08_0.04_285/0.82)] p-4 backdrop-blur-sm">
     <div
       ref="root"
       role="dialog"
       aria-modal="true"
       aria-labelledby="fuel-title"
-      class="clip-hud relative w-[min(26rem,100%)] border-2 border-ember bg-void p-6 text-center text-foreground [box-shadow:var(--glow-ember)]"
+      class="clip-hud relative m-auto w-[min(26rem,100%)] border-2 border-ember bg-void p-6 text-center text-foreground [box-shadow:var(--glow-ember)]"
     >
       <button
         type="button"
         aria-label="Close"
-        class="absolute right-3 top-3 grid h-9 w-9 place-items-center border-2 border-violet/60 text-foreground transition-colors hover:border-ember hover:text-ember focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ember"
+        class="absolute right-3 top-3 grid h-9 w-9 place-items-center pointer-coarse:h-11 pointer-coarse:w-11 border-2 border-violet/60 text-foreground transition-colors hover:border-ember hover:text-ember focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ember"
         @click="emit('close')"
       >
         <X class="h-4 w-4" aria-hidden="true" />

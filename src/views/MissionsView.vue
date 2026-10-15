@@ -112,11 +112,12 @@ async function toggleDisplayed(key: string, isDisplayed: boolean) {
         <p class="mb-4 text-sm text-foreground/85">
           {{ earnedCount }}/{{ collection.length }} collected. Complete a daily challenge to earn its badge; repeats stack up.
         </p>
-        <ul class="grid grid-cols-2 gap-4 sm:grid-cols-3">
+        <!-- One column on narrow phones: long badge names don't fit two-up at 320px. -->
+        <ul class="grid grid-cols-1 gap-4 min-[400px]:grid-cols-2 sm:grid-cols-3">
           <li v-for="b in collection" :key="b.key" class="flex items-center gap-3">
             <ChallengeBadgeIcon :badge-key="b.key" size="md" :count="b.earned?.timesEarned ?? 0" :locked="!b.earned" />
             <div class="min-w-0">
-              <p class="font-display text-xs uppercase tracking-[0.1em] text-foreground">{{ b.info.name }}</p>
+              <p class="font-display text-xs uppercase tracking-[0.1em] text-foreground [overflow-wrap:anywhere]">{{ b.info.name }}</p>
               <p class="text-xs leading-snug text-muted-foreground">{{ b.info.description }}</p>
             </div>
           </li>

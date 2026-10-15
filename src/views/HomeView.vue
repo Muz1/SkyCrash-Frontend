@@ -52,8 +52,9 @@ onMounted(() => {
 
     <HudHeader />
 
+    <!-- Centred; on a phone held sideways it scrolls rather than pushing links off-screen. -->
     <div
-      class="relative z-10 flex min-h-0 flex-1 flex-col items-center justify-center px-4 text-center"
+      class="relative z-10 flex min-h-0 flex-1 flex-col items-center justify-center-safe overflow-y-auto pl-[max(1rem,env(safe-area-inset-left))] pr-[max(1rem,env(safe-area-inset-right))] text-center"
     >
       <Plane
         :craft="hangarStore.craftId"
@@ -79,7 +80,7 @@ onMounted(() => {
 
       <!-- Secondary actions. -->
       <div class="mt-3 flex flex-wrap items-center justify-center gap-2 sm:gap-3">
-        <RouterLink to="/hangar" :class="hangarStore.isCustomized ? 'hangar-glow' : undefined">
+        <RouterLink to="/hangar" :class="['inline-flex', hangarStore.isCustomized && 'hangar-glow']">
           <ArcadeButton size="md" variant="ghost" :class="hangarStore.isCustomized ? '!border-lime !text-lime' : '!text-foreground'">
             <Warehouse class="h-4 w-4" aria-hidden="true" />
             <span>Hangar <span class="hidden font-sans font-bold normal-case tracking-normal xs:inline">· Change plane &amp; sky</span></span>
@@ -88,7 +89,7 @@ onMounted(() => {
         <ArcadeButton size="md" variant="ghost" class="!text-foreground" @click="giveFeedback">
           <MessageSquareHeart class="h-4 w-4" aria-hidden="true" /> Give Us Feedback
         </ArcadeButton>
-        <RouterLink v-if="!authStore.isAuthenticated" to="/register">
+        <RouterLink v-if="!authStore.isAuthenticated" to="/register" class="inline-flex">
           <ArcadeButton size="md" variant="magenta">Create Account</ArcadeButton>
         </RouterLink>
         <!-- Same destination as Join Lobby, so phones skip it to keep the hero on one screen. -->
@@ -100,7 +101,7 @@ onMounted(() => {
       <HowToPlay class="mt-[clamp(0.75rem,3dvh,1.5rem)]" />
       <RouterLink
         to="/game?tutorial=1"
-        class="mt-2 font-arcade text-[0.5625rem] uppercase tracking-[0.2em] text-electric underline-offset-4 hover:text-foreground hover:underline"
+        class="mt-2 inline-flex items-center font-arcade text-[0.5625rem] uppercase tracking-[0.2em] text-electric underline-offset-4 pointer-coarse:min-h-11 hover:text-foreground hover:underline"
       >
         Watch the full tutorial
       </RouterLink>

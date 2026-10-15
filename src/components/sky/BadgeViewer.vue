@@ -24,7 +24,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown))
   <Transition name="badge-viewer">
     <div
       v-if="info"
-      class="fixed inset-0 z-[90] flex items-center justify-center bg-void/85 p-4 backdrop-blur-sm"
+      class="fixed inset-0 z-[90] flex items-center-safe justify-center overflow-y-auto bg-void/85 p-4 backdrop-blur-sm"
       role="dialog"
       aria-modal="true"
       :aria-label="info.name"

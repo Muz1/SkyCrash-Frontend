@@ -55,10 +55,12 @@ async function accept() {
 </script>
 
 <template>
-  <div class="relative min-h-dvh overflow-hidden bg-void">
-    <div class="absolute inset-0"><SkyEnvironment skin="midnight" :dim="0.6" /></div>
+  <!-- One screen tall and scrolls inside itself (the document never scrolls, see style.css),
+       so the agree button is always reachable on short screens. -->
+  <div class="relative h-dvh overflow-y-auto bg-void">
+    <div class="fixed inset-0"><SkyEnvironment skin="midnight" :dim="0.6" /></div>
     <CRTOverlay />
-    <main class="relative z-10 mx-auto flex w-full max-w-2xl flex-col items-center px-4 py-8">
+    <main class="relative z-10 mx-auto flex w-full max-w-2xl flex-col items-center pb-[max(2rem,env(safe-area-inset-bottom))] pl-[max(1rem,env(safe-area-inset-left))] pr-[max(1rem,env(safe-area-inset-right))] pt-[max(2rem,env(safe-area-inset-top))]">
       <Wordmark class="w-48" />
       <NeonPanel accent="blue" class="mt-6 w-full">
         <h1 class="font-display text-2xl font-black uppercase tracking-[0.14em] text-foreground">
@@ -69,7 +71,7 @@ async function accept() {
         </p>
 
         <div
-          class="mt-3 max-h-[52vh] overflow-y-auto border-2 border-violet/40 bg-void/60 p-4"
+          class="mt-3 max-h-[52dvh] overflow-y-auto border-2 border-violet/40 bg-void/60 p-4"
           tabindex="0"
           aria-label="Terms of Service text"
         >
@@ -78,7 +80,7 @@ async function accept() {
 
         <form v-if="needsAgreement" class="mt-5" @submit.prevent="accept">
           <label
-            class="flex cursor-pointer items-start gap-3 border-2 border-lime/50 bg-lime/5 p-3 text-base text-foreground"
+            class="flex cursor-pointer items-start gap-3 border-2 border-lime/50 bg-lime/5 p-3 text-base text-foreground pointer-coarse:min-h-11"
           >
             <input
               v-model="agreed"

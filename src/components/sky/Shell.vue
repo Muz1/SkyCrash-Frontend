@@ -36,7 +36,14 @@ const hangarStore = useHangarStore()
     <PageTransition :craft="hangarStore.craftId" />
     <CRTOverlay />
     <HudHeader v-if="showHud" />
-    <main :class="cn('relative z-10 min-h-0 flex-1 overflow-y-auto px-4 pb-2 sm:px-8', props.class)">
+    <main
+      :class="
+        cn(
+          'relative z-10 min-h-0 flex-1 overflow-y-auto pb-2 pl-[max(1rem,env(safe-area-inset-left))] pr-[max(1rem,env(safe-area-inset-right))] sm:pl-[max(2rem,env(safe-area-inset-left))] sm:pr-[max(2rem,env(safe-area-inset-right))]',
+          props.class,
+        )
+      "
+    >
       <slot />
     </main>
     <NavDock />
