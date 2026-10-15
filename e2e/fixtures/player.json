@@ -1,0 +1,734 @@
+{
+  "/players/me": {
+    "playerId": "29a6045c-b967-40d9-a152-5c863c492d82",
+    "username": "AceMaverick",
+    "email": "acemaverick@test.local",
+    "creditBalance": 23979.5,
+    "memberSinceUtc": "2026-10-15T13:41:37.323856Z",
+    "isAdmin": false,
+    "isManager": false,
+    "displayedAchievementKey": null,
+    "equippedCraftId": null,
+    "equippedSkyId": null,
+    "hasAcceptedTerms": true,
+    "currentTermsVersion": "2026-10-02",
+    "hasCompletedTutorial": true
+  },
+  "/wallet/balance": {
+    "creditBalance": 23979.5
+  },
+  "/wallet/transactions": [
+    {
+      "id": "02c6c361-0e6b-4fbd-be69-3ec6ebd71094",
+      "amount": 500,
+      "type": "FeedbackReward",
+      "balanceAfter": 23979.5,
+      "description": "Thanks for your feedback",
+      "createdAtUtc": "2026-10-15T13:50:15.702886Z"
+    },
+    {
+      "id": "cc1084ca-5217-47f2-af44-84dc27f1752b",
+      "amount": 1670,
+      "type": "BetWon",
+      "balanceAfter": 23479.5,
+      "description": "Auto cashed out at 3,34x on round #10",
+      "createdAtUtc": "2026-10-15T13:47:04.444947Z"
+    },
+    {
+      "id": "f4af7fe1-7281-4de0-bbbc-00378a9c7b8f",
+      "amount": -500,
+      "type": "BetPlaced",
+      "balanceAfter": 21809.5,
+      "description": "Bet placed on round #10",
+      "createdAtUtc": "2026-10-15T13:46:35.416641Z"
+    },
+    {
+      "id": "3a5db59d-c542-42d9-826f-978300ae13c8",
+      "amount": 1130,
+      "type": "BetWon",
+      "balanceAfter": 22309.5,
+      "description": "Cashed out at 1,13x on round #9",
+      "createdAtUtc": "2026-10-15T13:46:08.835001Z"
+    },
+    {
+      "id": "d82e10d9-8884-42f2-a351-fea3e6f19f4d",
+      "amount": -1000,
+      "type": "BetPlaced",
+      "balanceAfter": 21179.5,
+      "description": "Bet placed on round #9",
+      "createdAtUtc": "2026-10-15T13:45:57.131762Z"
+    },
+    {
+      "id": "dd6181c5-5249-4116-906a-8ae9b2535945",
+      "amount": 422.5,
+      "type": "BetWon",
+      "balanceAfter": 22179.5,
+      "description": "Auto cashed out at 1,69x on round #8",
+      "createdAtUtc": "2026-10-15T13:45:06.883911Z"
+    },
+    {
+      "id": "f73b5c9d-a0c2-4f41-b926-99c1031cba9d",
+      "amount": -250,
+      "type": "BetPlaced",
+      "balanceAfter": 21757,
+      "description": "Bet placed on round #8",
+      "createdAtUtc": "2026-10-15T13:44:49.51878Z"
+    },
+    {
+      "id": "0daf2530-6b31-4c78-b416-5c5b0a856d4e",
+      "amount": 1950,
+      "type": "BetWon",
+      "balanceAfter": 22007,
+      "description": "Auto cashed out at 1,95x on round #7",
+      "createdAtUtc": "2026-10-15T13:44:32.067177Z"
+    },
+    {
+      "id": "753c1049-4e83-44b7-ba83-9dc0b470ce1e",
+      "amount": -1000,
+      "type": "BetPlaced",
+      "balanceAfter": 20057,
+      "description": "Bet placed on round #7",
+      "createdAtUtc": "2026-10-15T13:44:12.670134Z"
+    },
+    {
+      "id": "47182752-5e2f-4ea2-ac47-f5d67b5e5339",
+      "amount": 80,
+      "type": "ChallengeReward",
+      "balanceAfter": 21057,
+      "description": "Daily challenge reward: Cash out at 3.00x or higher in one round.",
+      "createdAtUtc": "2026-10-15T13:43:41.960364Z"
+    },
+    {
+      "id": "ae55ecae-855a-4283-9e8c-db3080167848",
+      "amount": 322,
+      "type": "BetWon",
+      "balanceAfter": 20977,
+      "description": "Cashed out at 3,22x on round #6",
+      "createdAtUtc": "2026-10-15T13:43:41.949204Z"
+    },
+    {
+      "id": "0deb632a-322c-4932-a132-40a7cf85a3d0",
+      "amount": -100,
+      "type": "BetPlaced",
+      "balanceAfter": 20655,
+      "description": "Bet placed on round #6",
+      "createdAtUtc": "2026-10-15T13:43:14.219014Z"
+    },
+    {
+      "id": "b30c1d2f-55c1-48e3-b82f-037fb0967ddc",
+      "amount": 1450,
+      "type": "BetWon",
+      "balanceAfter": 20755,
+      "description": "Auto cashed out at 1,45x on round #5",
+      "createdAtUtc": "2026-10-15T13:42:56.019082Z"
+    },
+    {
+      "id": "47654fb3-579a-4c2f-839f-96239a759fba",
+      "amount": 100,
+      "type": "ChallengeReward",
+      "balanceAfter": 19305,
+      "description": "Daily challenge reward: Wager a total of 1,000 credits.",
+      "createdAtUtc": "2026-10-15T13:42:40.690591Z"
+    },
+    {
+      "id": "5d625027-f9e6-4d83-8354-a3d403ea4b78",
+      "amount": -1000,
+      "type": "BetPlaced",
+      "balanceAfter": 19205,
+      "description": "Bet placed on round #5",
+      "createdAtUtc": "2026-10-15T13:42:40.685408Z"
+    },
+    {
+      "id": "02d5237a-e28c-4153-9055-79d3c0a8dfc3",
+      "amount": 555,
+      "type": "BetWon",
+      "balanceAfter": 20205,
+      "description": "Auto cashed out at 2,22x on round #4",
+      "createdAtUtc": "2026-10-15T13:42:23.902572Z"
+    },
+    {
+      "id": "2ea1bcef-3ec8-4174-8db8-67726418b3d4",
+      "amount": -250,
+      "type": "BetPlaced",
+      "balanceAfter": 19650,
+      "description": "Bet placed on round #4",
+      "createdAtUtc": "2026-10-15T13:42:02.319385Z"
+    },
+    {
+      "id": "5c9c7048-c8da-4e01-bd15-15ede02566f6",
+      "amount": -100,
+      "type": "BetPlaced",
+      "balanceAfter": 19900,
+      "description": "Bet placed on round #3",
+      "createdAtUtc": "2026-10-15T13:41:41.182249Z"
+    },
+    {
+      "id": "915272e4-9b49-4df8-9c9c-03b2c161fda4",
+      "amount": 20000,
+      "type": "AdminAdjustment",
+      "balanceAfter": 20000,
+      "description": "e2e seed",
+      "createdAtUtc": "2026-10-15T13:41:37.51274Z"
+    }
+  ],
+  "/wallet/spin": {
+    "canSpin": true,
+    "nextSpinAtUtc": "1970-01-01T00:00:00Z",
+    "secondsUntilNextSpin": 0,
+    "cooldownSeconds": 300,
+    "segments": [
+      1500,
+      4000,
+      2000,
+      7500,
+      2500,
+      5000,
+      3000,
+      10000
+    ],
+    "odds": [
+      0.24,
+      0.11,
+      0.22,
+      0.03,
+      0.18,
+      0.06,
+      0.14,
+      0.02
+    ]
+  },
+  "/achievements": [
+    {
+      "key": "ClearedForTakeoff",
+      "name": "Cleared for Takeoff",
+      "description": "Play 10 rounds.",
+      "target": 10,
+      "rewardCredits": 250,
+      "progress": 8,
+      "unlocked": false,
+      "unlockedAtUtc": "0001-01-01T00:00:00",
+      "isDisplayed": false
+    },
+    {
+      "key": "MaybeTakeABreak",
+      "name": "Maybe Take a Break",
+      "description": "Lose 100 rounds.",
+      "target": 100,
+      "rewardCredits": 250,
+      "progress": 1,
+      "unlocked": false,
+      "unlockedAtUtc": "0001-01-01T00:00:00",
+      "isDisplayed": false
+    },
+    {
+      "key": "FrequentFlyer",
+      "name": "Frequent Flyer",
+      "description": "Play 1,000 rounds.",
+      "target": 1000,
+      "rewardCredits": 2500,
+      "progress": 8,
+      "unlocked": false,
+      "unlockedAtUtc": "0001-01-01T00:00:00",
+      "isDisplayed": false
+    },
+    {
+      "key": "VeteranPilot",
+      "name": "Veteran Pilot",
+      "description": "Successfully cash out 1,000 rounds.",
+      "target": 1000,
+      "rewardCredits": 2500,
+      "progress": 7,
+      "unlocked": false,
+      "unlockedAtUtc": "0001-01-01T00:00:00",
+      "isDisplayed": false
+    },
+    {
+      "key": "SkyLegend",
+      "name": "Sky Legend",
+      "description": "Successfully cash out at 100x or higher.",
+      "target": 100,
+      "rewardCredits": 5000,
+      "progress": 3.34,
+      "unlocked": false,
+      "unlockedAtUtc": "0001-01-01T00:00:00",
+      "isDisplayed": false
+    },
+    {
+      "key": "CloseCall",
+      "name": "Close Call",
+      "description": "Cash out within a second of the crash.",
+      "target": 1,
+      "rewardCredits": 1000,
+      "progress": 0,
+      "unlocked": false,
+      "unlockedAtUtc": "0001-01-01T00:00:00",
+      "isDisplayed": false
+    }
+  ],
+  "/challenges/today": [
+    {
+      "id": "f1d7b7c5-e0b2-46e5-bd13-a04aa85d1a97",
+      "type": "PlayRoundsWithinWindow",
+      "description": "Play 15 rounds within 30 minutes.",
+      "target": 15,
+      "progress": 8,
+      "rewardCredits": 220,
+      "isCompleted": false,
+      "completedAtUtc": null,
+      "badgeKey": "RushHour",
+      "track": "Endurance",
+      "resetsAtUtc": "2026-10-16T00:00:00Z"
+    },
+    {
+      "id": "28a1a523-cf4a-49ae-a6cb-e7054b477ba0",
+      "type": "CashOutAtMultiplier",
+      "description": "Cash out at 3.00x or higher in one round.",
+      "target": 3,
+      "progress": 3,
+      "rewardCredits": 80,
+      "isCompleted": true,
+      "completedAtUtc": "2026-10-15T13:43:41.957584Z",
+      "badgeKey": "HighAltitude",
+      "track": "Skill",
+      "resetsAtUtc": "2026-10-16T00:00:00Z"
+    },
+    {
+      "id": "db5cdfd2-a1f5-4dc2-a7b3-c845569f83b8",
+      "type": "WagerCredits",
+      "description": "Wager a total of 1,000 credits.",
+      "target": 1000,
+      "progress": 1000,
+      "rewardCredits": 100,
+      "isCompleted": true,
+      "completedAtUtc": "2026-10-15T13:42:40.688893Z",
+      "badgeKey": "HighRoller",
+      "track": "Wallet & Wingmen",
+      "resetsAtUtc": "2026-10-16T00:00:00Z"
+    }
+  ],
+  "/challenges/badges": [
+    {
+      "badgeKey": "HighAltitude",
+      "timesEarned": 1,
+      "firstEarnedAtUtc": "2026-10-15T13:43:41.963015Z",
+      "lastEarnedAtUtc": "2026-10-15T13:43:41.963015Z"
+    },
+    {
+      "badgeKey": "HighRoller",
+      "timesEarned": 1,
+      "firstEarnedAtUtc": "2026-10-15T13:42:40.691862Z",
+      "lastEarnedAtUtc": "2026-10-15T13:42:40.691862Z"
+    }
+  ],
+  "/feedback/status": {
+    "isDue": false,
+    "rewardAvailable": false,
+    "roundsPlayed": 8,
+    "cashOuts": 7,
+    "nextPromptAtCashOut": 13,
+    "nextPromptAtRound": 14,
+    "intervalRounds": 6,
+    "rewardCredits": 500,
+    "lastSubmittedAtUtc": "2026-10-15T13:50:15.69155Z"
+  },
+  "/feedback/profile": {
+    "ageRange": "21-24",
+    "gender": null,
+    "genderSelfDescribe": null,
+    "country": null,
+    "region": null,
+    "occupation": null,
+    "playFrequency": "daily",
+    "devices": [
+      "smartphone"
+    ],
+    "sessionLength": null,
+    "gameGenres": [],
+    "motivations": [],
+    "triedBecause": null,
+    "favouriteFeatures": [],
+    "wantNext": [],
+    "wantNextText": null,
+    "discoverySource": null,
+    "socialPlatforms": [],
+    "scrollHooks": [],
+    "marketingOptIn": null,
+    "marketingContact": null
+  },
+  "/rounds/history": [
+    {
+      "roundId": "854be1ac-ee58-425d-8a4a-3804a55a38b9",
+      "roundNumber": 14,
+      "crashMultiplier": 24.65,
+      "crashedAtUtc": "2026-10-15T13:49:54.112564Z"
+    },
+    {
+      "roundId": "f3bb593c-3284-44a0-be1b-91b826f8e359",
+      "roundNumber": 13,
+      "crashMultiplier": 1.17,
+      "crashedAtUtc": "2026-10-15T13:48:47.679703Z"
+    },
+    {
+      "roundId": "02f1d32e-f4a4-4cba-ba62-a4383f8be4d1",
+      "roundNumber": 12,
+      "crashMultiplier": 3.39,
+      "crashedAtUtc": "2026-10-15T13:48:32.063767Z"
+    },
+    {
+      "roundId": "08759925-effe-421d-972f-203cef5596cf",
+      "roundNumber": 11,
+      "crashMultiplier": 4.27,
+      "crashedAtUtc": "2026-10-15T13:47:58.66406Z"
+    },
+    {
+      "roundId": "42a5c587-2501-473f-a20d-1d172d704c5f",
+      "roundNumber": 10,
+      "crashMultiplier": 9.19,
+      "crashedAtUtc": "2026-10-15T13:47:21.38301Z"
+    },
+    {
+      "roundId": "dc189257-408b-42e3-b3aa-5dbf5b7f6c0f",
+      "roundNumber": 9,
+      "crashMultiplier": 4.33,
+      "crashedAtUtc": "2026-10-15T13:46:31.315354Z"
+    },
+    {
+      "roundId": "ef792749-b0c1-4fdf-b544-f4027ebd2799",
+      "roundNumber": 8,
+      "crashMultiplier": 28.08,
+      "crashedAtUtc": "2026-10-15T13:45:53.795021Z"
+    },
+    {
+      "roundId": "19f29f46-60e0-4f52-9344-a6099f0d5647",
+      "roundNumber": 7,
+      "crashMultiplier": 4.27,
+      "crashedAtUtc": "2026-10-15T13:44:45.152924Z"
+    },
+    {
+      "roundId": "211c2c64-9411-402f-8748-01374f5e5613",
+      "roundNumber": 6,
+      "crashMultiplier": 15.25,
+      "crashedAtUtc": "2026-10-15T13:44:07.941837Z"
+    },
+    {
+      "roundId": "e4c92d85-1da6-47d5-ab62-74c1270c2d94",
+      "roundNumber": 5,
+      "crashMultiplier": 3.23,
+      "crashedAtUtc": "2026-10-15T13:43:09.416192Z"
+    },
+    {
+      "roundId": "515a69a0-e16a-41cf-881c-96567b56a671",
+      "roundNumber": 4,
+      "crashMultiplier": 4.82,
+      "crashedAtUtc": "2026-10-15T13:42:36.851973Z"
+    },
+    {
+      "roundId": "4f880bc1-06e9-4f56-a167-809d3a58b6b3",
+      "roundNumber": 3,
+      "crashMultiplier": 1.53,
+      "crashedAtUtc": "2026-10-15T13:41:57.466323Z"
+    },
+    {
+      "roundId": "87e36242-3792-4997-9be4-15e7881bf055",
+      "roundNumber": 2,
+      "crashMultiplier": 6.59,
+      "crashedAtUtc": "2026-10-15T13:41:37.378772Z"
+    },
+    {
+      "roundId": "b51f8be6-e4c8-4dbc-8414-5d5c8e8f75a7",
+      "roundNumber": 1,
+      "crashMultiplier": 1.38,
+      "crashedAtUtc": "2026-10-15T13:40:52.87928Z"
+    }
+  ],
+  "/players/me/bet-history": [
+    {
+      "betId": "c948f7f8-ebbb-4524-9969-b291d609736c",
+      "roundNumber": 10,
+      "amount": 500,
+      "status": "CashedOut",
+      "cashOutMultiplier": 3.34,
+      "payout": 1670,
+      "placedAtUtc": "2026-10-15T13:46:35.417753Z"
+    },
+    {
+      "betId": "b06e33be-94a6-4995-9a3b-6e10dd5560b7",
+      "roundNumber": 9,
+      "amount": 1000,
+      "status": "CashedOut",
+      "cashOutMultiplier": 1.13,
+      "payout": 1130,
+      "placedAtUtc": "2026-10-15T13:45:57.133581Z"
+    },
+    {
+      "betId": "12791d33-0582-47dd-8ffd-8ab8f1167c0b",
+      "roundNumber": 8,
+      "amount": 250,
+      "status": "CashedOut",
+      "cashOutMultiplier": 1.69,
+      "payout": 422.5,
+      "placedAtUtc": "2026-10-15T13:44:49.520034Z"
+    },
+    {
+      "betId": "8103e7fd-6216-415f-8de5-e940342f19a6",
+      "roundNumber": 7,
+      "amount": 1000,
+      "status": "CashedOut",
+      "cashOutMultiplier": 1.95,
+      "payout": 1950,
+      "placedAtUtc": "2026-10-15T13:44:12.671673Z"
+    },
+    {
+      "betId": "765fe934-6efc-4b36-afcb-20ce58ce8aa6",
+      "roundNumber": 6,
+      "amount": 100,
+      "status": "CashedOut",
+      "cashOutMultiplier": 3.22,
+      "payout": 322,
+      "placedAtUtc": "2026-10-15T13:43:14.220949Z"
+    },
+    {
+      "betId": "f5443256-86e6-4c1e-854f-9a47265d9bf9",
+      "roundNumber": 5,
+      "amount": 1000,
+      "status": "CashedOut",
+      "cashOutMultiplier": 1.45,
+      "payout": 1450,
+      "placedAtUtc": "2026-10-15T13:42:40.686934Z"
+    },
+    {
+      "betId": "e06271f8-b7c1-4a26-8736-4f03fd30c921",
+      "roundNumber": 4,
+      "amount": 250,
+      "status": "CashedOut",
+      "cashOutMultiplier": 2.22,
+      "payout": 555,
+      "placedAtUtc": "2026-10-15T13:42:02.320582Z"
+    },
+    {
+      "betId": "70a2ce17-0c44-4da0-ac9a-bf1d4a703318",
+      "roundNumber": 3,
+      "amount": 100,
+      "status": "Lost",
+      "cashOutMultiplier": null,
+      "payout": null,
+      "placedAtUtc": "2026-10-15T13:41:41.18598Z"
+    }
+  ],
+  "/leaderboard": {
+    "biggestWins": [
+      {
+        "username": "SkyLark_ZA",
+        "displayedAchievementKey": null,
+        "payout": 4030,
+        "cashOutMultiplier": 4.03,
+        "roundNumber": 6
+      },
+      {
+        "username": "JoziJet",
+        "displayedAchievementKey": null,
+        "payout": 3940,
+        "cashOutMultiplier": 3.94,
+        "roundNumber": 8
+      },
+      {
+        "username": "NeonNomad",
+        "displayedAchievementKey": null,
+        "payout": 3170,
+        "cashOutMultiplier": 3.17,
+        "roundNumber": 10
+      },
+      {
+        "username": "CapeFlyer",
+        "displayedAchievementKey": null,
+        "payout": 2780,
+        "cashOutMultiplier": 2.78,
+        "roundNumber": 4
+      },
+      {
+        "username": "TurboTumi",
+        "displayedAchievementKey": null,
+        "payout": 2750,
+        "cashOutMultiplier": 2.75,
+        "roundNumber": 8
+      },
+      {
+        "username": "JoziJet",
+        "displayedAchievementKey": null,
+        "payout": 2240,
+        "cashOutMultiplier": 2.24,
+        "roundNumber": 10
+      },
+      {
+        "username": "AceMaverick",
+        "displayedAchievementKey": null,
+        "payout": 1950,
+        "cashOutMultiplier": 1.95,
+        "roundNumber": 7
+      },
+      {
+        "username": "NeonNomad",
+        "displayedAchievementKey": null,
+        "payout": 1880,
+        "cashOutMultiplier": 1.88,
+        "roundNumber": 4
+      },
+      {
+        "username": "AceMaverick",
+        "displayedAchievementKey": null,
+        "payout": 1670,
+        "cashOutMultiplier": 3.34,
+        "roundNumber": 10
+      },
+      {
+        "username": "NeonNomad",
+        "displayedAchievementKey": null,
+        "payout": 1490,
+        "cashOutMultiplier": 2.98,
+        "roundNumber": 6
+      }
+    ],
+    "bestMultipliers": [
+      {
+        "username": "CapeFlyer",
+        "displayedAchievementKey": null,
+        "cashOutMultiplier": 4.03,
+        "roundNumber": 9
+      },
+      {
+        "username": "SkyLark_ZA",
+        "displayedAchievementKey": null,
+        "cashOutMultiplier": 4.03,
+        "roundNumber": 6
+      },
+      {
+        "username": "JoziJet",
+        "displayedAchievementKey": null,
+        "cashOutMultiplier": 3.94,
+        "roundNumber": 8
+      },
+      {
+        "username": "NeonNomad",
+        "displayedAchievementKey": null,
+        "cashOutMultiplier": 3.93,
+        "roundNumber": 9
+      },
+      {
+        "username": "TurboTumi",
+        "displayedAchievementKey": null,
+        "cashOutMultiplier": 3.69,
+        "roundNumber": 9
+      },
+      {
+        "username": "TurboTumi",
+        "displayedAchievementKey": null,
+        "cashOutMultiplier": 3.64,
+        "roundNumber": 4
+      },
+      {
+        "username": "JoziJet",
+        "displayedAchievementKey": null,
+        "cashOutMultiplier": 3.46,
+        "roundNumber": 9
+      },
+      {
+        "username": "AceMaverick",
+        "displayedAchievementKey": null,
+        "cashOutMultiplier": 3.34,
+        "roundNumber": 10
+      },
+      {
+        "username": "SkyLark_ZA",
+        "displayedAchievementKey": null,
+        "cashOutMultiplier": 3.23,
+        "roundNumber": 8
+      },
+      {
+        "username": "AceMaverick",
+        "displayedAchievementKey": null,
+        "cashOutMultiplier": 3.22,
+        "roundNumber": 6
+      }
+    ],
+    "mostActive": [
+      {
+        "username": "TurboTumi",
+        "displayedAchievementKey": null,
+        "betsPlaced": 8
+      },
+      {
+        "username": "JoziJet",
+        "displayedAchievementKey": null,
+        "betsPlaced": 8
+      },
+      {
+        "username": "NeonNomad",
+        "displayedAchievementKey": null,
+        "betsPlaced": 8
+      },
+      {
+        "username": "SkyLark_ZA",
+        "displayedAchievementKey": null,
+        "betsPlaced": 8
+      },
+      {
+        "username": "CapeFlyer",
+        "displayedAchievementKey": null,
+        "betsPlaced": 8
+      },
+      {
+        "username": "AceMaverick",
+        "displayedAchievementKey": null,
+        "betsPlaced": 8
+      }
+    ]
+  },
+  "/lobby/online": [],
+  "/lobby/mine": {
+    "lobbyId": "5c455f7d-7284-4b9b-887a-c93e019e74fc",
+    "name": "Cape Squadron",
+    "inviteCode": "URSLHK",
+    "hostPlayerId": "29a6045c-b967-40d9-a152-5c863c492d82",
+    "hostUsername": "AceMaverick",
+    "members": [
+      {
+        "playerId": "29a6045c-b967-40d9-a152-5c863c492d82",
+        "username": "AceMaverick",
+        "displayedAchievementKey": null,
+        "joinedAtUtc": "2026-10-15T13:41:37.883786Z",
+        "isHost": true,
+        "equippedCraftId": null,
+        "equippedSkyId": null
+      },
+      {
+        "playerId": "207e0de9-87fc-4c84-a313-16ee1c513be6",
+        "username": "NeonNomad",
+        "displayedAchievementKey": null,
+        "joinedAtUtc": "2026-10-15T13:41:37.989109Z",
+        "isHost": false,
+        "equippedCraftId": null,
+        "equippedSkyId": null
+      },
+      {
+        "playerId": "56ec2ccb-d5a9-44d8-b0e8-4df3b7669708",
+        "username": "SkyLark_ZA",
+        "displayedAchievementKey": null,
+        "joinedAtUtc": "2026-10-15T13:41:38.086143Z",
+        "isHost": false,
+        "equippedCraftId": null,
+        "equippedSkyId": null
+      }
+    ],
+    "maxPlayers": 8
+  },
+  "/payments/packs": [],
+  "/settings/public": {
+    "lobbyMaxPlayers": 8,
+    "audio": {
+      "music": 60,
+      "plane": 70,
+      "game": 80
+    },
+    "paymentsEnabled": false
+  }
+}
