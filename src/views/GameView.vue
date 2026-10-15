@@ -14,6 +14,7 @@ import CRTOverlay from '@/components/sky/CRTOverlay.vue'
 import FlightStage from '@/components/sky/FlightStage.vue'
 import NavDock from '@/components/sky/NavDock.vue'
 import HudHeader from '@/components/sky/HudHeader.vue'
+import HudMenuItem from '@/components/sky/HudMenuItem.vue'
 import NeonPanel from '@/components/sky/NeonPanel.vue'
 import ArcadeButton from '@/components/sky/ArcadeButton.vue'
 import StatusBadge from '@/components/sky/StatusBadge.vue'
@@ -217,12 +218,28 @@ function crashChipClass(value: number) {
     </div>
     <CRTOverlay />
 
-    <HudHeader />
+    <HudHeader>
+      <!-- On phones the strip's help and sound buttons move into the header menu. -->
+      <template #menu="{ close }">
+        <HudMenuItem accent="ember" @click="(close(), tutorial.open())">
+          <template #icon><CircleHelp class="h-4 w-4" aria-hidden="true" /></template>
+          How to play
+        </HudMenuItem>
+        <HudMenuItem :pressed="!audioStore.effectsEnabled" accent="violet" @click="audioStore.toggleEffects()">
+          <template #icon>
+            <Volume2 v-if="audioStore.effectsEnabled" class="h-4 w-4" aria-hidden="true" />
+            <VolumeX v-else class="h-4 w-4" aria-hidden="true" />
+          </template>
+          {{ audioStore.effectsEnabled ? 'Mute plane and game sounds' : 'Unmute plane and game sounds' }}
+        </HudMenuItem>
+      </template>
+    </HudHeader>
 
-    <!-- stage above, controls below on every device. The stage always keeps at least 40% of the
-         screen height; when space is tight the controls scroll inside themselves instead. -->
-    <div class="relative z-10 mx-auto flex min-h-0 w-full max-w-[90rem] flex-1 flex-col">
-      <main class="relative z-10 flex min-h-[40dvh] min-w-0 flex-1 flex-col px-3 sm:px-4">
+    <!-- stage above, controls below (beside it on a phone held sideways). The stage always keeps
+         at least 40% of the screen height (a third on short phones); when space is tight the
+         controls scroll inside themselves instead. -->
+    <div class="relative z-10 mx-auto flex min-h-0 w-full max-w-[90rem] flex-1 flex-col landscape-phone:flex-row">
+      <main class="relative z-10 flex min-h-[40dvh] min-w-0 flex-1 flex-col short:min-h-[30dvh] landscape-phone:min-h-0 pl-[max(0.75rem,env(safe-area-inset-left))] pr-[max(0.75rem,env(safe-area-inset-right))] sm:pl-[max(1rem,env(safe-area-inset-left))] sm:pr-[max(1rem,env(safe-area-inset-right))]">
         <!-- round strip: number/phase, recent crash points, sound toggle -->
         <div class="flex items-center gap-2">
           <p class="shrink-0 text-[0.625rem] uppercase tracking-[0.24em] text-muted-foreground sm:text-xs sm:tracking-[0.3em]">
@@ -249,7 +266,7 @@ function crashChipClass(value: number) {
             type="button"
             aria-label="How to play: replay the tutorial"
             title="How to play"
-            class="grid h-8 w-8 shrink-0 place-items-center border-2 border-violet/50 bg-void/70 text-muted-foreground clip-hud transition-colors hover:border-electric hover:text-electric"
+            class="hidden h-8 w-8 shrink-0 place-items-center border-2 border-violet/50 bg-void/70 text-muted-foreground clip-hud transition-colors hover:border-electric hover:text-electric pointer-coarse:h-11 pointer-coarse:w-11 md:grid"
             @click="tutorial.open()"
           >
             <CircleHelp class="h-3.5 w-3.5" aria-hidden="true" />
@@ -259,7 +276,7 @@ function crashChipClass(value: number) {
             :aria-label="audioStore.effectsEnabled ? 'Mute plane and game sounds' : 'Unmute plane and game sounds'"
             :aria-pressed="!audioStore.effectsEnabled"
             :title="audioStore.effectsEnabled ? 'Mute plane and game sounds' : 'Unmute plane and game sounds'"
-            class="grid h-8 w-8 shrink-0 place-items-center border-2 border-violet/50 bg-void/70 text-muted-foreground clip-hud transition-colors hover:border-electric hover:text-electric"
+            class="hidden h-8 w-8 shrink-0 place-items-center border-2 border-violet/50 bg-void/70 text-muted-foreground clip-hud transition-colors hover:border-electric hover:text-electric pointer-coarse:h-11 pointer-coarse:w-11 md:grid"
             @click="audioStore.toggleEffects()"
           >
             <Volume2 v-if="audioStore.effectsEnabled" class="h-3.5 w-3.5" aria-hidden="true" />
@@ -269,7 +286,7 @@ function crashChipClass(value: number) {
 
         <HowToPlay compact class="mt-1.5" />
 
-        <FlightStage :craft="craft" :wingmen="lobbyFlight.mates.value" class="mt-1 min-h-[11.25rem] flex-1">
+        <FlightStage :craft="craft" :wingmen="lobbyFlight.mates.value" class="mt-1 min-h-[11.25rem] flex-1 short:min-h-[8.5rem]">
           <template #readout>
             <div v-if="cashedOutThisRound" class="animate-sky-pop mt-3 text-center">
               <p class="font-display text-xs font-black uppercase tracking-[0.3em] text-lime text-glow-lime sm:text-sm">
@@ -307,10 +324,11 @@ function crashChipClass(value: number) {
         </FlightStage>
       </main>
 
-      <!-- controls: one compact panel for every phase; bottom padding clears the nav dock's peek tab -->
-      <div class="relative z-20 min-h-0 overflow-y-auto px-3 pb-[calc(env(safe-area-inset-bottom)+2.25rem)] pt-2 sm:px-4">
-        <NeonPanel accent="magenta" class="mx-auto w-full max-w-[64rem] [&>div]:p-2.5 sm:[&>div]:p-3">
-          <div class="grid gap-2.5 md:grid-cols-[minmax(0,1fr)_minmax(13rem,16rem)] md:items-center md:gap-5">
+      <!-- controls: one compact panel for every phase. On phones the bottom padding keeps the
+           nav dock's handle (and the bottom-edge swipe zone) clear of the buttons. -->
+      <div class="relative z-20 min-h-0 overflow-y-auto pb-[calc(env(safe-area-inset-bottom)+2.125rem)] landscape-phone:w-[min(24rem,50vw)] landscape-phone:shrink-0 [@media(min-width:48rem)_and_(min-height:500.02px)]:pb-2 pl-[max(0.75rem,env(safe-area-inset-left))] pr-[max(0.75rem,env(safe-area-inset-right))] pt-2 sm:pl-[max(1rem,env(safe-area-inset-left))] sm:pr-[max(1rem,env(safe-area-inset-right))]">
+        <NeonPanel accent="magenta" class="mx-auto w-full max-w-[64rem] [&>div]:p-2.5 sm:[&>div]:p-3 landscape-phone:[&>div]:p-2.5">
+          <div class="grid gap-2.5 md:grid-cols-[minmax(0,1fr)_minmax(13rem,16rem)] md:items-center md:gap-5 landscape-phone:grid-cols-1 landscape-phone:gap-2.5">
             <div class="min-w-0 space-y-2">
               <!-- bet amount + quick amounts on one line; the chips scroll rather than wrap -->
               <div class="flex items-center gap-2">
@@ -322,16 +340,16 @@ function crashChipClass(value: number) {
                     inputmode="numeric"
                     min="1"
                     :max="credits"
-                    class="block w-24 border-2 border-violet/50 bg-void/70 px-2 py-1 font-arcade text-sm text-ember text-glow-ember focus:border-magenta focus:outline-none sm:w-28 sm:text-base"
+                    class="block w-24 border-2 pointer-coarse:min-h-11 border-violet/50 bg-void/70 px-2 py-1 font-arcade text-base text-ember text-glow-ember focus:border-magenta focus:outline-none sm:w-28"
                   />
                 </label>
-                <div class="-my-1 flex min-w-0 flex-1 gap-2 overflow-x-auto py-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                <div data-scroll-x class="-my-1 flex min-w-0 flex-1 gap-2 overflow-x-auto py-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                   <button
                     v-for="v in BET_STEPS"
                     :key="v"
                     type="button"
                     :class="[
-                      'clip-hud shrink-0 border-2 px-2.5 py-1.5 font-arcade text-[0.5625rem] transition-all duration-150 active:translate-y-[1px]',
+                      'clip-hud shrink-0 border-2 px-2.5 py-1.5 font-arcade text-[0.5625rem] transition-all duration-150 active:translate-y-[1px] pointer-coarse:min-h-11 pointer-coarse:min-w-11',
                       betAmountInput === v
                         ? 'border-ember text-ember [box-shadow:var(--glow-ember)]'
                         : 'border-violet/50 text-muted-foreground hover:border-electric hover:text-electric',
@@ -342,7 +360,7 @@ function crashChipClass(value: number) {
                   </button>
                   <button
                     type="button"
-                    class="clip-hud shrink-0 border-2 border-magenta/60 px-2.5 py-1.5 font-arcade text-[0.5625rem] text-magenta transition-all hover:[box-shadow:var(--glow-magenta)]"
+                    class="clip-hud shrink-0 border-2 border-magenta/60 px-2.5 py-1.5 font-arcade text-[0.5625rem] text-magenta transition-all hover:[box-shadow:var(--glow-magenta)] pointer-coarse:min-h-11 pointer-coarse:min-w-11"
                     @click="betAmountInput = credits"
                   >
                     Max
@@ -363,7 +381,7 @@ function crashChipClass(value: number) {
                 <button
                   v-if="prompts.outOfCredits.value"
                   type="button"
-                  class="flex items-center gap-1.5 border-2 border-ember px-2 py-1 font-arcade text-[0.5rem] uppercase tracking-[0.15em] text-foreground [box-shadow:var(--glow-ember)] hover:bg-ember/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ember"
+                  class="flex items-center gap-1.5 border-2 border-ember pointer-coarse:min-h-11 px-2 py-1 font-arcade text-[0.5rem] uppercase tracking-[0.15em] text-foreground [box-shadow:var(--glow-ember)] hover:bg-ember/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ember"
                   @click="prompts.openWheel"
                 >
                   <RotateCw class="h-3 w-3" aria-hidden="true" /> Out of credits?
@@ -371,7 +389,7 @@ function crashChipClass(value: number) {
                 <RouterLink
                   to="/hangar"
                   :aria-label="`Your plane: ${getCraft(craft).name}. Open the hangar to change plane and sky`"
-                  class="clip-hud ml-auto hidden items-center gap-1.5 border-2 border-electric bg-void/70 py-0.5 pl-1 pr-2.5 text-electric transition-all hover:[box-shadow:var(--glow-blue)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-electric sm:flex"
+                  class="clip-hud ml-auto hidden items-center gap-1.5 border-2 border-electric bg-void/70 py-0.5 pl-1 pr-2.5 pointer-coarse:min-h-11 text-electric transition-all hover:[box-shadow:var(--glow-blue)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-electric sm:flex"
                 >
                   <img
                     :src="getCraft(craft).src"
@@ -399,7 +417,7 @@ function crashChipClass(value: number) {
                 v-if="primaryAction === 'cashout'"
                 variant="cash"
                 size="xl"
-                class="w-full flex-col !gap-0 py-2 sm:py-3"
+                class="w-full flex-col !gap-0 py-2 sm:py-3 short:sm:py-2"
                 :disabled="isCashingOut"
                 @click="runPrimaryAction"
               >
@@ -411,7 +429,7 @@ function crashChipClass(value: number) {
                 v-else-if="primaryAction === 'bet'"
                 size="xl"
                 variant="primary"
-                class="w-full"
+                class="w-full short:py-3 short:text-base"
                 :disabled="betInvalid || isPlacingBet"
                 @click="runPrimaryAction"
               >
@@ -449,7 +467,7 @@ function crashChipClass(value: number) {
       </div>
     </div>
 
-    <NavDock />
+    <NavDock auto-hide />
 
     <DailyChallengeBar
       v-if="prompts.briefingOpen.value"

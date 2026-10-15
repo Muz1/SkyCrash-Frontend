@@ -61,7 +61,7 @@ const shown = computed(() => (Number.isFinite(target.value) ? target.value : 0))
   <fieldset
     v-else
     :class="[
-      'clip-hud min-w-0 border-2 px-2 py-1 transition-all',
+      'clip-hud min-w-0 max-w-full border-2 px-2 py-1 transition-all',
       enabled
         ? 'border-electric bg-electric/10 [box-shadow:var(--glow-blue)]'
         : 'border-violet/50 bg-void/60',
@@ -91,7 +91,7 @@ const shown = computed(() => (Number.isFinite(target.value) ? target.value : 0))
         :aria-checked="enabled"
         aria-label="Auto Cash Out"
         :class="[
-          'flex items-center gap-1.5 border-2 px-1 py-0.5 font-arcade text-[0.5rem] uppercase transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-electric',
+          'flex shrink-0 items-center gap-1.5 border-2 px-1 py-0.5 font-arcade text-[0.5rem] uppercase pointer-coarse:min-h-11 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-electric',
           enabled ? 'border-electric text-electric' : 'border-violet/60 text-muted-foreground',
         ]"
         @click="enabled = !enabled"
@@ -106,7 +106,7 @@ const shown = computed(() => (Number.isFinite(target.value) ? target.value : 0))
         </span>
         {{ enabled ? 'On' : 'Off' }}
       </button>
-      <label class="flex items-center gap-1">
+      <label class="flex shrink-0 items-center gap-1">
         <span class="sr-only">Auto cash out target multiplier</span>
         <input
           v-model.number="target"
@@ -114,18 +114,20 @@ const shown = computed(() => (Number.isFinite(target.value) ? target.value : 0))
           inputmode="decimal"
           min="1.01"
           step="0.05"
-          class="block w-16 border-2 border-violet/50 bg-void/70 px-2 py-0.5 font-arcade text-sm text-electric text-glow-blue focus:border-electric focus:outline-none"
+          class="block w-20 border-2 border-violet/50 bg-void/70 px-2 py-0.5 font-arcade text-base pointer-coarse:min-h-11 sm:w-16 sm:text-sm pointer-coarse:sm:w-20 pointer-coarse:sm:text-base text-electric text-glow-blue focus:border-electric focus:outline-none"
           @focus="enabled = true"
         />
         <span class="font-arcade text-[0.625rem] text-electric">x</span>
       </label>
+      <!-- Presets scroll sideways when the row is tight, like the bet amount chips. -->
+      <div data-scroll-x class="-my-1 flex min-w-0 gap-1 overflow-x-auto py-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
       <button
         v-for="(p, i) in PRESETS"
         :key="p"
         type="button"
         :aria-label="`Set auto cash out to ${p}x`"
         :class="[
-          'clip-hud border px-1.5 py-0.5 font-arcade text-[0.5rem] transition-colors',
+          'clip-hud shrink-0 border px-1.5 py-0.5 pointer-coarse:min-h-11 pointer-coarse:min-w-11 font-arcade text-[0.5rem] transition-colors',
           i >= 3 && 'hidden sm:inline-block',
           enabled && target === p
             ? 'border-electric text-electric'
@@ -135,6 +137,7 @@ const shown = computed(() => (Number.isFinite(target.value) ? target.value : 0))
       >
         {{ p }}x
       </button>
+      </div>
     </div>
 
     <p v-if="props.error" class="mt-1 text-xs text-danger">{{ props.error }}</p>

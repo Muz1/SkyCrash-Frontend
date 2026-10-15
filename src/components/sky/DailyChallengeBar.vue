@@ -67,13 +67,13 @@ onBeforeUnmount(() => {
           <span class="hidden shrink-0 text-xs text-foreground/80 md:inline">· {{ challengeBadgeFor(current.badgeKey)?.name }}</span>
         </div>
       </div>
-      <RouterLink to="/missions" class="hidden shrink-0 font-arcade text-[0.5rem] uppercase tracking-[0.15em] text-electric hover:text-foreground sm:block">
+      <RouterLink to="/missions" class="hidden shrink-0 items-center font-arcade text-[0.5rem] uppercase tracking-[0.15em] text-electric hover:text-foreground pointer-coarse:min-h-11 sm:flex">
         All missions
       </RouterLink>
       <button
         type="button"
         aria-label="Hide daily challenges until tomorrow"
-        class="grid h-8 w-8 shrink-0 place-items-center border-2 border-violet/60 hover:border-lime hover:text-lime focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lime"
+        class="grid h-8 w-8 shrink-0 place-items-center border-2 border-violet/60 pointer-coarse:h-11 pointer-coarse:w-11 hover:border-lime hover:text-lime focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lime"
         @click="emit('close')"
       >
         <X class="h-4 w-4" aria-hidden="true" />

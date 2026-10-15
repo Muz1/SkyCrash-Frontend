@@ -75,7 +75,7 @@ function statusClass(row: FlightRow) {
     <button
       v-if="mode === 'chip'"
       type="button"
-      class="clip-hud flex h-8 items-center gap-1.5 border-2 border-magenta/60 bg-void/80 px-2 font-arcade text-[0.5rem] uppercase text-magenta"
+      class="clip-hud flex h-8 items-center gap-1.5 border-2 border-magenta/60 pointer-coarse:h-11 bg-void/80 px-2 font-arcade text-[0.5rem] uppercase text-magenta"
       :aria-expanded="open"
       aria-controls="lobby-flight-board"
       @click="open = !open"

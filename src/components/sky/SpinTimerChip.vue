@@ -23,7 +23,7 @@ onMounted(() => {
         : `Next free spin in ${formatDuration(seconds)}`
     "
     :class="[
-      'clip-hud flex shrink-0 items-center gap-1.5 border-2 bg-void/70 px-2 py-1.5 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ember',
+      'clip-hud flex shrink-0 items-center gap-1.5 border-2 bg-void/70 px-2 py-1.5 pointer-coarse:min-h-11 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ember',
       seconds === 0
         ? 'animate-pulse border-ember text-ember [box-shadow:var(--glow-ember)] hover:bg-ember/15'
         : 'border-violet/50 text-muted-foreground hover:border-ember hover:text-ember',

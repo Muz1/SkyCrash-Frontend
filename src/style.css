@@ -1,5 +1,10 @@
 @import "tailwindcss";
 
+/* Phone held sideways: little height, plenty of width (the game puts its controls beside the stage). */
+@custom-variant landscape-phone (@media (orientation: landscape) and (max-height: 500px));
+/* Short portrait phones (iPhone SE and similar): tighten vertical spacing on the game screen. */
+@custom-variant short (@media (max-height: 700px));
+
 @theme inline {
   --breakpoint-xs: 30rem;
 
