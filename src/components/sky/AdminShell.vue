@@ -4,11 +4,12 @@ const sidebarScroll = { top: 0, left: 0 }
 </script>
 
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
-import { LogOut, Moon, Sun } from '@lucide/vue'
+import { LogOut, Menu, Moon, Sun, X } from '@lucide/vue'
 import { useAuthStore } from '@/stores/AuthStore'
 import { usePlayerStore } from '@/stores/playerStore'
+import { useMediaQuery } from '@/composables/useMediaQuery'
 import logo from '@/assets/logo-skycrash.png'
 import AdminTabs from './AdminTabs.vue'
 import HelpTip from './HelpTip.vue'
@@ -46,7 +47,6 @@ watch(theme, (value) => {
 // Remember how far it was scrolled (module-level, shared by all instances) and put it back,
 // so picking a report lower down the menu doesn't jump the menu back to the top.
 const sidebar = ref<HTMLElement | null>(null)
-// (On narrow screens the menu becomes a sideways-scrolling row, hence left as well.)
 onMounted(() => {
   if (!sidebar.value) return
   sidebar.value.scrollTop = sidebarScroll.top
@@ -59,6 +59,50 @@ function rememberSidebarScroll() {
 }
 onBeforeUnmount(rememberSidebarScroll)
 
+// ---------- menu drawer (below 1024px the sidebar slides in from the left) ----------
+
+const isDrawer = useMediaQuery('(max-width: 1023.98px)')
+const drawerOpen = ref(false)
+const menuToggle = ref<HTMLButtonElement | null>(null)
+const drawerClose = ref<HTMLButtonElement | null>(null)
+
+async function openDrawer() {
+  drawerOpen.value = true
+  await nextTick()
+  // Start on the current page's link so the admin sees where they are.
+  const current = sidebar.value?.querySelector<HTMLElement>('[aria-current="page"]')
+  ;(current ?? drawerClose.value)?.focus()
+}
+function closeDrawer() {
+  if (!drawerOpen.value) return
+  drawerOpen.value = false
+  void nextTick(() => menuToggle.value?.focus())
+}
+function onDrawerKeydown(e: KeyboardEvent) {
+  if (e.key === 'Escape') {
+    e.preventDefault()
+    closeDrawer()
+    return
+  }
+  // Keep Tab inside the open drawer (it is a modal dialog).
+  if (e.key !== 'Tab' || !sidebar.value) return
+  const focusable = [...sidebar.value.querySelectorAll<HTMLElement>('a[href], button:not([disabled])')]
+  const first = focusable[0]
+  const last = focusable[focusable.length - 1]
+  if (!first || !last) return
+  if (e.shiftKey && document.activeElement === first) {
+    e.preventDefault()
+    last.focus()
+  } else if (!e.shiftKey && document.activeElement === last) {
+    e.preventDefault()
+    first.focus()
+  }
+}
+// Growing past tablet width turns the drawer back into the always-visible sidebar.
+watch(isDrawer, (drawer) => {
+  if (!drawer) drawerOpen.value = false
+})
+
 function handleLogout() {
   authStore.logout()
   playerStore.clear()
@@ -70,11 +114,23 @@ function handleLogout() {
   <div class="admin-console flex h-dvh flex-col overflow-hidden" :data-theme="theme">
     <header class="adm-topbar">
       <div class="adm-brand">
+        <button
+          ref="menuToggle"
+          type="button"
+          class="adm-menu-toggle"
+          aria-controls="adm-sidebar"
+          :aria-expanded="drawerOpen"
+          aria-haspopup="dialog"
+          @click="drawerOpen ? closeDrawer() : openDrawer()"
+        >
+          <Menu aria-hidden="true" />
+          <span>Menu</span>
+        </button>
         <img :src="logo" alt="Sky Crash" width="1152" height="576" />
         <span class="adm-brand-divider" aria-hidden="true" />
         <span class="adm-brand-label">Admin Dashboard</span>
       </div>
-      <div class="flex items-center gap-3">
+      <div class="flex items-center gap-2 sm:gap-3">
         <HelpTip v-if="helpText" :text="helpText" />
         <div class="adm-user">
           <span class="adm-avatar" aria-hidden="true">{{ initial }}</span>
@@ -93,16 +149,40 @@ function handleLogout() {
           <Sun v-if="theme === 'dark'" aria-hidden="true" />
           <Moon v-else aria-hidden="true" />
         </button>
-        <button type="button" class="adm-btn adm-btn--ghost" @click="handleLogout">
+        <button type="button" class="adm-btn adm-btn--ghost" aria-label="Logout" @click="handleLogout">
           <LogOut aria-hidden="true" /> <span class="hidden sm:inline">Logout</span>
         </button>
       </div>
     </header>
 
     <div class="adm-layout">
-      <aside ref="sidebar" class="adm-sidebar" @scroll.passive="rememberSidebarScroll">
-        <AdminTabs />
+      <!-- Sidebar on desktop; a modal drawer below 1024px (hidden, and out of the tab order, until opened). -->
+      <aside
+        id="adm-sidebar"
+        ref="sidebar"
+        :class="['adm-sidebar', drawerOpen && 'is-open']"
+        :role="isDrawer ? 'dialog' : undefined"
+        :aria-modal="isDrawer ? 'true' : undefined"
+        :aria-label="isDrawer ? 'Admin dashboard menu' : undefined"
+        @scroll.passive="rememberSidebarScroll"
+        @keydown="isDrawer && onDrawerKeydown($event)"
+      >
+        <div class="adm-drawer-head">
+          <div class="adm-drawer-user">
+            <span class="adm-avatar" aria-hidden="true">{{ initial }}</span>
+            <div>
+              <p class="adm-user-name">{{ adminName }}</p>
+              <p class="adm-user-role">{{ roleLabel }}</p>
+            </div>
+          </div>
+          <button ref="drawerClose" type="button" class="adm-theme-toggle" aria-label="Close menu" @click="closeDrawer">
+            <X aria-hidden="true" />
+          </button>
+        </div>
+        <!-- Any link tap navigates; the new page starts with the drawer closed. -->
+        <AdminTabs @click="closeDrawer" />
       </aside>
+      <div v-if="drawerOpen" class="adm-drawer-backdrop" aria-hidden="true" @click="closeDrawer" />
       <main class="adm-main">
         <slot />
       </main>

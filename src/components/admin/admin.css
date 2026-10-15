@@ -56,13 +56,15 @@
 /* ---------- top bar & tabs ---------- */
 
 .admin-console .adm-topbar {
-  height: 60px;
+  /* the notch / status bar sits above the bar's content on phones */
+  height: calc(60px + env(safe-area-inset-top, 0px));
   flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  padding: 0 24px;
+  padding: env(safe-area-inset-top, 0px) max(24px, env(safe-area-inset-right, 0px)) 0
+    max(24px, env(safe-area-inset-left, 0px));
   border-bottom: 1px solid var(--adm-border);
   background: oklch(0.16 0.055 262 / 0.82);
   backdrop-filter: blur(8px);
@@ -412,7 +414,7 @@
   padding: 20px 22px;
 }
 .admin-console .adm-kpi--fill .adm-kpi-value {
-  font-size: clamp(34px, 6.2vh, 64px);
+  font-size: clamp(34px, 6.2dvh, 64px);
 }
 .admin-console .adm-kpi-caption {
   font-size: 14px;
@@ -782,9 +784,11 @@
   inset: 0;
   z-index: 50;
   display: flex;
-  align-items: center;
+  /* safe: a dialog taller than the screen (phone held sideways) scrolls instead of losing its top */
+  align-items: safe center;
   justify-content: center;
-  padding: 16px;
+  overflow-y: auto;
+  padding: max(16px, env(safe-area-inset-top, 0px)) 16px max(16px, env(safe-area-inset-bottom, 0px));
   background: oklch(0.1 0.04 265 / 0.7);
   backdrop-filter: blur(4px);
 }
@@ -1380,7 +1384,19 @@
     display: none;
   }
   .admin-console .adm-topbar {
-    padding: 0 16px;
+    gap: 8px;
+    padding-left: max(12px, env(safe-area-inset-left, 0px));
+    padding-right: max(12px, env(safe-area-inset-right, 0px));
+  }
+  .admin-console .adm-brand {
+    gap: 10px;
+  }
+  .admin-console .adm-brand img {
+    height: 30px;
+  }
+  /* The signed-in admin's name moves into the menu drawer. */
+  .admin-console .adm-user {
+    display: none;
   }
 }
 
@@ -1455,30 +1471,86 @@
   outline-offset: 2px;
 }
 
-@media (max-width: 1023px) {
-  .admin-console .adm-layout {
-    flex-direction: column;
+/* Below 1024px the sidebar becomes a slide-in drawer, opened from the Menu button in the
+   top bar (AdminShell): the full grouped menu with headings, one tap away on every page. */
+.admin-console .adm-menu-toggle,
+.admin-console .adm-drawer-head,
+.admin-console .adm-drawer-backdrop {
+  display: none;
+}
+@media (max-width: 1023.98px) {
+  .admin-console .adm-menu-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+    height: 44px;
+    padding: 0 12px;
+    border-radius: var(--adm-radius-sm);
+    border: 1px solid var(--adm-border-strong);
+    background: var(--adm-field);
+    color: var(--adm-text);
+    font-size: 15px;
+    font-weight: 700;
+  }
+  .admin-console .adm-menu-toggle svg {
+    width: 20px;
+    height: 20px;
+  }
+  .admin-console .adm-menu-toggle:focus-visible {
+    outline: 2px solid var(--neon-blue);
+    outline-offset: 2px;
   }
   .admin-console .adm-sidebar {
-    width: auto;
-    padding: 8px 12px;
-    border-right: 0;
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 70;
+    width: min(20rem, 86vw);
+    padding: calc(12px + env(safe-area-inset-top, 0px)) 12px calc(24px + env(safe-area-inset-bottom, 0px))
+      max(12px, env(safe-area-inset-left, 0px));
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    background: var(--adm-surface-solid);
+    box-shadow: 0 0 40px -8px oklch(0 0 0 / 0.5);
+    transform: translateX(-105%);
+    visibility: hidden;
+    transition:
+      transform 0.25s ease,
+      visibility 0s linear 0.25s;
+  }
+  .admin-console .adm-sidebar.is-open {
+    transform: none;
+    visibility: visible;
+    transition: transform 0.25s ease;
+  }
+  .admin-console .adm-drawer-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 14px;
+    padding: 0 4px 12px 12px;
     border-bottom: 1px solid var(--adm-border);
-    overflow-x: auto;
-    overflow-y: hidden;
   }
-  .admin-console .adm-nav {
-    flex-direction: row;
-    gap: 6px;
+  .admin-console .adm-drawer-user {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
   }
-  .admin-console .adm-nav-group {
-    flex-direction: row;
-  }
-  .admin-console .adm-nav-heading {
-    display: none;
+  .admin-console .adm-drawer-backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 65;
+    background: oklch(0.12 0.03 265 / 0.55);
+    backdrop-filter: blur(2px);
   }
   .admin-console .adm-nav-link {
-    white-space: nowrap;
+    min-height: 44px;
   }
 }
 
@@ -1728,4 +1800,216 @@
 .admin-console[data-theme='light'] .adm-about {
   background: oklch(0.97 0.02 245);
   border-color: oklch(0.85 0.05 245);
+}
+
+/* ==========================================================================
+ * Phones (below 768px): pages flow and scroll as one column, headers stack, wide tables
+ * scroll sideways with the first column pinned, and tables with row actions turn into cards.
+ * ======================================================================== */
+
+/* Wide tables scroll sideways inside their panel, never the page. */
+.admin-console .adm-table-wrap {
+  overscroll-behavior-x: contain;
+}
+
+@media (max-width: 767.98px) {
+  .admin-console .adm-main {
+    padding: 16px max(16px, env(safe-area-inset-right, 0px)) calc(24px + env(safe-area-inset-bottom, 0px))
+      max(16px, env(safe-area-inset-left, 0px));
+  }
+  /* One scrolling page instead of panels that scroll inside themselves. */
+  .admin-console .adm-page,
+  .admin-console .adm-page-body,
+  .admin-console .adm-panel--fill {
+    flex: 0 0 auto;
+    min-height: auto;
+  }
+  .admin-console .adm-page-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+  .admin-console .adm-title {
+    font-size: 22px;
+    overflow-wrap: anywhere;
+  }
+  .admin-console .adm-page-actions {
+    flex-wrap: wrap;
+    flex-shrink: 1;
+    align-items: flex-start;
+  }
+  .admin-console .adm-page-actions > * {
+    max-width: 100%;
+  }
+  .admin-console .adm-filter,
+  .admin-console .adm-filter-range,
+  .admin-console .adm-chart-tools {
+    justify-content: flex-start;
+  }
+  .admin-console .adm-filter-range,
+  .admin-console .adm-filter-dates,
+  .admin-console .adm-panel-header,
+  .admin-console .adm-panel-actions {
+    flex-wrap: wrap;
+  }
+  .admin-console .adm-segmented {
+    flex-wrap: wrap;
+    max-width: 100%;
+  }
+  /* The date-range presets become an even grid rather than a ragged wrap. */
+  .admin-console .adm-filter .adm-segmented {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(6.5rem, 1fr));
+    width: 100%;
+  }
+  .admin-console .adm-kpis {
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 220px), 1fr));
+    gap: 12px;
+  }
+  .admin-console .adm-kpi-value {
+    font-size: 28px;
+    overflow-wrap: anywhere;
+  }
+  .admin-console .adm-about-body {
+    grid-template-columns: minmax(0, 1fr);
+    padding: 4px 14px 14px;
+  }
+  /* The player search takes a full row above its filters. */
+  .admin-console .adm-toolbar .adm-search {
+    min-width: 0;
+    flex-basis: 100%;
+  }
+
+  /* Sideways-scrolling tables keep their first column (the row's name) in view. */
+  .admin-console .adm-table-wrap .adm-table th:first-child,
+  .admin-console .adm-table-wrap .adm-table td:first-child {
+    position: sticky;
+    left: 0;
+    z-index: 1;
+    background: var(--adm-surface-solid);
+    box-shadow: 1px 0 0 var(--adm-border-strong);
+  }
+  .admin-console .adm-table-wrap .adm-table th:first-child {
+    z-index: 2;
+  }
+  .admin-console .adm-table td,
+  .admin-console .adm-table th {
+    padding: 0 12px;
+  }
+
+  /* Tables with row actions (players, admins, invitations): one card per row, every
+     action button in view. Each cell's data-label names it. */
+  .admin-console .adm-table.adm-table--cards {
+    min-width: 0;
+  }
+  .admin-console .adm-table--cards thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+  .admin-console .adm-table--cards,
+  .admin-console .adm-table--cards tbody,
+  .admin-console .adm-table--cards tr,
+  .admin-console .adm-table--cards td {
+    display: block;
+    width: 100%;
+  }
+  .admin-console .adm-table--cards tbody {
+    display: grid;
+    gap: 12px;
+    padding: 12px;
+  }
+  .admin-console .adm-table--cards tr {
+    padding: 6px 14px 10px;
+    border: 1px solid var(--adm-border);
+    border-radius: 12px;
+    background: var(--adm-surface-2);
+  }
+  .admin-console .adm-table-wrap .adm-table--cards tbody tr td,
+  .admin-console .adm-table-wrap .adm-table--cards tbody tr:nth-child(even) td,
+  .admin-console .adm-table-wrap .adm-table--cards tbody tr:hover td {
+    position: static;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    height: auto;
+    min-height: 36px;
+    padding: 6px 0;
+    border-bottom: 1px solid var(--adm-border);
+    background: transparent;
+    box-shadow: none;
+    white-space: normal;
+    text-align: right;
+    overflow-wrap: anywhere;
+  }
+  .admin-console .adm-table--cards td::before {
+    content: attr(data-label);
+    flex-shrink: 0;
+    text-align: left;
+    font-size: 12.5px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--adm-text-3);
+  }
+  .admin-console .adm-table--cards td:first-child {
+    font-size: 17px;
+  }
+  .admin-console .adm-table-wrap .adm-table--cards tbody tr td.adm-actions {
+    padding-top: 10px;
+    border-bottom: 0;
+  }
+  .admin-console .adm-table--cards td.adm-actions::before,
+  .admin-console .adm-table--cards td.adm-empty::before {
+    content: none;
+  }
+  .admin-console .adm-table--cards td.adm-actions > div {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    width: 100%;
+    gap: 8px;
+  }
+  .admin-console .adm-table-wrap .adm-table--cards tbody tr td.adm-empty {
+    justify-content: center;
+    text-align: center;
+  }
+}
+
+/* Touch screens (phones and tablets): every control is at least 44px tall, and text
+   fields use 16px type so iOS doesn't zoom the page when one is focused. */
+@media (pointer: coarse) {
+  .admin-console .adm-btn,
+  .admin-console .adm-btn--sm {
+    height: auto;
+    min-height: 44px;
+  }
+  .admin-console .adm-input,
+  .admin-console .adm-select,
+  .admin-console .adm-filter-dates .adm-input {
+    height: auto;
+    min-height: 44px;
+    font-size: 16px;
+  }
+  .admin-console textarea {
+    font-size: 16px;
+  }
+  .admin-console .adm-segmented button,
+  .admin-console .adm-filter .adm-segmented button,
+  .admin-console .adm-chart-toggle {
+    height: auto;
+    min-height: 44px;
+  }
+  .admin-console .adm-theme-toggle {
+    width: 44px;
+    height: 44px;
+  }
+  .admin-console .adm-nav-link,
+  .admin-console .adm-about summary,
+  .admin-console .adm-explain summary {
+    min-height: 44px;
+  }
 }
