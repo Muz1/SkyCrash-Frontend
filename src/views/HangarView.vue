@@ -158,7 +158,7 @@ function rarityBadgeClass(rarity: Rarity) {
           type="button"
           :class="
             cn(
-              'clip-hud border-2 px-5 py-2 font-arcade text-[0.5625rem] uppercase tracking-[0.2em] transition-all duration-150',
+              'clip-hud border-2 px-5 py-2 font-arcade text-[0.5625rem] uppercase tracking-[0.2em] transition-all duration-150 pointer-coarse:min-h-11',
               tab === t
                 ? 'border-ember bg-[image:var(--grad-sunset)] text-void [box-shadow:var(--glow-ember)]'
                 : 'border-violet/50 text-muted-foreground hover:border-electric hover:text-electric',
@@ -235,7 +235,7 @@ function rarityBadgeClass(rarity: Rarity) {
               <ArcadeButton v-else size="lg" variant="primary" @click="hangarStore.setCraft(previewCraft)">
                 Equip Aircraft
               </ArcadeButton>
-              <RouterLink to="/game">
+              <RouterLink to="/game" class="block">
                 <ArcadeButton size="sm" variant="blue" class="w-full">To The Runway</ArcadeButton>
               </RouterLink>
             </div>
@@ -260,7 +260,7 @@ function rarityBadgeClass(rarity: Rarity) {
               <ArcadeButton v-else size="lg" variant="primary" @click="hangarStore.setSkin(previewSky)">
                 Equip Sky
               </ArcadeButton>
-              <RouterLink to="/game">
+              <RouterLink to="/game" class="block">
                 <ArcadeButton size="sm" variant="blue" class="w-full">To The Runway</ArcadeButton>
               </RouterLink>
             </div>

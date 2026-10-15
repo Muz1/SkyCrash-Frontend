@@ -206,7 +206,7 @@ async function handleSave() {
         </NeonPanel>
 
         <NeonPanel class="mt-5" accent="lime">
-          <RouterLink to="/missions">
+          <RouterLink to="/missions" class="block">
             <ArcadeButton type="button" size="md" variant="blue" class="w-full">
               View Missions &amp; Achievements
             </ArcadeButton>

@@ -154,7 +154,7 @@ async function copyInviteCode() {
             <button
               type="button"
               :aria-label="`Copy invite code ${privateLobbyStore.lobby.inviteCode}`"
-              class="clip-hud flex items-center gap-2 border-2 border-electric/70 px-3 py-2 font-arcade text-xs uppercase tracking-[0.2em] text-electric transition-all hover:[box-shadow:var(--glow-blue)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-electric"
+              class="clip-hud flex items-center gap-2 border-2 border-electric/70 px-3 py-2 pointer-coarse:min-h-11 font-arcade text-xs uppercase tracking-[0.2em] text-electric transition-all hover:[box-shadow:var(--glow-blue)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-electric"
               @click="copyInviteCode"
             >
               {{ privateLobbyStore.lobby.inviteCode }}

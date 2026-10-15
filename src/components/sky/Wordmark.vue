@@ -6,7 +6,7 @@ withDefaults(defineProps<{ compact?: boolean }>(), { compact: false })
 </script>
 
 <template>
-  <RouterLink to="/" class="block leading-none">
+  <RouterLink to="/" :class="cn('block leading-none', compact && 'pointer-coarse:flex pointer-coarse:min-h-11 pointer-coarse:items-center')">
     <img
       :src="logo"
       alt="Sky Crash"

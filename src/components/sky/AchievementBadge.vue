@@ -42,7 +42,7 @@ function openViewer() {
     type="button"
     :title="`${label} — click to view`"
     :aria-label="`View ${label} badge`"
-    :class="cn('inline-flex shrink-0 cursor-zoom-in align-middle transition-transform duration-150 hover:scale-125', props.class)"
+    :class="cn('inline-flex shrink-0 cursor-zoom-in items-center justify-center align-middle transition-transform duration-150 hover:scale-125 pointer-coarse:min-h-11 pointer-coarse:min-w-11', props.class)"
     @click.stop.prevent="openViewer"
   >
     <img

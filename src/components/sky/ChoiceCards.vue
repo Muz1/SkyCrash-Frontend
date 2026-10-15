@@ -59,7 +59,7 @@ const gridClass = computed(() =>
           'group relative flex items-center gap-2 border-2 text-left font-bold transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-electric active:scale-[0.97]',
           variant === 'card'
             ? 'clip-hud min-h-[3.75rem] px-3 py-2 text-sm sm:text-base'
-            : 'min-h-10 rounded-full px-4 py-1.5 text-sm',
+            : 'min-h-11 rounded-full px-4 py-1.5 text-sm',
           isOn(o.key)
             ? 'border-electric bg-electric/20 text-foreground [box-shadow:var(--glow-blue)]'
             : 'border-violet/50 bg-void/60 text-foreground/90 hover:-translate-y-0.5 hover:border-electric',

@@ -1,7 +1,7 @@
 import { cva } from 'class-variance-authority'
 
 export const arcadeButton = cva(
-  'relative inline-flex select-none items-center justify-center gap-2 font-display font-black uppercase tracking-[0.14em] transition-all duration-150 clip-hud border-2 disabled:pointer-events-none disabled:opacity-40 disabled:saturate-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-void active:translate-y-[2px]',
+  'relative inline-flex select-none items-center justify-center gap-2 pointer-coarse:min-h-11 font-display font-black uppercase tracking-[0.14em] transition-all duration-150 clip-hud border-2 disabled:pointer-events-none disabled:opacity-40 disabled:saturate-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-void active:translate-y-[2px]',
   {
     variants: {
       variant: {

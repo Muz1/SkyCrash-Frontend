@@ -140,13 +140,13 @@ async function handleSubmit() {
         </div>
 
         <div class="mt-5 border-2 border-lime/50 bg-lime/5 p-3">
-          <label class="flex cursor-pointer items-start gap-3 text-base text-foreground">
+          <label class="flex cursor-pointer items-start gap-3 text-base text-foreground pointer-coarse:min-h-11 pointer-coarse:items-center">
             <input v-model="agreedToTerms" type="checkbox" required class="mt-1 h-5 w-5 shrink-0 accent-[var(--neon-lime)]" />
             <span>I agree to the Terms of Service</span>
           </label>
           <button
             type="button"
-            class="mt-1.5 pl-8 text-sm font-semibold text-electric underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-electric"
+            class="mt-1.5 pl-8 text-sm font-semibold text-electric pointer-coarse:min-h-11 underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-electric"
             @click="showTerms = true"
           >
             Read the Terms of Service

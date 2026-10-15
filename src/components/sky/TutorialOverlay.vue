@@ -100,7 +100,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
         </p>
         <button
           type="button"
-          class="ml-auto flex shrink-0 items-center gap-1.5 border-2 border-violet/60 px-2 py-1 font-arcade text-[0.5rem] uppercase tracking-[0.15em] text-foreground hover:border-magenta hover:text-magenta focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-magenta"
+          class="ml-auto flex shrink-0 items-center gap-1.5 border-2 border-violet/60 px-2 py-1 pointer-coarse:min-h-11 font-arcade text-[0.5rem] uppercase tracking-[0.15em] text-foreground hover:border-magenta hover:text-magenta focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-magenta"
           @click="emit('close')"
         >
           <X class="h-3 w-3" aria-hidden="true" /> Skip<span class="hidden min-[400px]:inline">&nbsp;tutorial</span>
@@ -251,7 +251,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
         <button
           type="button"
           aria-label="Back"
-          class="flex shrink-0 items-center gap-1 border-2 border-violet/50 px-3 py-2 font-arcade text-[0.5625rem] uppercase text-foreground disabled:opacity-30"
+          class="flex shrink-0 items-center justify-center gap-1 border-2 border-violet/50 px-3 py-2 pointer-coarse:min-h-11 pointer-coarse:min-w-11 font-arcade text-[0.5625rem] uppercase text-foreground disabled:opacity-30"
           :disabled="index === 0"
           @click="back"
         >

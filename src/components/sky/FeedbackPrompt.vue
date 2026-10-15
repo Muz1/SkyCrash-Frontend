@@ -319,7 +319,7 @@ const questionClass = 'block text-base font-bold leading-snug text-foreground'
         <button
           type="button"
           aria-label="Maybe later"
-          class="absolute right-3 top-3 z-10 grid h-9 w-9 place-items-center border-2 border-violet/60 text-foreground transition-colors hover:border-electric hover:text-electric focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-electric"
+          class="absolute right-3 top-3 z-10 grid h-9 w-9 place-items-center pointer-coarse:h-11 pointer-coarse:w-11 border-2 border-violet/60 text-foreground transition-colors hover:border-electric hover:text-electric focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-electric"
           @click="fb.dismiss()"
         >
           <X class="h-4 w-4" aria-hidden="true" />
@@ -405,7 +405,7 @@ const questionClass = 'block text-base font-bold leading-snug text-foreground'
                   :aria-checked="rating === n"
                   :aria-label="`${n} star${n === 1 ? '' : 's'}: ${RATING_LABELS[n - 1]}`"
                   :tabindex="rating === n || (rating === 0 && n === 1) ? 0 : -1"
-                  class="grid h-10 w-10 place-items-center transition-transform hover:scale-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-electric"
+                  class="grid h-11 w-11 place-items-center transition-transform hover:scale-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-electric"
                   @mouseenter="hoverRating = n"
                   @click="rating = n"
                 >
@@ -470,7 +470,7 @@ const questionClass = 'block text-base font-bold leading-snug text-foreground'
                   :key="option.tag"
                   :class="
                     cn(
-                      'flex min-h-10 cursor-pointer items-center gap-2 border-2 px-2.5 text-sm font-bold transition-colors focus-within:ring-2 focus-within:ring-electric',
+                      'flex min-h-11 cursor-pointer items-center gap-2 border-2 px-2.5 text-sm font-bold transition-colors focus-within:ring-2 focus-within:ring-electric',
                       wishes.includes(option.tag)
                         ? 'border-electric bg-electric/20 text-foreground'
                         : 'border-violet/50 text-foreground/90 hover:border-electric',

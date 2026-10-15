@@ -39,7 +39,7 @@ const model = defineModel<string | number>()
       :maxlength="maxlength"
       :class="
         cn(
-          'clip-hud w-full border-2 border-violet/50 bg-void/70 px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/60 transition-all focus:border-magenta focus:outline-none focus:[box-shadow:var(--glow-magenta)]',
+          'clip-hud w-full border-2 border-violet/50 bg-void/70 px-3 py-2.5 text-base text-foreground placeholder:text-muted-foreground/60 transition-all focus:border-magenta focus:outline-none focus:[box-shadow:var(--glow-magenta)]',
           $props.class,
         )
       "
