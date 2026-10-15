@@ -99,7 +99,8 @@ function diff(a: number | null, b: number | null) {
             :format="(v) => `${v}%`"
             :height="200"
           />
-          <table class="adm-table adm-table--dense mt-3">
+          <div class="adm-table-wrap mt-3">
+          <table class="adm-table adm-table--dense">
             <caption class="sr-only">Retention results</caption>
             <thead>
               <tr><th scope="col">Retention</th><th scope="col">Counts as back on</th><th scope="col" class="text-right">Players</th><th scope="col" class="text-right">Result</th></tr>
@@ -113,6 +114,7 @@ function diff(a: number | null, b: number | null) {
               </tr>
             </tbody>
           </table>
+          </div>
         </AdminPanel>
 
         <AdminPanel title="Where players are now" caption="Lifecycle of every registered player" accent="lime">

@@ -72,7 +72,7 @@ async function toggle() {
                 aria-label="Payments"
                 :disabled="saving"
                 :class="[
-                  'relative h-9 w-[4.5rem] shrink-0 rounded-full border-2 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--neon-violet)] disabled:opacity-60',
+                  'relative h-9 w-[4.5rem] shrink-0 rounded-full pointer-coarse:h-11 pointer-coarse:w-[5.25rem] border-2 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--neon-violet)] disabled:opacity-60',
                   settings.enabled
                     ? 'border-[var(--neon-lime)] bg-[var(--neon-lime)]'
                     : 'border-[var(--adm-border-strong)] bg-[var(--adm-surface-3)]',

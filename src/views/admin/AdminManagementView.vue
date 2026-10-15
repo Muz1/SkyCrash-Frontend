@@ -155,16 +155,16 @@ onMounted(load)
 
         <AdminPanel title="Administrators" :caption="admins ? `${admins.length} admin${admins.length === 1 ? '' : 's'}` : undefined" accent="blue" flush>
           <div v-if="admins" class="adm-table-wrap">
-            <table class="adm-table">
+            <table class="adm-table adm-table--cards">
               <thead><tr><th>Name</th><th>Role</th><th>Last seen</th><th class="text-right">Actions</th></tr></thead>
               <tbody>
                 <tr v-for="a in admins" :key="a.userId">
-                  <td>
+                  <td data-label="Name">
                     <p class="adm-strong">{{ a.username }}<span v-if="a.email === authStore.email" class="adm-muted"> (you)</span></p>
                     <p class="adm-muted text-[0.8438rem]">{{ a.email }}</p>
                   </td>
-                  <td><AdminPill :label="a.isManager ? 'Manager' : 'Admin'" :tone="a.isManager ? 'warning' : 'accent'" /></td>
-                  <td class="adm-muted adm-num-inline">{{ dateTime(a.lastSeenUtc) }}</td>
+                  <td data-label="Role"><AdminPill :label="a.isManager ? 'Manager' : 'Admin'" :tone="a.isManager ? 'warning' : 'accent'" /></td>
+                  <td class="adm-muted adm-num-inline" data-label="Last seen">{{ dateTime(a.lastSeenUtc) }}</td>
                   <td class="adm-actions">
                     <div v-if="a.email !== authStore.email">
                       <AdminButton size="sm" :variant="a.isManager ? 'secondary' : 'info'" :disabled="busy" @click="run(a.isManager ? 'revoke-manager' : 'grant-manager', a.email)">
@@ -186,16 +186,16 @@ onMounted(load)
 
       <AdminPanel title="Invitations" :caption="invitations ? `${invitations.length} sent` : undefined" accent="violet" flush>
         <div v-if="invitations" class="adm-table-wrap">
-          <table class="adm-table">
+          <table class="adm-table adm-table--cards">
             <thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Status</th><th>Invited by</th><th>Sent</th><th class="text-right">Action</th></tr></thead>
             <tbody>
               <tr v-for="i in invitations" :key="i.invitationId">
-                <td class="adm-strong">{{ i.name }}</td>
-                <td>{{ i.email }}</td>
-                <td>{{ i.role }}</td>
-                <td><AdminPill :label="i.status" :tone="statusTone[i.status]" /></td>
-                <td>{{ i.invitedBy }}</td>
-                <td class="adm-muted adm-num-inline">{{ dateTime(i.createdAtUtc) }}</td>
+                <td class="adm-strong" data-label="Name">{{ i.name }}</td>
+                <td data-label="Email">{{ i.email }}</td>
+                <td data-label="Role">{{ i.role }}</td>
+                <td data-label="Status"><AdminPill :label="i.status" :tone="statusTone[i.status]" /></td>
+                <td data-label="Invited by">{{ i.invitedBy }}</td>
+                <td class="adm-muted adm-num-inline" data-label="Sent">{{ dateTime(i.createdAtUtc) }}</td>
                 <td class="adm-actions">
                   <div>
                     <AdminButton v-if="i.status === 'Pending'" size="sm" variant="danger" :disabled="busy" @click="revoke(i)">

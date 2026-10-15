@@ -74,21 +74,21 @@ onMounted(() => {
         >
           <div class="flex min-h-0 flex-1 flex-col">
             <div
-              class="flex shrink-0 items-center gap-4 pb-2 text-[0.75rem] font-bold uppercase tracking-[0.08em] text-[var(--adm-text-3)]"
+              class="flex shrink-0 items-center gap-2 pb-2 text-[0.75rem] sm:gap-4 font-bold uppercase tracking-[0.08em] text-[var(--adm-text-3)]"
             >
-              <span class="w-32 shrink-0">Crash range</span>
+              <span class="w-24 shrink-0 sm:w-32">Crash range</span>
               <span class="flex-1">Share of rounds</span>
-              <span class="w-16 shrink-0 text-right">Share</span>
-              <span class="w-16 shrink-0 text-right">Rounds</span>
+              <span class="w-12 shrink-0 text-right sm:w-16">Share</span>
+              <span class="w-14 shrink-0 text-right sm:w-16">Rounds</span>
             </div>
             <ul class="flex min-h-0 flex-1 flex-col justify-around overflow-y-auto border-t border-[var(--adm-border)]">
               <li
                 v-for="bucket in volatilityStore.summary.histogram"
                 :key="bucket.label"
-                class="group flex items-center gap-4 rounded-md px-0 py-1.5 transition-colors hover:bg-[oklch(0.62_0.26_305/0.07)]"
+                class="group flex items-center gap-2 rounded-md sm:gap-4 px-0 py-1.5 transition-colors hover:bg-[oklch(0.62_0.26_305/0.07)]"
                 :title="`${bucket.label}: ${bucket.percentage}% of rounds (${bucket.count})`"
               >
-                <span class="adm-num-inline w-32 shrink-0 text-[0.9062rem] font-semibold text-[var(--adm-text-2)]">
+                <span class="adm-num-inline w-24 shrink-0 text-[0.9062rem] sm:w-32 font-semibold text-[var(--adm-text-2)]">
                   {{ bucket.label }}
                 </span>
                 <div class="relative h-3 flex-1 rounded-r-[4px] bg-[oklch(1_0_0/0.03)]">
@@ -97,10 +97,10 @@ onMounted(() => {
                     :style="{ width: Math.max(0.5, (bucket.percentage / maxPercentage) * 100) + '%' }"
                   />
                 </div>
-                <span class="adm-num w-16 shrink-0 text-right text-[0.9062rem] font-semibold text-[var(--adm-text)]">
+                <span class="adm-num w-12 shrink-0 text-right text-[0.9062rem] sm:w-16 font-semibold text-[var(--adm-text)]">
                   {{ bucket.percentage }}%
                 </span>
-                <span class="adm-num w-16 shrink-0 text-right text-[0.875rem] text-[var(--adm-text-3)]">{{ bucket.count }}</span>
+                <span class="adm-num w-14 shrink-0 text-right text-[0.875rem] sm:w-16 text-[var(--adm-text-3)]">{{ bucket.count }}</span>
               </li>
             </ul>
           </div>

@@ -131,7 +131,7 @@ function reset() {
               <button
                 type="button"
                 :aria-label="`Remove ${k}`"
-                class="grid h-6 w-6 place-items-center rounded-full hover:bg-[var(--adm-surface-3)]"
+                class="grid h-6 w-6 place-items-center rounded-full hover:bg-[var(--adm-surface-3)] pointer-coarse:-my-2.5 pointer-coarse:-mr-1 pointer-coarse:h-11 pointer-coarse:w-11"
                 @click="t.keywords.splice(ki, 1)"
               >
                 <X class="h-3.5 w-3.5" aria-hidden="true" />

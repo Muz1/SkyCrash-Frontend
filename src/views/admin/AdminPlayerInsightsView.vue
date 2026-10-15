@@ -143,13 +143,15 @@ const hookKeys = computed(() =>
             </template>
             <AdminPanel v-if="section.title === 'Who plays'" title="Where players are based" caption="Countries with enough players to show" accent="violet">
               <div v-if="!data.countries.length" class="adm-empty">No countries given yet.</div>
-              <table v-else class="adm-table adm-table--dense">
+              <div v-else class="adm-table-wrap">
+              <table class="adm-table adm-table--dense">
                 <caption class="sr-only">Players by country</caption>
                 <thead><tr><th scope="col">Country</th><th scope="col" class="text-right">Players</th></tr></thead>
                 <tbody>
                   <tr v-for="c in data.countries" :key="c.country"><th scope="row">{{ c.country }}</th><td class="text-right">{{ count(c.players) }}</td></tr>
                 </tbody>
               </table>
+              </div>
             </AdminPanel>
           </div>
         </template>
@@ -157,9 +159,9 @@ const hookKeys = computed(() =>
         <h2 class="adm-section-title">Retention by answer</h2>
         <AdminPanel title="Who comes back?" caption="Observed relationships between answers and play, not causes" accent="lime" flush>
           <template #toolbar>
-            <label class="flex items-center gap-2">
+            <label class="flex min-w-0 flex-wrap items-center gap-2">
               <span class="adm-label">Compare by</span>
-              <select v-model="dimension" class="adm-select">
+              <select v-model="dimension" class="adm-select min-w-0 max-w-full">
                 <option v-for="s in data.segments" :key="s.dimension" :value="s.dimension">{{ QUESTIONS[s.dimension]?.title ?? s.dimension }}</option>
               </select>
             </label>

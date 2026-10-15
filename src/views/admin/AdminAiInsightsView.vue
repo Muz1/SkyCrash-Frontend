@@ -46,7 +46,7 @@ const sentimentTone = { Positive: 'success', Negative: 'danger', Mixed: 'warning
           <RouterLink
             v-if="data.insights.source !== 'gemini'"
             to="/admin/feedback/keywords"
-            class="text-[0.875rem] font-bold text-[var(--adm-accent)] underline-offset-2 hover:underline"
+            class="text-[0.875rem] font-bold text-[var(--adm-accent)] underline-offset-2 hover:underline pointer-coarse:inline-flex pointer-coarse:min-h-11 pointer-coarse:items-center"
           >
             Edit keywords
           </RouterLink>

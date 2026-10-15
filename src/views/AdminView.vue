@@ -111,7 +111,8 @@ onMounted(() => {
         </template>
 
         <div class="adm-table-wrap">
-          <table class="adm-table min-w-[62.5rem]">
+          <!-- One card per player on phones (see .adm-table--cards in admin.css). -->
+          <table class="adm-table adm-table--cards min-w-[62.5rem]">
             <thead>
               <tr>
                 <th>Username</th>
@@ -125,17 +126,17 @@ onMounted(() => {
             </thead>
             <tbody>
               <tr v-for="player in adminStore.players" :key="player.playerId">
-                <td class="adm-strong">
+                <td class="adm-strong" data-label="Username">
                   {{ player.username }}
                   <span v-if="player.playerId === authStore.playerId" class="adm-muted ml-1 text-[0.7812rem] font-medium">
                     (you)
                   </span>
                 </td>
-                <td class="adm-muted">{{ player.email }}</td>
-                <td class="adm-num adm-strong">{{ balanceFormat.format(player.creditBalance) }}</td>
-                <td><AdminPill :label="player.isManager ? 'Manager' : player.isAdmin ? 'Admin' : 'Player'" :dot="false" /></td>
-                <td><AdminPill :label="player.isBlocked ? 'Blocked' : 'Active'" /></td>
-                <td class="adm-muted adm-num-inline">{{ new Date(player.lastSeenUtc).toLocaleString() }}</td>
+                <td class="adm-muted" data-label="Email">{{ player.email }}</td>
+                <td class="adm-num adm-strong" data-label="Balance">{{ balanceFormat.format(player.creditBalance) }}</td>
+                <td data-label="Role"><AdminPill :label="player.isManager ? 'Manager' : player.isAdmin ? 'Admin' : 'Player'" :dot="false" /></td>
+                <td data-label="Status"><AdminPill :label="player.isBlocked ? 'Blocked' : 'Active'" /></td>
+                <td class="adm-muted adm-num-inline" data-label="Last Seen">{{ new Date(player.lastSeenUtc).toLocaleString() }}</td>
                 <td class="adm-actions">
                   <div>
                     <AdminButton v-if="isManager && !player.isAdmin" size="sm" variant="info" @click="adminStore.promote(player.playerId)">
