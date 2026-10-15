@@ -218,9 +218,15 @@
 .admin-console .adm-page-header {
   flex-shrink: 0;
   display: flex;
+  flex-wrap: wrap;
   align-items: flex-end;
   justify-content: space-between;
   gap: 16px;
+}
+/* The title block keeps a readable width; when the actions don't fit beside it (tablets),
+   they wrap onto their own line instead of squeezing the subtitle to one word per line. */
+.admin-console .adm-page-header > :first-child {
+  flex: 1 1 20rem;
 }
 .admin-console .adm-eyebrow {
   font-size: 12px;
