@@ -9,7 +9,7 @@ import NeonPanel from '@/components/sky/NeonPanel.vue'
 import ArcadeButton from '@/components/sky/ArcadeButton.vue'
 import AchievementBadge from '@/components/sky/AchievementBadge.vue'
 import ChallengeBadgeIcon from '@/components/sky/ChallengeBadgeIcon.vue'
-import { CHALLENGE_BADGES, challengeBadgeFor, SOCIAL_CHALLENGE_TYPES } from '@/lib/challengeBadges'
+import { CHALLENGE_BADGE_KEYS, CHALLENGE_BADGES, challengeBadgeOrUnknown, SOCIAL_CHALLENGE_TYPES } from '@/lib/challengeBadges'
 import { useCountdown, formatDuration } from '@/composables/useCountdown'
 
 const challengeStore = useChallengeStore()
@@ -27,9 +27,9 @@ const { seconds: resetSeconds } = useCountdown(resetsAt)
 
 // Every challenge badge, earned or not, so players can see what's left to collect.
 const collection = computed(() =>
-  Object.keys(CHALLENGE_BADGES).map((key) => ({
+  CHALLENGE_BADGE_KEYS.map((key) => ({
     key,
-    info: CHALLENGE_BADGES[key]!,
+    info: CHALLENGE_BADGES[key],
     earned: challengeStore.badges.find((b) => b.badgeKey === key) ?? null,
   })),
 )
@@ -74,7 +74,7 @@ async function toggleDisplayed(key: string, isDisplayed: boolean) {
             <ChallengeBadgeIcon :badge-key="c.badgeKey" size="md" :locked="!c.isCompleted" class="mt-0.5" />
             <div class="min-w-0 flex-1">
             <p class="font-arcade text-[0.5rem] uppercase tracking-[0.2em] text-foreground/70">
-              {{ c.track }} · {{ challengeBadgeFor(c.badgeKey)?.name }} badge
+              {{ c.track }} · {{ challengeBadgeOrUnknown(c.badgeKey).name }} badge
             </p>
             <div class="mt-1 flex items-center justify-between gap-2">
               <p class="font-display text-sm uppercase tracking-[0.12em] text-foreground">{{ c.description }}</p>
