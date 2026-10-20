@@ -4,12 +4,19 @@ import { useLeaderboardStore } from '@/stores/leaderboardStore'
 import Shell from '@/components/sky/Shell.vue'
 import NeonPanel from '@/components/sky/NeonPanel.vue'
 import AchievementBadge from '@/components/sky/AchievementBadge.vue'
+import { en } from '@/copy/en'
+import type { LeaderboardPeriod } from '@/types'
 
 const leaderboardStore = useLeaderboardStore()
+const PERIODS: LeaderboardPeriod[] = ['daily', 'weekly', 'all']
 
 onMounted(() => {
   leaderboardStore.fetchLeaderboard()
 })
+
+function pick(period: LeaderboardPeriod) {
+  if (period !== leaderboardStore.period) void leaderboardStore.fetchLeaderboard(period)
+}
 </script>
 
 <template>
@@ -21,6 +28,25 @@ onMounted(() => {
       <p class="mt-1 text-center text-xs uppercase tracking-[0.25em] text-muted-foreground">
         Three ways to top the sky
       </p>
+
+      <div role="tablist" :aria-label="en.leaderboard.periodLabel" class="mt-5 flex justify-center gap-2">
+        <button
+          v-for="p in PERIODS"
+          :key="p"
+          type="button"
+          role="tab"
+          :aria-selected="leaderboardStore.period === p"
+          :class="[
+            'clip-hud border-2 px-3 py-1.5 font-display text-[0.625rem] font-black uppercase tracking-[0.16em] transition-all pointer-coarse:min-h-11',
+            leaderboardStore.period === p
+              ? 'border-ember text-ember [box-shadow:var(--glow-ember)]'
+              : 'border-violet/50 text-muted-foreground hover:border-ember hover:text-ember',
+          ]"
+          @click="pick(p)"
+        >
+          {{ en.leaderboard.periods[p] }}
+        </button>
+      </div>
 
       <p v-if="leaderboardStore.isLoading && !leaderboardStore.data" class="mt-6 text-center text-muted-foreground">Loading…</p>
 

@@ -5,9 +5,15 @@ import Shell from '@/components/sky/Shell.vue'
 import NeonPanel from '@/components/sky/NeonPanel.vue'
 import ArcadeButton from '@/components/sky/ArcadeButton.vue'
 import StatusBadge from '@/components/sky/StatusBadge.vue'
+import VerifyRoundModal from '@/components/sky/VerifyRoundModal.vue'
+import { useRoute } from 'vue-router'
+import { en } from '@/copy/en'
 
 const historyStore = useHistoryStore()
-const activeTab = ref<'rounds' | 'bets'>('bets')
+const route = useRoute()
+const activeTab = ref<'rounds' | 'bets'>(route.query.tab === 'rounds' ? 'rounds' : 'bets')
+/** The round whose provably-fair proof is open. */
+const verifying = ref<{ roundId: string; roundNumber: number } | null>(null)
 
 onMounted(() => {
   historyStore.fetchRounds(1)
@@ -61,15 +67,30 @@ function betStatus(status: string): 'CASHED OUT' | 'CRASHED' | 'LIVE' {
         <div v-else>
           <p v-if="historyStore.rounds.length === 0" class="text-sm text-muted-foreground">No rounds yet.</p>
           <ul v-else class="divide-y divide-border/60">
-            <li v-for="r in historyStore.rounds" :key="r.roundId" class="flex items-center justify-between py-3">
-              <span class="font-display text-xs uppercase tracking-[0.16em] text-muted-foreground">Round #{{ r.roundNumber }}</span>
+            <li v-for="r in historyStore.rounds" :key="r.roundId" class="flex items-center gap-3 py-2">
+              <span class="min-w-0 flex-1 font-display text-xs uppercase tracking-[0.16em] text-muted-foreground">Round #{{ r.roundNumber }}</span>
+              <span v-if="r.maxMultiplierReached" class="font-arcade text-[0.4375rem] uppercase text-lime">Max</span>
               <span :class="r.crashMultiplier >= 2 ? 'text-lime text-glow-lime' : 'text-foreground'" class="font-arcade text-sm">
                 {{ r.crashMultiplier.toFixed(2) }}x
               </span>
+              <button
+                type="button"
+                :aria-label="en.verifyRound.buttonLabel(r.roundNumber)"
+                class="clip-hud shrink-0 border-2 border-electric/70 px-2 py-1 font-arcade text-[0.5rem] uppercase text-electric transition-all hover:[box-shadow:var(--glow-blue)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-electric pointer-coarse:min-h-11 pointer-coarse:min-w-11"
+                @click="verifying = { roundId: r.roundId, roundNumber: r.roundNumber }"
+              >
+                {{ en.verifyRound.button }}
+              </button>
             </li>
           </ul>
         </div>
       </NeonPanel>
     </div>
+    <VerifyRoundModal
+      v-if="verifying"
+      :round-id="verifying.roundId"
+      :round-number="verifying.roundNumber"
+      @close="verifying = null"
+    />
   </Shell>
 </template>

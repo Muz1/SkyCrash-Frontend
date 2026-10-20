@@ -127,6 +127,14 @@ export const PLAYER_SCREENS: Screen[] = [
     },
   },
   { name: 'round history', path: '/history' },
+  {
+    name: 'verify round',
+    path: '/history?tab=rounds',
+    prepare: async (p) => {
+      await p.getByRole('button', { name: /^verify round/i }).first().click()
+      await expect(p.getByRole('dialog').getByRole('status')).toContainText(/match/i)
+    },
+  },
   { name: 'wallet', path: '/wallet' },
   {
     name: 'wallet + buy credits',

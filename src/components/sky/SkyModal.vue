@@ -49,6 +49,8 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
+  <!-- On <body>, so it layers above the header and nav dock of whatever page opened it. -->
+  <Teleport to="body">
   <div class="fixed inset-0 z-[95] flex overflow-y-auto bg-[oklch(0.08_0.04_285/0.82)] p-4 backdrop-blur-sm" @click.self="props.closable && emit('close')">
     <section
       ref="panel"
@@ -80,4 +82,5 @@ onBeforeUnmount(() => {
       </div>
     </section>
   </div>
+  </Teleport>
 </template>
