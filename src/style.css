@@ -575,8 +575,9 @@
   }
 }
 
-/* ---------- Hangar navigation: lit while a custom loadout is equipped ---------- */
-/* drop-shadow (not box-shadow) so the glow follows clip-hud shapes instead of being clipped. */
+/* ---------- Hangar navigation: a few pulses while the hangar has something new ---------- */
+/* drop-shadow (not box-shadow) so the glow follows clip-hud shapes instead of being clipped.
+   Three pulses, then it settles: it used to loop forever whenever a custom loadout was on. */
 @keyframes hangar-glow {
   0%,
   100% {
@@ -587,7 +588,7 @@
   }
 }
 @utility hangar-glow {
-  animation: hangar-glow 2.4s ease-in-out infinite;
+  animation: hangar-glow 2.4s ease-in-out 3;
 }
 
 @media (prefers-reduced-motion: reduce) {

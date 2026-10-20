@@ -33,8 +33,16 @@ export const useHangarStore = defineStore('hangar', () => {
   const skinId = ref<SkinId>(DEFAULT_SKIN)
   /** Whether the last equip reached the server (false = saved on this device only). */
   const savedToServer = ref(true)
-  /** A non-default plane or sky (see DEFAULT_CRAFT / DEFAULT_SKIN) is equipped: hangar navigation glows to show it. */
+  /** A non-default plane or sky (see DEFAULT_CRAFT / DEFAULT_SKIN) is equipped. */
   const isCustomized = computed(() => craftId.value !== DEFAULT_CRAFT || skinId.value !== DEFAULT_SKIN)
+
+  // Planes and skies the player has already looked at in the hangar. The hangar button only
+  // pulses (a few times, see the hangar-glow utility) while something here is new to them.
+  const seen = ref<Set<string>>(new Set())
+  const allItems = () => [...CRAFTS.map((c) => `craft:${c.id}`), ...SKY_SKINS.map((s) => `sky:${s.id}`)]
+  /** Planes/skies not looked at yet, as "craft:<id>" / "sky:<id>". */
+  const unseen = computed(() => allItems().filter((id) => !seen.value.has(id)))
+  const hasNew = computed(() => unseen.value.length > 0)
 
   // The server value is only adopted once per signed-in player, so a profile
   // refetch (after every bet) can't undo an equip that's still being saved.
@@ -43,6 +51,35 @@ export const useHangarStore = defineStore('hangar', () => {
 
   function storageKey() {
     return `skycrash_hangar_${authStore.playerId ?? 'guest'}`
+  }
+
+  function seenKey() {
+    return `skycrash_hangar_seen_${authStore.playerId ?? 'guest'}`
+  }
+
+  function loadSeen() {
+    let ids: string[] | null = null
+    try {
+      const raw = localStorage.getItem(seenKey())
+      if (raw) ids = JSON.parse(raw) as string[]
+    } catch {
+      // ignore corrupt or unavailable storage
+    }
+    // Pilots who customised before "seen" was tracked have clearly been to the hangar.
+    if (!ids && stored && (validCraft(stored.craftId) !== DEFAULT_CRAFT || validSkin(stored.skinId) !== DEFAULT_SKIN)) {
+      ids = allItems()
+    }
+    seen.value = new Set(Array.isArray(ids) ? ids : [])
+  }
+
+  /** The player has opened the hangar: everything in it counts as seen from now on. */
+  function markAllSeen() {
+    seen.value = new Set([...seen.value, ...allItems()])
+    try {
+      localStorage.setItem(seenKey(), JSON.stringify([...seen.value]))
+    } catch {
+      // Non-fatal: the button just pulses again next visit.
+    }
   }
 
   function load() {
@@ -58,6 +95,7 @@ export const useHangarStore = defineStore('hangar', () => {
     }
     craftId.value = validCraft(stored?.craftId) ?? DEFAULT_CRAFT
     skinId.value = validSkin(stored?.skinId) ?? DEFAULT_SKIN
+    loadSeen()
     if (playerStore.profile) reconcile()
   }
 
@@ -124,5 +162,5 @@ export const useHangarStore = defineStore('hangar', () => {
   watch(() => authStore.playerId, load, { immediate: true })
   watch(() => playerStore.profile, reconcile)
 
-  return { craftId, skinId, isCustomized, savedToServer, setCraft, setSkin }
+  return { craftId, skinId, isCustomized, savedToServer, unseen, hasNew, markAllSeen, setCraft, setSkin }
 })

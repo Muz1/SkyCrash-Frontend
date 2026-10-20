@@ -80,8 +80,8 @@ onMounted(() => {
 
       <!-- Secondary actions. -->
       <div class="mt-3 flex flex-wrap items-center justify-center gap-2 sm:gap-3">
-        <RouterLink to="/hangar" :class="['inline-flex', hangarStore.isCustomized && 'hangar-glow']">
-          <ArcadeButton size="md" variant="ghost" :class="hangarStore.isCustomized ? '!border-lime !text-lime' : '!text-foreground'">
+        <RouterLink to="/hangar" :class="['inline-flex', hangarStore.hasNew && 'hangar-glow']">
+          <ArcadeButton size="md" variant="ghost" :class="hangarStore.hasNew ? '!border-lime !text-lime' : '!text-foreground'">
             <Warehouse class="h-4 w-4" aria-hidden="true" />
             <span>Hangar <span class="hidden font-sans font-bold normal-case tracking-normal xs:inline">· Change plane &amp; sky</span></span>
           </ArcadeButton>
