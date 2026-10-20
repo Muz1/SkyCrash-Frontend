@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted } from 'vue'
+import { onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { MessageSquareHeart, Warehouse } from '@lucide/vue'
 import { usePlayerStore } from '@/stores/playerStore'
@@ -16,6 +16,8 @@ import Wordmark from '@/components/sky/Wordmark.vue'
 import ArcadeButton from '@/components/sky/ArcadeButton.vue'
 import HowToPlay from '@/components/sky/HowToPlay.vue'
 import FeedbackPrompt from '@/components/sky/FeedbackPrompt.vue'
+import TutorialOverlay from '@/components/sky/TutorialOverlay.vue'
+import { polishCopy as copy } from '@/copy/polish'
 
 const playerStore = usePlayerStore()
 const authStore = useAuthStore()
@@ -24,6 +26,8 @@ const hangarStore = useHangarStore()
 const feedback = useFeedbackForm()
 const route = useRoute()
 const router = useRouter()
+/** The illustrated tutorial, playable on the landing page without an account. */
+const showTutorial = ref(false)
 
 /** Signed-in pilots get the form right here; visitors sign in first and come back to it. */
 function giveFeedback() {
@@ -63,9 +67,11 @@ onMounted(() => {
       />
 
       <h1 class="sr-only">Sky Crash</h1>
-      <div aria-hidden>
-        <Wordmark />
-      </div>
+      <Wordmark />
+      <!-- The game in one line, before anyone has to sign up. -->
+      <p class="mt-2 font-display text-sm font-bold uppercase tracking-[0.12em] text-foreground sm:text-base">
+        {{ copy.landing.tagline }}
+      </p>
 
       <!-- The two main actions: side by side on desktop, Join Lobby directly beneath Play Now on phones. -->
       <div class="mt-[clamp(0.75rem,2.5dvh,1.5rem)] flex w-full max-w-sm flex-col items-stretch gap-3 sm:w-auto sm:max-w-none sm:flex-row sm:items-center">
@@ -99,12 +105,14 @@ onMounted(() => {
       </div>
 
       <HowToPlay class="mt-[clamp(0.75rem,3dvh,1.5rem)]" />
-      <RouterLink
-        to="/game?tutorial=1"
+      <!-- Signed-in pilots replay it on the game screen; visitors watch it right here. -->
+      <button
+        type="button"
         class="mt-2 inline-flex items-center font-arcade text-[0.5625rem] uppercase tracking-[0.2em] text-electric underline-offset-4 pointer-coarse:min-h-11 hover:text-foreground hover:underline"
+        @click="showTutorial = true"
       >
-        Watch the full tutorial
-      </RouterLink>
+        {{ copy.landing.fullTutorial }}
+      </button>
 
       <p class="mt-4 font-arcade text-[0.5rem] uppercase tracking-[0.3em] text-violet [@media(max-height:900px)]:hidden">
         High risk. High thrill. Beat the sky.
@@ -114,5 +122,6 @@ onMounted(() => {
     <NavDock />
 
     <FeedbackPrompt v-if="feedback.isOpen.value" :controller="feedback" done-label="Back to Sky Crash" />
+    <TutorialOverlay v-if="showTutorial" @close="showTutorial = false" />
   </div>
 </template>

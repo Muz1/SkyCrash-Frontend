@@ -2,23 +2,21 @@
 import { ref } from 'vue'
 import { X } from '@lucide/vue'
 import { cn } from '@/lib/cn'
-import NeonPanel from './NeonPanel.vue'
+import TutorialIllustration from './TutorialIllustration.vue'
+import { TUTORIAL_STEPS } from '@/lib/tutorialSteps'
+import { polishCopy } from '@/copy/polish'
 
 /**
- * "How to play" for first-time pilots: bet → watch the multiplier climb →
- * cash out before the plane crashes. The full version is three panels (home
- * page); the compact one is a single dismissible line (game screen) that stays
- * hidden once closed.
+ * "How it works" for first-time pilots. The full version (landing page) is the illustrated
+ * tutorial as a strip of five small cards: credits → bet → climb → cash out → crash, plus the
+ * house-edge footnote. It swipes sideways on narrow phones. The compact one is a single
+ * dismissible line (game screen) that stays hidden once closed.
  */
 const props = withDefaults(defineProps<{ compact?: boolean; class?: string }>(), { compact: false })
 
 const STORAGE_KEY = 'skycrash_howto_dismissed'
 
-const steps = [
-  { n: '1', t: 'Bet', d: 'Place your bet before the plane takes off.' },
-  { n: '2', t: 'Watch it climb', d: 'The multiplier rises the higher the plane flies.' },
-  { n: '3', t: 'Cash out', d: 'Bank your winnings before the plane crashes.' },
-]
+const copy = polishCopy
 
 function readDismissed() {
   try {
@@ -68,27 +66,35 @@ function dismiss() {
     </button>
   </div>
 
-  <section v-else-if="!compact" aria-labelledby="how-to-play-title" :class="cn('w-full max-w-3xl', props.class)">
+  <section v-else-if="!compact" aria-labelledby="how-to-play-title" :class="cn('w-full max-w-4xl', props.class)">
     <h2
       id="how-to-play-title"
       class="mb-2 text-center font-arcade text-[0.5625rem] uppercase tracking-[0.3em] text-ember text-glow-ember"
     >
-      How to play
+      {{ copy.landing.howItWorks }}
     </h2>
-    <ol class="grid grid-cols-3 gap-2 sm:gap-3">
-      <li v-for="s in steps" :key="s.n">
-        <NeonPanel accent="magenta" class="h-full [&>div]:p-2.5 sm:[&>div]:p-4">
-          <p class="flex items-baseline gap-2">
-            <span class="font-arcade text-sm text-magenta text-glow-magenta sm:text-xl">{{ s.n }}</span>
-            <span class="font-display text-[0.6875rem] font-black uppercase tracking-[0.1em] text-foreground sm:text-sm sm:tracking-[0.16em]">
-              {{ s.t }}
-            </span>
+    <!-- Narrow phones: a sideways swipe strip; from sm up all five fit in a row. -->
+    <ol
+      data-scroll-x
+      class="-mx-4 flex snap-x snap-mandatory gap-2 overflow-x-auto px-4 pb-1 sm:mx-0 sm:grid sm:grid-cols-5 sm:overflow-visible sm:px-0"
+    >
+      <li
+        v-for="(s, i) in TUTORIAL_STEPS"
+        :key="s.key"
+        class="clip-hud flex w-[8.5rem] shrink-0 snap-start flex-col border-2 border-magenta/50 bg-void/80 text-left sm:w-auto"
+      >
+        <div class="relative h-20 border-b border-violet/40 bg-deep/70 [@media(max-height:640px)]:h-14">
+          <TutorialIllustration :step="s.key" mini />
+        </div>
+        <div class="p-2">
+          <p class="flex items-baseline gap-1.5">
+            <span class="font-arcade text-[0.625rem] text-magenta text-glow-magenta">{{ i + 1 }}</span>
+            <span class="font-display text-[0.6875rem] font-black uppercase leading-tight tracking-[0.08em] text-foreground">{{ s.title }}</span>
           </p>
-          <p class="mt-1 hidden text-sm leading-snug text-muted-foreground xs:block [@media(max-height:640px)]:hidden">
-            {{ s.d }}
-          </p>
-        </NeonPanel>
+          <p class="mt-1 text-sm leading-snug text-[#d8ccf5] [@media(max-height:640px)]:hidden">{{ s.body }}</p>
+        </div>
       </li>
     </ol>
+    <p class="mt-2 text-center text-sm text-[#d8ccf5]">{{ copy.tutorial.house }}</p>
   </section>
 </template>
