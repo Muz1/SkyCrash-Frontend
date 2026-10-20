@@ -18,6 +18,7 @@ export const en = {
     permanent: 'Permanent',
     tryAgain: 'Something went wrong. Try again.',
     signIn: 'Log in',
+    back: 'Back',
   },
 
   bet: {

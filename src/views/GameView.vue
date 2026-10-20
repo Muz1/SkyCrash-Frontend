@@ -40,6 +40,7 @@ import InfoTip from '@/components/sky/InfoTip.vue'
 import GameRulesModal from '@/components/sky/GameRulesModal.vue'
 import WinSummaryCard from '@/components/sky/WinSummaryCard.vue'
 import LiveBetsPanel from '@/components/sky/LiveBetsPanel.vue'
+import AccountNotices from '@/components/sky/AccountNotices.vue'
 
 const gameStore = useGameStore()
 const playerStore = usePlayerStore()
@@ -263,6 +264,7 @@ function crashChipClass(value: number) {
         </HudMenuItem>
       </template>
     </HudHeader>
+    <AccountNotices />
 
     <!-- stage above, controls below (beside it on a phone held sideways). The stage always keeps
          at least 40% of the screen height (a third on short phones); when space is tight the

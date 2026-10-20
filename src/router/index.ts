@@ -98,6 +98,12 @@ const router = createRouter({
     },
     // Older reports kept reachable by URL but no longer in the navigation.
     { path: '/admin/reports', name: 'admin-reports', component: AdminReportsView, meta: admin },
+
+    // ---- account safety (player side) ----
+    // The Account rules: public, and where players accept a new version.
+    { path: '/rules', name: 'rules', component: () => import('../views/RulesView.vue'), meta: { anyRole: true } },
+    // "Verify email": the link in the confirmation email lands here with ?token=.
+    { path: '/verify-email', name: 'verify-email', component: () => import('../views/VerifyEmailView.vue'), meta: { anyRole: true } },
   ],
 })
 
