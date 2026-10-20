@@ -15,6 +15,10 @@ export interface RegisterPayload {
   password: string
   /** The player ticked "I agree to the Terms of Service". */
   acceptTerms: boolean
+  /** The player ticked "I agree to the Account rules". */
+  acceptRules?: boolean
+  /** yyyy-mm-dd; must be 18+. */
+  dateOfBirth?: string
 }
 
 export interface LoginPayload {
@@ -28,6 +32,7 @@ export interface AuthResponse {
   username: string
   email: string
   expiresAtUtc: string
+  emailVerified?: boolean
 }
 
 export interface PlayerProfile {
@@ -48,6 +53,10 @@ export interface PlayerProfile {
   currentTermsVersion?: string
   /** False until the first-flight tutorial has been finished or skipped. */
   hasCompletedTutorial?: boolean
+  /** "Verify email": false shows the unverified banner. Older servers omit it. */
+  emailVerified?: boolean
+  /** Free-play part of creditBalance. */
+  bonusBalance?: number
 }
 
 export interface UpdateProfilePayload {
@@ -106,6 +115,7 @@ export interface RoundHistoryEntry {
   roundNumber: number
   crashMultiplier: number
   crashedAtUtc: string
+  maxMultiplierReached?: boolean
 }
 
 export interface BetHistoryEntry {
@@ -140,6 +150,7 @@ export interface MostActiveEntry {
 }
 
 export interface LeaderboardData {
+  period?: LeaderboardPeriod
   biggestWins: BiggestWinEntry[]
   bestMultipliers: BestMultiplierEntry[]
   mostActive: MostActiveEntry[]
@@ -299,6 +310,12 @@ export interface SpinStatus {
   segments: number[]
   /** Chance of landing on each segment (same order), summing to 1. Older servers omit it. */
   odds?: number[]
+  expectedValue?: number
+  dailySpinLimit?: number
+  /** Null when there is no daily limit. */
+  spinsLeftToday?: number | null
+  /** The most recent spin, so a player who left mid-animation still sees the prize. */
+  lastSpin?: LastSpin | null
 }
 
 export interface SpinResult {
@@ -336,6 +353,10 @@ export interface PublicSettings {
   audio: { music: number; plane: number; game: number }
   /** True while players can buy credits (admin switch on and gateway usable). */
   paymentsEnabled?: boolean
+  /** Published game rules and limits. Older servers omit it. */
+  rules?: PublicGameRules
+  /** Google sign-in shows only when set. */
+  googleClientId?: string | null
 }
 
 
@@ -349,3 +370,140 @@ export interface LobbyRoundBet {
   status: 'Placed' | 'CashedOut' | 'Lost'
   cashOutMultiplier: number | null
 }
+
+// ---------------------------------------------------------------------------------------
+// Player-side features from the October 2026 backend work (see backend docs/API_CHANGES.md).
+// ---------------------------------------------------------------------------------------
+
+/** GET /api/settings/public → rules: house edge and every risk limit (enforced by the server). */
+export interface PublicGameRules {
+  houseEdgePercentage: number
+  theoreticalRtpPercentage: number
+  crashFormulaVersion: number
+  minBet: number
+  maxBet: number
+  maxMultiplier: number
+  maxProfitPerBet: number
+  maxRoundLiability: number
+  maxBetFromBonusBalance: number
+  bonusWageringMultiple: number
+  bonusExpiryDays: number
+  bettingPaused: boolean
+}
+
+/** Full wallet split: bonus credits must be wagered before they turn into cash credits. */
+export interface WalletBalanceDetail {
+  creditBalance: number
+  bonusBalance: number
+  cashBalance: number
+  bonusWageringRemaining: number
+  bonusExpiresAtUtc: string | null
+}
+
+export interface LastSpin {
+  amount: number
+  segmentIndex: number
+  spunAtUtc: string
+}
+
+/** GET /api/rounds/{id}/verify: everything needed to recompute a finished round. */
+export interface RoundVerification {
+  roundId: string
+  roundNumber: number
+  serverSeedHash: string
+  serverSeed: string | null
+  hmacMessage: string
+  clientSeed: string | null
+  houseEdge: number
+  maxMultiplier: number
+  formulaVersion: number
+  crashMultiplier: number | null
+  maxMultiplierReached: boolean
+  crashedAtUtc: string | null
+}
+
+/** One bet on the current round, for the public live-bets panel (usernames only). */
+export interface LiveRoundBet {
+  username: string
+  amount: number
+  status: 'Placed' | 'CashedOut' | 'Lost' | string
+  cashOutMultiplier: number | null
+  payout: number | null
+}
+
+export type LeaderboardPeriod = 'daily' | 'weekly' | 'all'
+
+export interface AccountRule {
+  code: string
+  category: string
+  title: string
+  summary: string
+  details: string
+  action: string
+  defaultDurationDays: number | null
+  detection: string
+  isActive: boolean
+  appealable: boolean
+}
+
+export interface AccountRuleSet {
+  version: number
+  label: string
+  effectiveFromUtc: string
+  publishedBy: string
+  changeNote: string
+  rules: AccountRule[]
+}
+
+export interface PlayerSanction {
+  id: string
+  ruleCode: string
+  ruleTitle: string
+  ruleSummary: string
+  ruleSetVersion: number
+  action: string
+  startsAtUtc: string
+  /** Null = permanent. */
+  endsAtUtc: string | null
+  appealable: boolean
+  appealPending?: boolean
+}
+
+export type AccountStatus = 'GoodStanding' | 'Warning' | 'Restricted' | 'Blocked'
+
+export interface AccountStanding {
+  status: AccountStatus
+  activeSanctions: PlayerSanction[]
+  currentRuleSetVersion: number
+  acceptedRuleSetVersion: number | null
+  mustAcceptRules: boolean
+}
+
+/** 403 body from POST /api/auth/login when the account is blocked. */
+export interface BlockedLogin {
+  message: string
+  sanction: PlayerSanction | null
+  appealToken: string | null
+}
+
+export interface LossLimits {
+  daily: number | null
+  weekly: number | null
+  pendingDaily: number | null
+  pendingWeekly: number | null
+  pendingFromUtc: string | null
+  netLossToday: number
+  netLossThisWeek: number
+}
+
+export interface PlaySession {
+  startedAtUtc: string | null
+  minutesPlayed: number
+  bets: number
+  wagered: number
+  won: number
+  netResult: number
+  reminderMinutes: number
+}
+
+export type CashOutReason = 'AutoTarget' | 'ProfitCap' | 'MaxMultiplier' | 'RoundLiability'

@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import type { LobbyRoundBet } from '@/types'
+import type { CashOutReason, LiveRoundBet, LobbyRoundBet } from '@/types'
 
 /** A lobby-mate's bet this round, kept up to date by the bet/cash-out broadcasts. */
 export interface LobbyBet {
@@ -11,6 +11,29 @@ export interface LobbyBet {
 }
 
 export type RoundPhase = 'Idle' | 'Waiting' | 'Running' | 'Crashed'
+
+/** The summary card after one of my cash-outs: stays up (dismissable) into the next round. */
+export interface WinSummary {
+  roundId: string | null
+  roundNumber: number | null
+  stake: number
+  multiplier: number
+  payout: number
+  auto: boolean
+  reason: CashOutReason | null
+  /** Filled in once the round ends. */
+  crashMultiplier: number | null
+  maxReached: boolean
+}
+
+/** One row of the public live-bets panel. */
+export interface LiveBetRow {
+  username: string
+  amount: number
+  status: 'Placed' | 'CashedOut' | 'Lost'
+  cashOutMultiplier: number | null
+  payout: number | null
+}
 
 export const useGameStore = defineStore('game', () => {
   const roundId = ref<string | null>(null)
@@ -38,8 +61,24 @@ export const useGameStore = defineStore('game', () => {
   /** One entry per lobby-mate who bet this round, keyed by player id. Only lobby-mates are ever sent. */
   const lobbyBets = ref<Record<string, LobbyBet>>({})
   const cashOutStatus = ref<'None' | 'CashedOut' | 'Rejected'>('None')
-  const cashOutResult = ref<{ cashOutMultiplier: number; payout: number; auto: boolean } | null>(null)
+  const cashOutResult = ref<{
+    cashOutMultiplier: number
+    payout: number
+    auto: boolean
+    reason?: CashOutReason | null
+  } | null>(null)
   const cashOutRejectionReason = ref<string | null>(null)
+  /** The round ended at the cap instead of crashing: everyone still flying was paid. */
+  const maxReached = ref(false)
+  /** Round limits announced with RoundWaiting (older servers omit them). */
+  const roundMaxMultiplier = ref<number | null>(null)
+  /** Machine-readable reason for the last refused bet (restricted / rules-required / loss-limit). */
+  const betRejectionCode = ref<string | null>(null)
+  /** Did I have a live (not cashed-out) bet when the round ended? Drives the crash sound. */
+  const hadLiveBetAtCrash = ref(false)
+  const lastWin = ref<WinSummary | null>(null)
+  /** Everyone's bets this round, usernames only (GetLiveRoundBets + LiveBet / LiveCashOut). */
+  const liveBets = ref<LiveBetRow[]>([])
 
   let countdownTimer: ReturnType<typeof setInterval> | null = null
 
@@ -89,6 +128,7 @@ export const useGameStore = defineStore('game', () => {
     roundNumber: number
     serverSeedHash: string
     countdownSeconds: number
+    maxMultiplier?: number
   }) {
     roundId.value = payload.roundId
     roundNumber.value = payload.roundNumber
@@ -105,6 +145,11 @@ export const useGameStore = defineStore('game', () => {
     cashOutStatus.value = 'None'
     cashOutResult.value = null
     cashOutRejectionReason.value = null
+    maxReached.value = false
+    hadLiveBetAtCrash.value = false
+    betRejectionCode.value = null
+    liveBets.value = []
+    if (typeof payload.maxMultiplier === 'number') roundMaxMultiplier.value = payload.maxMultiplier
     startCountdownTimer()
   }
 
@@ -119,11 +164,20 @@ export const useGameStore = defineStore('game', () => {
     currentMultiplier.value = payload.multiplier
   }
 
-  function onRoundCrashed(payload: { crashMultiplier: number; serverSeed: string }) {
+  function onRoundCrashed(payload: { crashMultiplier: number; serverSeed: string; maxMultiplierReached?: boolean }) {
+    hadLiveBetAtCrash.value = myBetStatus.value === 'Placed' && cashOutStatus.value !== 'CashedOut'
+    maxReached.value = !!payload.maxMultiplierReached
     phase.value = 'Crashed'
     currentMultiplier.value = payload.crashMultiplier
     lastRevealedSeed.value = payload.serverSeed
     lastCrashPoints.value = [payload.crashMultiplier, ...lastCrashPoints.value].slice(0, 10)
+    if (lastWin.value && lastWin.value.roundId === roundId.value) {
+      lastWin.value = { ...lastWin.value, crashMultiplier: payload.crashMultiplier, maxReached: maxReached.value }
+    }
+    // Whoever is still on the board lost (at the cap the server sends their cash-outs instead).
+    if (!maxReached.value) {
+      liveBets.value = liveBets.value.map((b) => (b.status === 'Placed' ? { ...b, status: 'Lost' } : b))
+    }
   }
 
   function onBetConfirmed(payload: { betId: string; amount: number; autoCashoutTarget?: number | null }) {
@@ -131,11 +185,15 @@ export const useGameStore = defineStore('game', () => {
     myBetStatus.value = 'Placed'
     myAutoCashoutTarget.value = payload.autoCashoutTarget ?? null
     betRejectionReason.value = null
+    betRejectionCode.value = null
+    // A new bet replaces last round's win summary.
+    lastWin.value = null
   }
 
-  function onBetRejected(payload: { message: string }) {
+  function onBetRejected(payload: { message: string; code?: string }) {
     myBetStatus.value = 'Rejected'
     betRejectionReason.value = payload.message
+    betRejectionCode.value = payload.code ?? null
   }
 
   function onBetPlacedByPlayer(payload: {
@@ -202,14 +260,74 @@ export const useGameStore = defineStore('game', () => {
     lobbyBets.value = next
   }
 
-  function onCashOutConfirmed(payload: { cashOutMultiplier: number; payout: number; auto?: boolean }) {
+  function onCashOutConfirmed(payload: {
+    cashOutMultiplier: number
+    payout: number
+    auto?: boolean
+    reason?: CashOutReason
+  }) {
     cashOutStatus.value = 'CashedOut'
     cashOutResult.value = {
       cashOutMultiplier: payload.cashOutMultiplier,
       payout: payload.payout,
       auto: payload.auto ?? false,
+      reason: payload.reason ?? null,
+    }
+    const stake = myBetAmount.value ?? payload.payout / Math.max(payload.cashOutMultiplier, 1)
+    lastWin.value = {
+      roundId: roundId.value,
+      roundNumber: roundNumber.value,
+      stake,
+      multiplier: payload.cashOutMultiplier,
+      payout: payload.payout,
+      auto: payload.auto ?? false,
+      reason: payload.reason ?? null,
+      crashMultiplier: phase.value === 'Crashed' ? currentMultiplier.value : null,
+      maxReached: phase.value === 'Crashed' && maxReached.value,
     }
     myBetStatus.value = 'None' // the bet is resolved now — no longer an active "placed" bet
+  }
+
+  function dismissWin() {
+    lastWin.value = null
+  }
+
+  // ---------- public live-bets panel ----------
+
+  function normaliseStatus(status: string): LiveBetRow['status'] {
+    return status === 'CashedOut' ? 'CashedOut' : status === 'Lost' ? 'Lost' : 'Placed'
+  }
+
+  function applyLiveBets(bets: LiveRoundBet[]) {
+    liveBets.value = bets.map((b) => ({
+      username: b.username,
+      amount: b.amount,
+      status: normaliseStatus(b.status),
+      cashOutMultiplier: b.cashOutMultiplier,
+      payout: b.payout,
+    }))
+  }
+
+  function onLiveBet(payload: { username: string; amount: number }) {
+    const rest = liveBets.value.filter((b) => b.username !== payload.username)
+    liveBets.value = [
+      { username: payload.username, amount: payload.amount, status: 'Placed' as const, cashOutMultiplier: null, payout: null },
+      ...rest,
+    ].slice(0, 100)
+  }
+
+  function onLiveCashOut(payload: { username: string; cashOutMultiplier: number; payout: number }) {
+    const existing = liveBets.value.find((b) => b.username === payload.username)
+    const row: LiveBetRow = {
+      username: payload.username,
+      amount: existing?.amount ?? 0,
+      status: 'CashedOut',
+      cashOutMultiplier: payload.cashOutMultiplier,
+      payout: payload.payout,
+    }
+    liveBets.value = existing
+      ? liveBets.value.map((b) => (b.username === payload.username ? row : b))
+      : [row, ...liveBets.value]
   }
 
   function onCashOutRejected(payload: { message: string }) {
@@ -236,6 +354,16 @@ export const useGameStore = defineStore('game', () => {
     cashOutStatus,
     cashOutResult,
     cashOutRejectionReason,
+    maxReached,
+    roundMaxMultiplier,
+    betRejectionCode,
+    hadLiveBetAtCrash,
+    lastWin,
+    dismissWin,
+    liveBets,
+    applyLiveBets,
+    onLiveBet,
+    onLiveCashOut,
     onCashOutConfirmed,
     onCashOutRejected,
     applySnapshot,

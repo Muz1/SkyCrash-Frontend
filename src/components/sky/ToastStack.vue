@@ -13,7 +13,7 @@ const accentClass: Record<string, string> = {
 </script>
 
 <template>
-  <div class="pointer-events-none fixed inset-x-0 top-[max(1rem,env(safe-area-inset-top))] z-[100] flex flex-col items-center gap-2 px-4">
+  <div role="status" aria-live="polite" class="pointer-events-none fixed inset-x-0 top-[max(1rem,env(safe-area-inset-top))] z-[100] flex flex-col items-center gap-2 px-4">
     <TransitionGroup name="toast">
       <div
         v-for="toast in toastStore.toasts"
@@ -30,9 +30,17 @@ const accentClass: Record<string, string> = {
           <p class="font-display text-xs font-black uppercase tracking-[0.2em]">{{ toast.title }}</p>
           <p class="mt-0.5 truncate text-xs text-muted-foreground">{{ toast.message }}</p>
         </div>
+        <RouterLink
+          v-if="toast.action"
+          :to="toast.action.to"
+          class="ml-auto grid shrink-0 place-items-center border-2 border-current px-2 py-1 font-arcade text-[0.5rem] uppercase tracking-[0.15em] pointer-coarse:min-h-11 hover:bg-foreground/10"
+          @click="toastStore.dismiss(toast.id)"
+        >
+          {{ toast.action.label }}
+        </RouterLink>
         <button
           type="button"
-          class="ml-auto shrink-0 text-muted-foreground hover:text-foreground"
+          :class="cn('grid shrink-0 place-items-center text-muted-foreground hover:text-foreground pointer-coarse:h-11 pointer-coarse:w-11', !toast.action && 'ml-auto')"
           aria-label="Dismiss"
           @click="toastStore.dismiss(toast.id)"
         >

@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import * as publicSettingsService from '@/services/publicSettingsService'
-import type { PublicSettings } from '@/types'
+import type { PublicGameRules, PublicSettings } from '@/types'
 
 /**
  * Admin-configured values the player app needs (lobby size, default volumes).
@@ -30,5 +30,10 @@ export const usePublicSettingsStore = defineStore('publicSettings', () => {
     return load()
   }
 
-  return { settings, load, refresh }
+  /** Published game limits (min/max bet, max multiplier, caps); null on older servers. */
+  const rules = computed<PublicGameRules | null>(() => settings.value?.rules ?? null)
+  /** Google sign-in shows only when the server has a client id. */
+  const googleClientId = computed(() => settings.value?.googleClientId || null)
+
+  return { settings, rules, googleClientId, load, refresh }
 })
