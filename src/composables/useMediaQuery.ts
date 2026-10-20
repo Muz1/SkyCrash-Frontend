@@ -8,7 +8,9 @@ export const PHONE_SCREEN = `${NARROW_SCREEN}, (orientation: landscape) and (max
 
 /** Reactive `matchMedia`: true while the query matches, updated on resize/rotation. */
 export function useMediaQuery(query: string): Ref<boolean> {
-  const matches = ref(false)
+  // Read it straight away (not just on mount) so the first render is already right; otherwise
+  // e.g. the phone nav dock would paint visible and then slide away on every page load.
+  const matches = ref(typeof window !== 'undefined' && !!window.matchMedia?.(query).matches)
   let media: MediaQueryList | null = null
   const onChange = (e: MediaQueryListEvent) => (matches.value = e.matches)
 
