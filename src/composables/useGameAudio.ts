@@ -23,8 +23,8 @@ function once(cue: keyof typeof played, roundId: string | null) {
  * automatically inside soundEngine, and the engine fades one big cue out
  * before starting the next.
  *
- * A player hears either the win chime or the crash for a round, never both:
- * once they've cashed out the crash only stops the engine, and a late
+ * A player who cashed out never hears the "lost" crash: after a win the crash is a
+ * soft "phew" (crashSafe), and a late
  * cash-out confirmation after the crash stays silent.
  */
 export function useGameAudio() {
@@ -39,11 +39,16 @@ export function useGameAudio() {
         if (previous === 'Waiting' && once('takeoff', gameStore.roundId)) soundEngine.takeoff()
         else soundEngine.engineOn()
       } else if (phase === 'Crashed') {
-        // Only boom for a crash we actually watched, not a snapshot on page load,
-        // and not for a player who already banked this round (they heard the win).
+        // Only for a crash we actually watched, not a snapshot on page load. Each ending has
+        // its own cue: the cap fanfare, a soft "phew" after my cash-out, the full boom plus a
+        // falling tone when my bet was still in, and the plain boom for spectators.
         const won = played.win === (gameStore.roundId ?? 'unknown')
-        if (previous === 'Running' && !won && once('crash', gameStore.roundId)) soundEngine.crash()
-        else soundEngine.landed()
+        if (previous === 'Running' && once('crash', gameStore.roundId)) {
+          if (gameStore.maxReached) soundEngine.maxReached()
+          else if (won) soundEngine.crashSafe()
+          else if (gameStore.hadLiveBetAtCrash) soundEngine.crashLost()
+          else soundEngine.crash()
+        } else soundEngine.landed()
       } else {
         soundEngine.landed()
       }

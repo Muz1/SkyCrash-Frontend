@@ -32,11 +32,24 @@ import DailyChallengeBar from '@/components/sky/DailyChallengeBar.vue'
 import SpinWheel from '@/components/sky/SpinWheel.vue'
 import { useGameScreenPrompts } from '@/composables/useGameScreenPrompts'
 import { useChallengeStore } from '@/stores/challengeStore'
+import { usePublicSettingsStore } from '@/stores/publicSettingsStore'
+import { allowedSteps, autoTargetProblem, maxStake, maxWin, skyMilestone, stakeProblem } from '@/lib/gameRules'
+import { creditAmount, multiplier as fmtMultiplier } from '@/lib/format'
+import { en } from '@/copy/en'
+import InfoTip from '@/components/sky/InfoTip.vue'
+import GameRulesModal from '@/components/sky/GameRulesModal.vue'
+import WinSummaryCard from '@/components/sky/WinSummaryCard.vue'
+import LiveBetsPanel from '@/components/sky/LiveBetsPanel.vue'
 
 const gameStore = useGameStore()
 const playerStore = usePlayerStore()
 const hangarStore = useHangarStore()
 const audioStore = useAudioStore()
+const publicSettings = usePublicSettingsStore()
+/** Published limits (min/max bet, max multiplier, profit cap). Null on older servers. */
+const rules = computed(() => publicSettings.rules)
+const rulesOpen = ref(false)
+onMounted(() => void publicSettings.load())
 
 useGameAudio()
 const prompts = useGameScreenPrompts()
@@ -124,15 +137,31 @@ const cashedOutThisRound = computed(() => gameStore.cashOutStatus === 'CashedOut
 // reflects whatever CashOutConfirmed event comes back, auto-triggered or not.
 const autoCashoutError = computed(() => {
   if (!autoCashoutEnabled.value) return null
-  if (!Number.isFinite(autoCashoutTarget.value) || autoCashoutTarget.value < 1.01) {
-    return 'Auto cashout target must be at least 1.01x.'
-  }
+  const problem = autoTargetProblem(autoCashoutTarget.value, rules.value)
+  if (problem === 'tooLow') return en.bet.autoTooLow
+  if (problem === 'tooHigh') return en.bet.autoTooHigh(String(rules.value?.maxMultiplier ?? ''))
   return null
 })
 
-const betInvalid = computed(
-  () => !(betAmountInput.value > 0) || betAmountInput.value > credits.value || !!autoCashoutError.value,
-)
+// The server enforces every limit; these checks only stop bets it would refuse anyway.
+const stakeIssue = computed(() => stakeProblem(betAmountInput.value, credits.value, rules.value))
+const stakeHint = computed(() => {
+  switch (stakeIssue.value) {
+    case 'tooSmall':
+      return en.bet.tooSmall(creditAmount(rules.value?.minBet ?? 0))
+    case 'tooBig':
+      return en.bet.tooBig(creditAmount(rules.value?.maxBet ?? 0))
+    case 'noCredits':
+      return en.bet.noCredits
+    default:
+      return null
+  }
+})
+const betSteps = computed(() => allowedSteps(BET_STEPS, rules.value))
+const potentialMaxWin = computed(() => maxWin(betAmountInput.value, rules.value))
+const milestone = computed(() => (flying.value || crashed.value ? skyMilestone(gameStore.currentMultiplier) : 0))
+
+const betInvalid = computed(() => stakeIssue.value !== 'none' || !!autoCashoutError.value || !!rules.value?.bettingPaused)
 
 async function handlePlaceBet() {
   isPlacingBet.value = true
@@ -213,7 +242,7 @@ function crashChipClass(value: number) {
   <!-- Fills exactly one screen: header, flight stage (flex), controls, nav dock. Never scrolls. -->
   <div class="relative flex h-dvh flex-col overflow-hidden bg-void">
     <div class="absolute inset-0 overflow-hidden">
-      <SkyEnvironment :skin="skin" :progress="flying || crashed ? climb : 0" :dim="crashed ? 0.5 : 0.34" />
+      <SkyEnvironment :skin="skin" :progress="flying || crashed ? climb : 0" :dim="crashed ? 0.5 : 0.34" :milestone="milestone" />
       <Ambient :skin="skin" :progress="flying || crashed ? climb : 0" />
     </div>
     <CRTOverlay />
@@ -254,6 +283,7 @@ function crashChipClass(value: number) {
               {{ p.toFixed(2) }}x
             </li>
           </ul>
+          <LiveBetsPanel mode="chip" />
           <LobbyFlightBoard
             mode="chip"
             :me="lobbyFlight.me.value"
@@ -288,7 +318,15 @@ function crashChipClass(value: number) {
 
         <FlightStage :craft="craft" :wingmen="lobbyFlight.mates.value" class="mt-1 min-h-[11.25rem] flex-1 short:min-h-[8.5rem]">
           <template #readout>
-            <div v-if="cashedOutThisRound" class="animate-sky-pop mt-3 text-center">
+            <div v-if="crashed && gameStore.maxReached" class="animate-sky-pop mt-2 text-center" role="status">
+              <p class="font-display text-xs font-black uppercase tracking-[0.24em] text-lime text-glow-lime sm:text-lg">
+                {{ en.round.maxReached }}
+              </p>
+              <p class="mt-1 font-arcade text-[0.5rem] uppercase tracking-[0.3em] text-ember">
+                {{ en.round.paidAtCap(fmtMultiplier(gameStore.currentMultiplier)) }}
+              </p>
+            </div>
+            <div v-else-if="cashedOutThisRound" class="animate-sky-pop mt-3 text-center">
               <p class="font-display text-xs font-black uppercase tracking-[0.3em] text-lime text-glow-lime sm:text-sm">
                 Cashed Out{{ gameStore.cashOutResult?.auto ? ' (Auto)' : '' }}
               </p>
@@ -312,6 +350,14 @@ function crashChipClass(value: number) {
               {{ hasActiveBet ? 'Flight Over' : 'Round Over' }}
             </p>
           </template>
+
+          <!-- everyone's bets this round (usernames only): panel on large screens, chip in the strip otherwise -->
+          <LiveBetsPanel mode="panel" />
+
+          <!-- my last win: stake, multiplier, payout, profit; dismissable, never over the controls -->
+          <div v-if="gameStore.lastWin" class="pointer-events-none absolute bottom-1 left-0 z-10">
+            <WinSummaryCard :win="gameStore.lastWin" @dismiss="gameStore.dismissWin()" />
+          </div>
 
           <!-- me + my lobby-mates this round: panel on larger screens, tap-to-open chip on phones -->
           <LobbyFlightBoard
@@ -337,15 +383,16 @@ function crashChipClass(value: number) {
                   <input
                     v-model.number="betAmountInput"
                     type="number"
-                    inputmode="numeric"
-                    min="1"
-                    :max="credits"
+                    inputmode="decimal"
+                    :min="rules?.minBet ?? 1"
+                    :max="rules ? Math.min(rules.maxBet, credits) : credits"
+                    :aria-invalid="!!stakeHint"
                     class="block w-24 border-2 pointer-coarse:min-h-11 border-violet/50 bg-void/70 px-2 py-1 font-arcade text-base text-ember text-glow-ember focus:border-magenta focus:outline-none sm:w-28"
                   />
                 </label>
                 <div data-scroll-x class="-my-1 flex min-w-0 flex-1 gap-2 overflow-x-auto py-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                   <button
-                    v-for="v in BET_STEPS"
+                    v-for="v in betSteps"
                     :key="v"
                     type="button"
                     :class="[
@@ -361,7 +408,7 @@ function crashChipClass(value: number) {
                   <button
                     type="button"
                     class="clip-hud shrink-0 border-2 border-magenta/60 px-2.5 py-1.5 font-arcade text-[0.5625rem] text-magenta transition-all hover:[box-shadow:var(--glow-magenta)] pointer-coarse:min-h-11 pointer-coarse:min-w-11"
-                    @click="betAmountInput = credits"
+                    @click="betAmountInput = maxStake(credits, rules)"
                   >
                     Max
                   </button>
@@ -376,8 +423,24 @@ function crashChipClass(value: number) {
                   :locked="hasActiveBet"
                   :armed-target="gameStore.myAutoCashoutTarget"
                   :error="autoCashoutError"
+                  :max="rules?.maxMultiplier ?? null"
                 />
                 <SpinTimerChip />
+                <!-- the most this stake can return under the caps; the ⓘ explains them -->
+                <span v-if="potentialMaxWin !== null" class="flex shrink-0 items-center gap-1">
+                  <span class="font-arcade text-[0.5rem] uppercase tracking-[0.12em] text-lime">
+                    {{ en.bet.maxWin(creditAmount(potentialMaxWin)) }}
+                  </span>
+                  <InfoTip :text="en.bet.capsInfo" :label="en.rulesModal.title">
+                    <button
+                      type="button"
+                      class="mt-2 block font-semibold text-electric underline underline-offset-2 pointer-coarse:min-h-11"
+                      @click="rulesOpen = true"
+                    >
+                      {{ en.bet.rulesLink }}
+                    </button>
+                  </InfoTip>
+                </span>
                 <button
                   v-if="prompts.outOfCredits.value"
                   type="button"
@@ -403,9 +466,9 @@ function crashChipClass(value: number) {
                 </RouterLink>
               </div>
 
-              <p v-if="gameStore.myBetStatus === 'Rejected'" class="text-sm text-danger">
-                {{ gameStore.betRejectionReason }}
-              </p>
+              <!-- refused bets arrive as toasts (with a link to fix them); this is just the stake check -->
+              <p v-if="stakeHint" class="text-xs text-danger" role="alert">{{ stakeHint }}</p>
+              <p v-else-if="rules?.bettingPaused" class="text-xs text-ember" role="status">{{ en.bet.paused }}</p>
               <p v-if="gameStore.cashOutStatus === 'Rejected'" class="text-sm text-danger">
                 {{ gameStore.cashOutRejectionReason }}
               </p>
@@ -483,5 +546,7 @@ function crashChipClass(value: number) {
     />
 
     <TutorialOverlay v-if="tutorial.isOpen.value" @close="tutorial.finish" />
+
+    <GameRulesModal v-if="rulesOpen" @close="rulesOpen = false" />
   </div>
 </template>

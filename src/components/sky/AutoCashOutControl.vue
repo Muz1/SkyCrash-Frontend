@@ -1,6 +1,8 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { Zap } from '@lucide/vue'
+import { AUTO_PRESETS, MIN_AUTO_TARGET } from '@/lib/gameRules'
+import { en } from '@/copy/en'
 
 /**
  * Auto Cash Out, front and centre next to the bet controls. A clear ON/OFF switch, the
@@ -17,9 +19,20 @@ const props = defineProps<{
   /** True while I have a live bet, so settings can't change mid-flight. */
   locked: boolean
   error: string | null
+  /** The round cap (public rules): no preset above it, and the input stops there. */
+  max?: number | null
 }>()
 
-const PRESETS = [1.5, 2, 3, 5, 10]
+const presets = computed(() => AUTO_PRESETS.filter((p) => props.max == null || p <= props.max))
+const isCustom = computed(() => enabled.value && !presets.value.includes(target.value as (typeof AUTO_PRESETS)[number]))
+const input = ref<HTMLInputElement | null>(null)
+
+/** "Custom": switch on and jump into the number field. */
+function pickCustom() {
+  enabled.value = true
+  input.value?.focus()
+  input.value?.select()
+}
 const shown = computed(() => (Number.isFinite(target.value) ? target.value : 0))
 </script>
 
@@ -109,10 +122,12 @@ const shown = computed(() => (Number.isFinite(target.value) ? target.value : 0))
       <label class="flex shrink-0 items-center gap-1">
         <span class="sr-only">Auto cash out target multiplier</span>
         <input
+          ref="input"
           v-model.number="target"
           type="number"
           inputmode="decimal"
-          min="1.01"
+          :min="MIN_AUTO_TARGET"
+          :max="props.max ?? undefined"
           step="0.05"
           class="block w-20 border-2 border-violet/50 bg-void/70 px-2 py-0.5 font-arcade text-base pointer-coarse:min-h-11 sm:w-16 sm:text-sm pointer-coarse:sm:w-20 pointer-coarse:sm:text-base text-electric text-glow-blue focus:border-electric focus:outline-none"
           @focus="enabled = true"
@@ -122,13 +137,13 @@ const shown = computed(() => (Number.isFinite(target.value) ? target.value : 0))
       <!-- Presets scroll sideways when the row is tight, like the bet amount chips. -->
       <div data-scroll-x class="-my-1 flex min-w-0 gap-1 overflow-x-auto py-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
       <button
-        v-for="(p, i) in PRESETS"
+        v-for="p in presets"
         :key="p"
         type="button"
         :aria-label="`Set auto cash out to ${p}x`"
+        :aria-pressed="enabled && target === p"
         :class="[
           'clip-hud shrink-0 border px-1.5 py-0.5 pointer-coarse:min-h-11 pointer-coarse:min-w-11 font-arcade text-[0.5rem] transition-colors',
-          i >= 3 && 'hidden sm:inline-block',
           enabled && target === p
             ? 'border-electric text-electric'
             : 'border-violet/40 text-muted-foreground hover:border-electric hover:text-electric',
@@ -136,6 +151,19 @@ const shown = computed(() => (Number.isFinite(target.value) ? target.value : 0))
         @click="((target = p), (enabled = true))"
       >
         {{ p }}x
+      </button>
+      <button
+        type="button"
+        :aria-pressed="isCustom"
+        :class="[
+          'clip-hud shrink-0 border px-1.5 py-0.5 pointer-coarse:min-h-11 pointer-coarse:min-w-11 font-arcade text-[0.5rem] uppercase transition-colors',
+          isCustom
+            ? 'border-electric text-electric'
+            : 'border-violet/40 text-muted-foreground hover:border-electric hover:text-electric',
+        ]"
+        @click="pickCustom"
+      >
+        {{ en.bet.custom }}
       </button>
       </div>
     </div>

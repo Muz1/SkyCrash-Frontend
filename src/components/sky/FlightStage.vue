@@ -42,6 +42,9 @@ onBeforeUnmount(() => observer?.disconnect())
 
 const flying = computed(() => gameStore.phase === 'Running')
 const crashed = computed(() => gameStore.phase === 'Crashed')
+/** The round ended at the cap: no explosion, the plane just stops and everyone flying is paid. */
+const capped = computed(() => crashed.value && gameStore.maxReached)
+const boom = computed(() => crashed.value && !capped.value)
 const waiting = computed(() => gameStore.phase === 'Waiting')
 const airborne = computed(() => flying.value || crashed.value)
 
@@ -283,9 +286,9 @@ const WAITING_SECONDS = 10
 const countdownFraction = computed(() => Math.max(0, Math.min(1, (gameStore.countdownSeconds ?? 0) / WAITING_SECONDS)))
 
 const multiplierClass = computed(() =>
-  crashed.value
+  boom.value
     ? 'text-danger [text-shadow:0_0_18px_color-mix(in_oklab,var(--neon-red)_90%,transparent)]'
-    : gameStore.cashOutStatus === 'CashedOut'
+    : capped.value || gameStore.cashOutStatus === 'CashedOut'
       ? 'text-lime text-glow-lime'
       : 'text-electric text-glow-blue',
 )
@@ -296,8 +299,8 @@ const multiplierClass = computed(() =>
     <svg v-if="width > 0" class="absolute inset-0 h-full w-full" :viewBox="`0 0 ${width} ${height}`" aria-hidden="true">
       <defs>
         <linearGradient id="flight-fill" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" :style="{ stopColor: crashed ? 'var(--neon-red)' : 'var(--neon-magenta)', stopOpacity: 0.55 }" />
-          <stop offset="100%" :style="{ stopColor: crashed ? 'var(--neon-red)' : 'var(--neon-magenta)', stopOpacity: 0.04 }" />
+          <stop offset="0%" :style="{ stopColor: boom ? 'var(--neon-red)' : 'var(--neon-magenta)', stopOpacity: 0.55 }" />
+          <stop offset="100%" :style="{ stopColor: boom ? 'var(--neon-red)' : 'var(--neon-magenta)', stopOpacity: 0.04 }" />
         </linearGradient>
         <linearGradient id="flight-line" x1="0" y1="1" x2="1" y2="0">
           <stop offset="0%" style="stop-color: var(--neon-magenta)" />
@@ -311,11 +314,11 @@ const multiplierClass = computed(() =>
         <path
           :d="curve.line"
           fill="none"
-          :stroke="crashed ? 'var(--neon-red)' : 'url(#flight-line)'"
+          :stroke="boom ? 'var(--neon-red)' : 'url(#flight-line)'"
           stroke-width="4"
           stroke-linecap="round"
           stroke-linejoin="round"
-          :style="{ filter: `drop-shadow(0 0 6px ${crashed ? 'var(--neon-red)' : 'var(--neon-magenta)'})` }"
+          :style="{ filter: `drop-shadow(0 0 6px ${boom ? 'var(--neon-red)' : 'var(--neon-magenta)'})` }"
         />
       </template>
 
@@ -386,7 +389,7 @@ const multiplierClass = computed(() =>
       :style="{ transform: planeTransform, willChange: 'transform', width: `${planeSize}px`, height: `${planeSize}px` }"
     >
       <!-- The curve is the exhaust trail here, so the sprite's own generic trail is off. -->
-      <Plane :craft="props.craft" :size="planeSize" :idle="waiting" :crashing="crashed" :trail="false" />
+      <Plane :craft="props.craft" :size="planeSize" :idle="waiting" :crashing="boom" :trail="false" />
     </div>
     <!-- near half of the next ring + pass-through flashes (drawn in front of the plane) -->
     <svg v-if="width > 0" class="pointer-events-none absolute inset-0 h-full w-full" :viewBox="`0 0 ${width} ${height}`" aria-hidden="true">
@@ -421,7 +424,7 @@ const multiplierClass = computed(() =>
       <span class="checkpoint-burst__label font-arcade">{{ b.cp }}x</span>
     </div>
     <div
-      v-if="crashed && width > 0"
+      v-if="boom && width > 0"
       class="pointer-events-none absolute left-0 top-0 h-0 w-0"
       :style="{ transform: `translate3d(${tip.x}px, ${tip.y}px, 0)` }"
     >
