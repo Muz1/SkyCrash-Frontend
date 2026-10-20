@@ -197,12 +197,16 @@ export interface AdminPlayerSummary {
   isBlocked: boolean
   memberSinceUtc: string
   lastSeenUtc: string
+  emailVerified?: boolean
+  isTestAccount?: boolean
 }
 
 export interface AdminPlayerFilters {
   search?: string
   isBlocked?: boolean
   isAdmin?: boolean
+  emailVerified?: boolean
+  isTestAccount?: boolean
   sortBy?: 'username' | 'email' | 'balance' | 'membersince' | 'lastseen'
   sortDir?: 'asc' | 'desc'
 }

@@ -31,6 +31,8 @@ export interface ReportQuery {
   range: RangePreset
   from?: string
   to?: string
+  /** Analytics reports leave test accounts out unless this is true (?includeTest=true). */
+  includeTest?: boolean
 }
 
 export interface ReportRangeInfo {
@@ -74,21 +76,87 @@ export interface OverviewReport {
   dailyNetProfit: DailyValue[]
 }
 
+export interface LabelledAmount {
+  label: string
+  amount: number
+}
+
+export interface LargestWin {
+  betId: string
+  username: string
+  isTestAccount: boolean
+  placedAtUtc: string
+  roundNumber: number
+  stake: number
+  bonusStake: number
+  cashOutMultiplier: number
+  crashMultiplier: number
+  payout: number
+  /** Manual, AutoTarget, ProfitCap, MaxMultiplier or RoundLiability. */
+  settledBy: string
+}
+
+export interface CapEventCount {
+  reason: string
+  count: number
+  payouts: number
+}
+
+export interface DailyRevenuePoint {
+  date: string
+  wagered: number
+  payouts: number
+  grossRevenue: number
+  freeCredits: number
+  netProfit: number
+  ggr?: number
+  ngr?: number
+  purchaseRevenueZar?: number
+  capEvents?: number
+  largestPayout?: number
+  /** Set when a cap fired or one win paid more than half the day's wagers. */
+  annotation?: string | null
+}
+
+/** All amounts are credits (play money) except purchaseRevenueZar. */
 export interface RevenueReport {
   range: ReportRangeInfo
+  includesTestAccounts?: boolean
   totalWagered: number
+  cashWagered?: number
+  bonusWagered?: number
   totalPayouts: number
+  ggr?: number
+  ggrCash?: number
+  ggrBonus?: number
   grossRevenue: number
+  bonusCost?: number
+  bonusCostBySource?: LabelledAmount[]
+  bonusForfeited?: number
   freeCreditsGiven: number
-  freeCreditsBreakdown: { label: string; amount: number }[]
+  freeCreditsBreakdown: LabelledAmount[]
+  ngr?: number
   netProfit: number
+  holdPercentage?: number | null
+  ngrMarginPercentage?: number | null
   profitMarginPercentage: number | null
   betCount: number
   averageBet: number
   houseEdgePercentage: number
   expectedGrossRevenue: number
   actualRtpPercentage: number
-  daily: { date: string; wagered: number; payouts: number; grossRevenue: number; freeCredits: number; netProfit: number }[]
+  theoreticalRtpPercentage?: number
+  sampleSizeNote?: string
+  gapToExpected?: number
+  ggrStandardDeviation?: number
+  gapZScore?: number | null
+  gapExplanation?: string
+  purchaseRevenueZar?: number
+  purchaseCount?: number
+  creditsSold?: number
+  largestWins?: LargestWin[]
+  capEvents?: CapEventCount[]
+  daily: DailyRevenuePoint[]
 }
 
 export interface GamePerformanceReport {
@@ -179,9 +247,28 @@ export interface FeedbackSubmissionItem {
   roundsPlayedAtSubmit: number
   cashOutsAtSubmit: number
   roundsPlayedNow: number
+  /** Raw "wants us to add" tag keys (categories holds their labels). */
+  tags?: string[]
+  /** Responsible-gambling concern, with the phrases that triggered it. */
+  isConcern?: boolean
+  concernPhrases?: string[]
+  /** Sent within 24h of the same player's previous submission (never rewarded). */
+  isDuplicate?: boolean
+  /** How many submissions this player has in the range. */
+  submissionsByPlayer?: number
+}
+
+export interface FeedbackSubmissionsSummary {
+  averageRating: number
+  countByRating: CountBucket[]
+  topRequestedTags: CountBucket[]
+  concernCount: number
+  duplicateCount: number
+  playersWithSeveralSubmissions: number
 }
 
 export interface FeedbackSubmissionsPage {
+  summary?: FeedbackSubmissionsSummary
   page: number
   pageSize: number
   totalCount: number
@@ -194,7 +281,10 @@ export interface FeedbackSubmissionFilters {
   sentiment?: string
   category?: string
   rewarded?: boolean
+  /** True: only responsible-gambling concerns. */
+  concern?: boolean
   page?: number
+  pageSize?: number
 }
 
 export interface FeedbackCluster {
