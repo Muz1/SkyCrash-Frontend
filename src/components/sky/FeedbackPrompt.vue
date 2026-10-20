@@ -14,6 +14,7 @@ import {
 } from '@/types/feedback'
 import { getMyInsightAnswers } from '@/services/feedbackService'
 import type { useFeedbackForm } from '@/composables/useFeedbackPrompt'
+import { polishCopy } from '@/copy/polish'
 
 /**
  * The feedback dialog, in three stages:
@@ -303,6 +304,13 @@ const questionClass = 'block text-base font-bold leading-snug text-foreground'
           >Yes</ArcadeButton
         >
       </div>
+      <button
+        type="button"
+        class="mt-3 inline-flex min-h-11 items-center px-2 text-sm text-[#c4b5fd] underline underline-offset-4 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-electric"
+        @click="fb.dontAskAgain()"
+      >
+        {{ polishCopy.feedback.dontAsk }}
+      </button>
     </div>
 
     <div

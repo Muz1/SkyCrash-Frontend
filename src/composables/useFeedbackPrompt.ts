@@ -46,6 +46,51 @@ function writeSnooze(playerId: string | null, snooze: Snooze) {
   }
 }
 
+/** No automatic re-ask within this long after the player closes the pop-up. */
+export const DISMISS_COOLDOWN_MS = 24 * 60 * 60 * 1000
+
+/** The player's own choices about the automatic ask (this device). */
+export interface FeedbackPrefs {
+  /** "Don't ask again": the pop-up never opens by itself again. */
+  neverAsk?: boolean
+  /** When the player last closed the pop-up without answering (ms since epoch). */
+  dismissedAt?: number
+  /** They have sent feedback; the server only rewards it once, so stop asking. */
+  submitted?: boolean
+}
+
+function prefsKey(playerId: string | null) {
+  return `skycrash_feedback_prefs_${playerId ?? 'anon'}`
+}
+
+export function readFeedbackPrefs(playerId: string | null): FeedbackPrefs {
+  try {
+    const raw = localStorage.getItem(prefsKey(playerId))
+    return raw ? (JSON.parse(raw) as FeedbackPrefs) : {}
+  } catch {
+    return {}
+  }
+}
+
+function updateFeedbackPrefs(playerId: string | null, patch: FeedbackPrefs) {
+  try {
+    localStorage.setItem(prefsKey(playerId), JSON.stringify({ ...readFeedbackPrefs(playerId), ...patch }))
+  } catch {
+    // Storage unavailable: the server's schedule still limits how often it asks.
+  }
+}
+
+/**
+ * Whether the pop-up may open by itself: never after "Don't ask again" or once the player has
+ * sent feedback (here or per the server), and not within 24 hours of the last dismiss.
+ */
+export function mayAutoAsk(prefs: FeedbackPrefs, status: PlayerFeedbackStatus | null, now = Date.now()) {
+  if (prefs.neverAsk || prefs.submitted) return false
+  if (status?.lastSubmittedAtUtc) return false
+  if (prefs.dismissedAt !== undefined && now - prefs.dismissedAt < DISMISS_COOLDOWN_MS) return false
+  return true
+}
+
 /** Whether sending feedback right now earns credits (older servers: whenever it's due). */
 export function rewardIsAvailable(s: PlayerFeedbackStatus | null) {
   if (!s) return false
@@ -102,6 +147,13 @@ export function useFeedbackForm() {
   function dismiss() {
     const s = status.value
     if (s) writeSnooze(authStore.playerId, { rounds: s.roundsPlayed, target: s.nextPromptAtCashOut ?? null })
+    updateFeedbackPrefs(authStore.playerId, { dismissedAt: Date.now() })
+    isOpen.value = false
+  }
+
+  /** "Don't ask again": close, and never open by itself again (the home page button still works). */
+  function dontAskAgain() {
+    updateFeedbackPrefs(authStore.playerId, { neverAsk: true })
     isOpen.value = false
   }
 
@@ -117,6 +169,7 @@ export function useFeedbackForm() {
     try {
       result.value = await feedbackService.submitFeedback(payload)
       stage.value = 'done'
+      updateFeedbackPrefs(authStore.playerId, { submitted: true })
       // The reward (if any) has been paid: refresh the balance and the schedule.
       void playerStore.fetchProfile()
       void refreshStatus()
@@ -142,6 +195,7 @@ export function useFeedbackForm() {
     openForm,
     accept,
     dismiss,
+    dontAskAgain,
     close,
     submit,
   }
@@ -152,7 +206,8 @@ export function useFeedbackForm() {
  * the backend whether feedback is due (decided server-side from the player's
  * cash-outs, with the gap growing after each answer), and it also asks once
  * after a big win (a cash-out at 5x or more) even when nothing is due. It never
- * interrupts a flight and yields to other pop-ups. "No" snoozes the regular ask.
+ * interrupts a flight and yields to other pop-ups. "No" snoozes the regular ask and starts a
+ * 24h cooldown; "Don't ask again" or a submission stops the automatic ask for good.
  */
 export function useFeedbackPrompt(options: { isBlocked?: () => boolean } = {}) {
   const gameStore = useGameStore()
@@ -187,6 +242,8 @@ export function useFeedbackPrompt(options: { isBlocked?: () => boolean } = {}) {
     checking = true
     try {
       const s = await form.refreshStatus()
+      // The player's own "don't ask" / already-answered / 24h cooldown beat every trigger.
+      if (!mayAutoAsk(readFeedbackPrefs(authStore.playerId), s)) return
       const bigWin = bigWinRound !== null && bigWinRound !== bigWinAskedRound
       const due = !!s && s.isDue && !isSnoozed(s)
       if ((bigWin || due) && !inFlight() && !options.isBlocked?.() && !form.isOpen.value) {
