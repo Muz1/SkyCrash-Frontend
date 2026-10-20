@@ -127,7 +127,7 @@ const sentimentTone = { Positive: 'success', Neutral: 'neutral', Negative: 'dang
           <div class="text-[0.875rem] text-[var(--adm-text-2)]">
             <p class="flex items-center gap-1.5 font-semibold" :class="f.rewardReceived ? 'text-[var(--neon-lime)]' : ''">
               <Gift class="h-4 w-4" aria-hidden="true" />
-              {{ f.rewardReceived ? `Rewarded R${f.creditsAwarded.toLocaleString()}` : 'Not rewarded' }}
+              {{ f.rewardReceived ? `Rewarded ${f.creditsAwarded.toFixed(2)} credits` : 'Not rewarded' }}
             </p>
             <p class="mt-1">At submit: {{ f.roundsPlayedAtSubmit }} rounds, {{ f.cashOutsAtSubmit }} cash-outs</p>
             <p>Rounds played now: {{ f.roundsPlayedNow }}</p>

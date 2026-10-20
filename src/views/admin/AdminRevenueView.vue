@@ -8,7 +8,7 @@ import AdminBarChart from '@/components/admin/AdminBarChart.vue'
 import { useReport } from '@/composables/useReport'
 import { getRevenue } from '@/services/adminAnalyticsService'
 import { ABOUT } from '@/lib/reportAbout'
-import { pct, rand } from '@/lib/reportFormat'
+import { pct, cr } from '@/lib/reportFormat'
 
 const { query, data, loading, error } = useReport(getRevenue)
 </script>
@@ -18,7 +18,7 @@ const { query, data, loading, error } = useReport(getRevenue)
     v-model:query="query"
     title="Revenue & Profit"
     eyebrow="Money"
-    subtitle="What players wager, what they win, and what the house keeps (1 credit = R1)."
+    subtitle="What players wager, what they win, and what the house keeps. Credits are play money; only PayFast purchases are rands."
     :about="ABOUT.revenue!"
     :ready="!!data"
     :loading="loading"
@@ -28,25 +28,25 @@ const { query, data, loading, error } = useReport(getRevenue)
     <template v-if="data">
       <div class="adm-kpis">
         <AdminKpi label="Total wagered" :icon="Coins" tone="blue" :caption="`${data.betCount.toLocaleString()} resolved bets`">
-          <span class="adm-num">{{ rand(data.totalWagered) }}</span>
+          <span class="adm-num">{{ cr(data.totalWagered) }}</span>
         </AdminKpi>
         <AdminKpi label="Total payouts" :icon="HandCoins" tone="ember" :caption="`Actual RTP ${pct(data.actualRtpPercentage)}`">
-          <span class="adm-num">{{ rand(data.totalPayouts) }}</span>
+          <span class="adm-num">{{ cr(data.totalPayouts) }}</span>
         </AdminKpi>
         <AdminKpi label="Gross revenue" :icon="Landmark" tone="violet" caption="Wagered − payouts">
-          <span class="adm-num">{{ rand(data.grossRevenue) }}</span>
+          <span class="adm-num">{{ cr(data.grossRevenue) }}</span>
         </AdminKpi>
         <AdminKpi label="Free credits given" :icon="Gift" tone="magenta" caption="Rewards, wheel, top-ups">
-          <span class="adm-num">{{ rand(data.freeCreditsGiven) }}</span>
+          <span class="adm-num">{{ cr(data.freeCreditsGiven) }}</span>
         </AdminKpi>
         <AdminKpi label="Net profit" :icon="TrendingUp" :tone="data.netProfit >= 0 ? 'lime' : 'magenta'" caption="Gross revenue − free credits">
-          <span class="adm-num">{{ rand(data.netProfit) }}</span>
+          <span class="adm-num">{{ cr(data.netProfit) }}</span>
         </AdminKpi>
         <AdminKpi label="Profit margin" :icon="Percent" tone="lime" caption="Net profit ÷ wagered">
           <span class="adm-num">{{ pct(data.profitMarginPercentage) }}</span>
         </AdminKpi>
         <AdminKpi label="Average bet" :icon="Scale" tone="blue">
-          <span class="adm-num">{{ rand(data.averageBet) }}</span>
+          <span class="adm-num">{{ cr(data.averageBet) }}</span>
         </AdminKpi>
         <AdminKpi
           label="Expected from house edge"
@@ -54,7 +54,7 @@ const { query, data, loading, error } = useReport(getRevenue)
           tone="violet"
           :caption="`${pct(data.houseEdgePercentage)} edge × wagered`"
         >
-          <span class="adm-num">{{ rand(data.expectedGrossRevenue) }}</span>
+          <span class="adm-num">{{ cr(data.expectedGrossRevenue) }}</span>
         </AdminKpi>
       </div>
 
@@ -67,7 +67,7 @@ const { query, data, loading, error } = useReport(getRevenue)
               { name: 'Wagered', values: data.daily.map((d) => d.wagered) },
               { name: 'Paid out', values: data.daily.map((d) => d.payouts) },
             ]"
-            :format="rand"
+            :format="cr"
             :height="240"
           />
         </AdminPanel>
@@ -79,7 +79,7 @@ const { query, data, loading, error } = useReport(getRevenue)
               { name: 'Gross revenue', values: data.daily.map((d) => d.grossRevenue) },
               { name: 'Net profit', values: data.daily.map((d) => d.netProfit) },
             ]"
-            :format="rand"
+            :format="cr"
             :height="240"
           />
         </AdminPanel>
@@ -89,7 +89,7 @@ const { query, data, loading, error } = useReport(getRevenue)
             value-label="Credits"
             horizontal
             :items="data.freeCreditsBreakdown.map((b) => ({ label: b.label, value: Math.max(0, b.amount) }))"
-            :format="rand"
+            :format="cr"
             empty-text="No free credits were given in this range."
           />
         </AdminPanel>
