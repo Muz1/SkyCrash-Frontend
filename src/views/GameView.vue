@@ -411,13 +411,14 @@ function crashChipClass(value: number) {
               </p>
             </div>
 
-            <!-- the one button that matters, adapting to the round phase -->
-            <div class="flex flex-col gap-1.5">
+            <!-- the one button that matters, adapting to the round phase (first in the column on a
+                 phone held sideways, so it never scrolls out of view) -->
+            <div class="flex flex-col gap-1.5 landscape-phone:order-first">
               <ArcadeButton
                 v-if="primaryAction === 'cashout'"
                 variant="cash"
                 size="xl"
-                class="w-full flex-col !gap-0 py-2 sm:py-3 short:sm:py-2"
+                class="w-full flex-col !gap-0 py-2 sm:py-3 short:sm:py-2 landscape-phone:py-1.5"
                 :disabled="isCashingOut"
                 @click="runPrimaryAction"
               >
@@ -429,7 +430,7 @@ function crashChipClass(value: number) {
                 v-else-if="primaryAction === 'bet'"
                 size="xl"
                 variant="primary"
-                class="w-full short:py-3 short:text-base"
+                class="w-full short:py-3 short:text-base landscape-phone:py-2.5"
                 :disabled="betInvalid || isPlacingBet"
                 @click="runPrimaryAction"
               >
@@ -448,7 +449,7 @@ function crashChipClass(value: number) {
                 v-else
                 :variant="queuedForNextRound ? 'ghost' : 'magenta'"
                 size="lg"
-                class="w-full flex-col !gap-0.5"
+                class="w-full flex-col !gap-0.5 landscape-phone:py-2"
                 :disabled="!queuedForNextRound && betInvalid"
                 @click="runPrimaryAction"
               >

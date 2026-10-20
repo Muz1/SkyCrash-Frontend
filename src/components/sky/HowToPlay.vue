@@ -61,7 +61,7 @@ function dismiss() {
     <button
       type="button"
       aria-label="Hide how to play"
-      class="grid h-7 w-7 shrink-0 place-items-center text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ember"
+      class="grid h-7 w-7 shrink-0 place-items-center pointer-coarse:-my-2 pointer-coarse:h-11 pointer-coarse:w-11 text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ember"
       @click="dismiss"
     >
       <X class="h-4 w-4" aria-hidden="true" />
