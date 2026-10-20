@@ -1,6 +1,8 @@
 // One report per admin page, built from the data that page already has loaded.
 // Every section carries a plain-language description so the PDF reads on its own.
 import { formatDateTime, type ReportDefinition } from '@/lib/pdfReport'
+import { count, cr, longDate, mult, pct2, zar } from '@/lib/reportFormat'
+import type { RevenueReport } from '@/types/insights'
 import type {
   AdminPlayerSummary,
   BetHistoryEntry,
@@ -270,6 +272,114 @@ export function buildVolatilityReport(summary: VolatilitySummary): ReportDefinit
         columns: ['Range', 'Rounds', 'Share of Sample'],
         rows: summary.histogram.map((b) => [b.label, b.count, `${b.percentage}%`]),
         emptyText: 'No crashed rounds in the sample.',
+      },
+    ],
+  }
+}
+
+// ---------- Revenue & Profit (structured PDF, built from the loaded report) ----------
+
+const settledLabel: Record<string, string> = {
+  Manual: 'Manual',
+  AutoTarget: 'Auto target',
+  ProfitCap: 'Profit cap',
+  MaxMultiplier: 'Max multiplier',
+  RoundLiability: 'Round liability',
+}
+export const settledByLabel = (s: string) => settledLabel[s] ?? s.replace(/([a-z])([A-Z])/g, '$1 $2')
+
+export function buildRevenueReport(r: RevenueReport): ReportDefinition {
+  const ggr = r.ggr ?? r.grossRevenue
+  const ngr = r.ngr ?? r.netProfit
+  const bonusCost = r.bonusCost ?? r.freeCreditsGiven
+  const bySource = r.bonusCostBySource ?? r.freeCreditsBreakdown
+  const range = `${longDate(r.range.from)} – ${longDate(r.range.to)} (${r.range.days} days, UTC)`
+  return {
+    title: 'Revenue & Profit Report',
+    fileName: 'skycrash-revenue',
+    summary:
+      `${range}. ${r.includesTestAccounts ? 'Test accounts included.' : 'Test accounts excluded.'} ` +
+      'All amounts are credits except Purchases, which are rands. Credits are play money; only PayFast purchases are rands. ' +
+      (r.gapExplanation ? r.gapExplanation : ''),
+    sections: [
+      {
+        kind: 'metrics',
+        heading: 'Headline figures',
+        description:
+          'GGR = wagered − payouts. NGR = GGR − bonus cost. Hold % = GGR ÷ wagered. NGR margin = NGR ÷ wagered. Expected from house edge = wagered × edge.',
+        rows: [
+          ['GGR (credits)', cr(ggr)],
+          ['GGR on cash stakes', cr(r.ggrCash)],
+          ['GGR on bonus stakes', cr(r.ggrBonus)],
+          ['Expected from house edge', cr(r.expectedGrossRevenue)],
+          ['Gap to expected', cr(r.gapToExpected)],
+          ['Gap in std devs (z)', r.gapZScore == null ? '—' : r.gapZScore.toFixed(2)],
+          ['Std dev of GGR', cr(r.ggrStandardDeviation)],
+          ['Actual RTP', pct2(r.actualRtpPercentage)],
+          ['Theoretical RTP', pct2(r.theoreticalRtpPercentage ?? 100 - r.houseEdgePercentage)],
+          ['Bonus cost', cr(bonusCost)],
+          ['Bonus forfeited', cr(r.bonusForfeited)],
+          ['NGR (credits)', cr(ngr)],
+          ['Hold %', pct2(r.holdPercentage)],
+          ['NGR margin', pct2(r.ngrMarginPercentage ?? r.profitMarginPercentage)],
+          ['Wagered', cr(r.totalWagered)],
+          ['Payouts', cr(r.totalPayouts)],
+          ['Resolved bets', count(r.betCount)],
+          ['Average bet', cr(r.averageBet)],
+          ['Purchases (ZAR)', zar(r.purchaseRevenueZar)],
+          ['Purchase count', count(r.purchaseCount)],
+          ['Credits sold', cr(r.creditsSold)],
+        ],
+      },
+      ...(r.sampleSizeNote ? [{ kind: 'text' as const, heading: 'Sample size', description: r.sampleSizeNote }] : []),
+      {
+        kind: 'table',
+        heading: 'Bonus cost by source',
+        description: 'Free credits granted in the range, by where they came from (credits).',
+        columns: ['Source', 'Credits'],
+        rows: bySource.map((b) => [b.label, cr(b.amount)]),
+        emptyText: 'No bonus credits were granted in this range.',
+      },
+      {
+        kind: 'table',
+        heading: 'Largest wins',
+        description: 'The ten biggest payouts. "Settled by" says whether the player cashed out or a cap / auto target did. TEST marks a test account.',
+        columns: ['Player', 'Round', 'Stake', 'Cash-out', 'Crash', 'Payout', 'Settled by', 'When'],
+        rows: (r.largestWins ?? []).map((w) => [
+          `${w.username}${w.isTestAccount ? ' (TEST)' : ''}`,
+          `#${w.roundNumber}`,
+          cr(w.stake),
+          mult(w.cashOutMultiplier),
+          mult(w.crashMultiplier),
+          cr(w.payout),
+          settledByLabel(w.settledBy),
+          formatDateTime(w.placedAtUtc),
+        ]),
+        emptyText: 'No winning bets in this range.',
+      },
+      {
+        kind: 'table',
+        heading: 'Cap events',
+        description: 'Bets cashed out by a risk cap: profit cap (10 000 max profit), max multiplier (100x) or round liability.',
+        columns: ['Reason', 'Bets', 'Payouts'],
+        rows: (r.capEvents ?? []).map((c) => [settledByLabel(c.reason), count(c.count), cr(c.payouts)]),
+        emptyText: 'No caps fired in this range.',
+      },
+      {
+        kind: 'table',
+        heading: 'Daily breakdown',
+        description: 'Per UTC day. A note marks days where a cap fired or one win paid more than half the day’s wagers.',
+        columns: ['Date', 'Wagered', 'Payouts', 'GGR', 'NGR', 'Purchases (R)', 'Caps', 'Note'],
+        rows: r.daily.map((d) => [
+          longDate(d.date),
+          cr(d.wagered),
+          cr(d.payouts),
+          cr(d.ggr ?? d.grossRevenue),
+          cr(d.ngr ?? d.netProfit),
+          zar(d.purchaseRevenueZar),
+          count(d.capEvents),
+          d.annotation ?? '',
+        ]),
       },
     ],
   }
