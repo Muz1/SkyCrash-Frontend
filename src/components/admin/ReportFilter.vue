@@ -18,13 +18,16 @@ const today = new Date().toISOString().slice(0, 10)
 const from = ref(model.value.from ?? new Date(Date.now() - 13 * 86_400_000).toISOString().slice(0, 10))
 const to = ref(model.value.to ?? today)
 
+// The "Include test accounts" switch lives on the same query; keep it when the range changes.
+const keep = () => (model.value.includeTest ? { includeTest: true } : {})
+
 function pick(id: RangePreset) {
-  model.value = id === 'custom' ? { range: 'custom', from: from.value, to: to.value } : { range: id }
+  model.value = id === 'custom' ? { range: 'custom', from: from.value, to: to.value, ...keep() } : { range: id, ...keep() }
 }
 
 watch([from, to], () => {
   if (model.value.range === 'custom' && from.value && to.value) {
-    model.value = { range: 'custom', from: from.value, to: to.value }
+    model.value = { range: 'custom', from: from.value, to: to.value, ...keep() }
   }
 })
 

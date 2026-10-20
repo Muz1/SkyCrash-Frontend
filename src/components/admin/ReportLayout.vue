@@ -7,6 +7,7 @@ import ReportFilter from './ReportFilter.vue'
 import AboutReport from './AboutReport.vue'
 import type { ReportQuery } from '@/types/insights'
 import type { AboutContent } from '@/lib/reportAbout'
+import { admin as copy } from '@/copy/admin'
 
 /**
  * The frame every report page shares: title, date-range filter, "About this report",
@@ -23,15 +24,31 @@ withDefaults(defineProps<{
   info?: { from: string; to: string; days: number } | null
   /** Reports that aren't date-based (e.g. Skin Usage) hide the filter. */
   filter?: boolean
-}>(), { filter: true, loading: false, error: null, info: null })
+  /** Show the "Include test accounts" switch (analytics reports; adds ?includeTest=true). */
+  testToggle?: boolean
+  /** Turn off the page-snapshot PDF (pages with their own data export). */
+  pageExport?: boolean
+}>(), { filter: true, loading: false, error: null, info: null, testToggle: false, pageExport: true })
 const query = defineModel<ReportQuery>('query')
+
+function setIncludeTest(on: boolean) {
+  if (!query.value) return
+  const { includeTest: _drop, ...rest } = query.value
+  void _drop
+  query.value = on ? { ...rest, includeTest: true } : rest
+}
 </script>
 
 <template>
   <AdminShell>
-    <AdminPage :title="title" :eyebrow="eyebrow" :subtitle="subtitle">
+    <AdminPage :title="title" :eyebrow="eyebrow" :subtitle="subtitle" :page-export="pageExport">
       <template #actions>
         <slot name="actions" />
+        <label v-if="testToggle && query" class="adm-switch" :title="copy.testToggle.hint">
+          <input type="checkbox" :checked="!!query.includeTest" @change="setIncludeTest(($event.target as HTMLInputElement).checked)" />
+          <span class="adm-switch-track" aria-hidden="true" />
+          <span>{{ copy.testToggle.label }}</span>
+        </label>
         <ReportFilter v-if="filter && query" v-model="query" :info="info" />
       </template>
 

@@ -23,6 +23,7 @@ const { query, data, loading, error } = useReport(getOverview)
     :loading="loading"
     :error="error"
     :info="data?.range"
+    test-toggle
   >
     <template v-if="data">
       <div class="adm-kpis">
