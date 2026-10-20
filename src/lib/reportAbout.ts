@@ -38,7 +38,7 @@ export const ABOUT: Record<string, AboutContent> = {
       { term: 'Purchases', definition: 'PayFast credit-pack purchases in rands, how many, and the credits sold.' },
       { term: 'Largest wins / cap events', definition: 'The ten biggest payouts, and the bets a risk cap (100× max multiplier, 10 000 max profit, round liability) cashed out.' },
     ],
-    charts: 'Bets vs payouts compares the two credit flows per day. Revenue & profit shows GGR and NGR per day; below zero means players won more than they lost (plus bonuses). A marked day had a cap fire or one win larger than half that day's wagers; hover the marker for the note.',
+    charts: 'Bets vs payouts compares the two credit flows per day. Revenue & profit shows GGR and NGR per day; below zero means players won more than they lost (plus bonuses). A marked day had a cap fire or one win larger than half that day’s wagers; hover the marker for the note.',
     useFor: 'Check the game earns its edge, see whether one lucky win explains a bad day, judge bonus generosity, and reconcile the books.',
   },
   gamePerformance: {
