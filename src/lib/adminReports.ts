@@ -55,13 +55,15 @@ export function buildPlayersReport(
         heading: 'Accounts',
         description:
           'Each row is one player account. "Balance" is the player\'s current credits; "Last Seen" is the last time the player was active in the game.',
-        columns: ['Username', 'Email', 'Balance', 'Role', 'Status', 'Member Since', 'Last Seen'],
+        columns: ['Username', 'Email', 'Balance', 'Role', 'Status', 'Email verified', 'Test', 'Member Since', 'Last Seen'],
         rows: players.map((p) => [
           p.username,
           p.email,
-          p.creditBalance,
+          p.creditBalance.toFixed(2),
           p.isAdmin ? 'Admin' : 'Player',
           p.isBlocked ? 'Blocked' : 'Active',
+          p.emailVerified ? 'Yes' : 'No',
+          p.isTestAccount ? 'Test' : '',
           formatDateTime(p.memberSinceUtc),
           formatDateTime(p.lastSeenUtc),
         ]),
