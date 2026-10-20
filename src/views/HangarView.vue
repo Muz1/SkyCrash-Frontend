@@ -446,13 +446,14 @@ function rarityBadgeClass(rarity: Rarity) {
       <div
         class="sticky bottom-0 z-20 -mx-4 mt-5 flex flex-wrap items-center gap-2 border-t-2 border-magenta/50 bg-void/90 px-4 py-2 backdrop-blur-md sm:-mx-6 sm:px-6"
       >
-        <p class="min-w-0 flex-1 basis-40 text-sm leading-snug text-foreground" role="status" aria-live="polite">
+        <p class="w-full min-w-0 truncate text-sm leading-snug text-foreground sm:w-auto sm:flex-1" role="status" aria-live="polite">
           <span class="font-bold uppercase tracking-[0.08em]">{{ previewName }}</span>
-          <span :class="cn('block text-xs', previewEquipped ? 'text-lime' : 'text-ember')">
+          <span aria-hidden="true" class="text-[#a99bd4]"> · </span>
+          <span :class="previewEquipped || equipNote ? 'text-lime' : 'text-ember'">
             {{ equipNote || (previewEquipped ? copy.equipped : copy.tapAgain) }}
           </span>
         </p>
-        <div class="flex flex-1 basis-56 justify-end gap-2">
+        <div class="flex w-full justify-end gap-2 sm:w-auto">
           <ArcadeButton v-if="!previewEquipped" size="md" variant="magenta" class="flex-1 sm:flex-none" @click="equipPreview">
             {{ copy.equip }}
           </ArcadeButton>
