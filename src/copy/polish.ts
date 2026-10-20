@@ -13,7 +13,7 @@ export const polishCopy = {
     done: "Let's fly",
     replay: 'How to play',
     steps: {
-      credits: { title: 'Your credits', body: 'You start with free credits. No real money.' },
+      credits: { title: 'Your credits', body: "Credits are for play. They can't be withdrawn." },
       bet: { title: 'Place a bet', body: 'Pick an amount, then tap BET before take-off.' },
       climb: { title: 'Watch it climb', body: 'The multiplier rises the longer the plane flies.' },
       cashout: { title: 'Cash out', body: 'Tap CASH OUT before the plane crashes.' },

@@ -30,6 +30,15 @@ const heading = (page: Page, name: RegExp) => expect(page.getByRole('heading', {
 export const PLAYER_SCREENS: Screen[] = [
   { name: 'landing (guest)', path: '/', mock: { role: 'guest' } },
   { name: 'landing', path: '/' },
+  {
+    name: 'landing tutorial (guest)',
+    path: '/',
+    mock: { role: 'guest' },
+    prepare: async (p) => {
+      await p.getByRole('button', { name: /full tutorial/i }).click()
+      await expect(p.getByRole('dialog', { name: /your credits/i })).toBeVisible()
+    },
+  },
   { name: 'login', path: '/login', mock: { role: 'guest' }, prepare: (p) => heading(p, /welcome back/i) },
   { name: 'register', path: '/register', mock: { role: 'guest' }, prepare: (p) => heading(p, /join the flight/i) },
   {
@@ -51,7 +60,7 @@ export const PLAYER_SCREENS: Screen[] = [
     name: 'tutorial',
     path: '/game?tutorial=1',
     prepare: async (p) => {
-      await expect(p.getByRole('dialog', { name: /place your bet/i })).toBeVisible()
+      await expect(p.getByRole('dialog', { name: /your credits/i })).toBeVisible()
     },
   },
   {
@@ -60,11 +69,12 @@ export const PLAYER_SCREENS: Screen[] = [
     prepare: async (p) => {
       // Wait for each card before the next tap: the card changes height between steps.
       const dialog = p.getByRole('dialog')
-      for (let step = 2; step <= 8; step++) {
+      for (let step = 2; step <= 5; step++) {
         await dialog.getByRole('button', { name: /^next/i }).click()
-        await expect(dialog).toContainText(`${step}/8`)
+        await expect(dialog).toContainText(`${step}/5`)
       }
-      await expect(p.getByRole('dialog', { name: /your hangar/i })).toBeVisible()
+      await expect(p.getByRole('dialog', { name: /crash/i })).toBeVisible()
+      await expect(dialog).toContainText('99% on average')
     },
   },
   {
