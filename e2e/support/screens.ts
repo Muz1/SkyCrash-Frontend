@@ -182,6 +182,10 @@ export const ADMIN_SCREENS: Screen[] = [
   ['feedback keywords', '/admin/feedback/keywords'],
   ['ai advisor', '/admin/advisor'],
   ['players', '/admin/players'],
+  ['account rules', '/admin/rules'],
+  ['account rules sanctions', '/admin/rules?tab=sanctions'],
+  ['account rules appeals', '/admin/rules?tab=appeals'],
+  ['account rules audit log', '/admin/rules?tab=audit'],
   ['live round', '/admin/rounds'],
   ['lobbies', '/admin/lobbies'],
   ['audio', '/admin/audio'],
@@ -191,7 +195,31 @@ export const ADMIN_SCREENS: Screen[] = [
   ['reports (legacy)', '/admin/reports'],
   ['operations', '/ops'],
   ['volatility', '/volatility'],
-].map(([name, path]) => ({ name: `admin ${name}`, path: path!, mock: admin }))
+].map(([name, path]) => ({ name: `admin ${name}`, path: path!, mock: admin }) as Screen)
+
+// Admin dialogs: each must fit a phone too.
+ADMIN_SCREENS.push(
+  {
+    name: 'admin block dialog',
+    path: '/admin/players',
+    mock: admin,
+    prepare: async (p) => {
+      await p.getByRole('button', { name: /^block$/i }).first().click()
+      await expect(p.getByRole('dialog', { name: /block player/i })).toBeVisible()
+      await p.getByRole('dialog').getByRole('combobox').selectOption('F2')
+      await expect(p.getByRole('dialog').getByText(/no bots/i)).toBeVisible()
+    },
+  },
+  {
+    name: 'admin rule edit dialog',
+    path: '/admin/rules',
+    mock: admin,
+    prepare: async (p) => {
+      await p.getByRole('button', { name: 'Edit rule F2' }).click()
+      await expect(p.getByRole('dialog', { name: /edit f2/i })).toBeVisible()
+    },
+  },
+)
 
 /**
  * Mocks the API, opens the screen and waits until it has rendered. Returns the API calls that

@@ -8,7 +8,16 @@ export type ReportCell = string | number | null | undefined
 
 export type ReportSection =
   | { kind: 'metrics'; heading: string; description: string; rows: [label: string, value: ReportCell][] }
-  | { kind: 'table'; heading: string; description: string; columns: string[]; rows: ReportCell[][]; emptyText?: string }
+  | {
+      kind: 'table'
+      heading: string
+      description: string
+      columns: string[]
+      rows: ReportCell[][]
+      emptyText?: string
+      /** Share of the page width per column index (e.g. { 3: 0.4 }); others size automatically. */
+      widths?: Record<number, number>
+    }
   | { kind: 'text'; heading: string; description: string }
 
 export interface ReportDefinition {
@@ -16,6 +25,8 @@ export interface ReportDefinition {
   fileName: string
   summary: string
   sections: ReportSection[]
+  /** Force landscape (otherwise chosen when a table has more than 7 columns). */
+  landscape?: boolean
 }
 
 function cellText(value: ReportCell): string {
@@ -39,7 +50,7 @@ export async function exportReportPdf(report: ReportDefinition): Promise<void> {
   const { MARGIN, NAVY, ACCENT, INK, MUTED, RULE, SOFT, WHITE, CONTINUATION_TOP, FOOTER_SPACE } = brand
 
   // Wide tables get a landscape page so their columns stay readable.
-  const landscape = report.sections.some((s) => s.kind === 'table' && s.columns.length > 7)
+  const landscape = report.landscape ?? report.sections.some((s) => s.kind === 'table' && s.columns.length > 7)
   const doc = new jsPDF({ unit: 'pt', format: 'a4', orientation: landscape ? 'landscape' : 'portrait' })
   const pageWidth = doc.internal.pageSize.getWidth()
   const pageHeight = doc.internal.pageSize.getHeight()
@@ -192,6 +203,11 @@ export async function exportReportPdf(report: ReportDefinition): Promise<void> {
         },
         headStyles: { fillColor: NAVY, textColor: WHITE, fontStyle: 'bold', fontSize: 8, lineWidth: 0 },
         alternateRowStyles: { fillColor: SOFT },
+        columnStyles: Object.fromEntries(
+          Object.entries(section.widths ?? {}).map(([i, share]) => [i, { cellWidth: contentWidth * share }]),
+        ),
+        // Long free text wraps inside its cell; a row never splits across two pages.
+        rowPageBreak: 'avoid',
         didParseCell: (data) => {
           if (hasRows && numeric[data.column.index]) data.cell.styles.halign = 'right'
         },

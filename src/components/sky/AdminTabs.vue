@@ -22,6 +22,7 @@ import {
   ShieldCheck,
   Repeat,
   UserSearch,
+  Scale,
 } from '@lucide/vue'
 import { usePlayerStore } from '@/stores/playerStore'
 
@@ -62,6 +63,7 @@ const groups = computed(() => [
     label: 'Game Management',
     items: [
       { to: '/admin/players', label: 'Players', icon: UserCog },
+      { to: '/admin/rules', label: 'Account Rules', icon: Scale },
       { to: '/admin/rounds', label: 'Live Round', icon: Radio },
       { to: '/admin/lobbies', label: 'Lobbies', icon: Armchair },
       { to: '/admin/audio', label: 'Audio', icon: Volume2 },

@@ -3376,5 +3376,235 @@
       "bonusExpiryDays": 7,
       "bettingPaused": false
     }
-  }
+  },
+  "/admin/rules": {
+    "current": {
+      "version": 2,
+      "label": "v2.0",
+      "effectiveFromUtc": "2026-10-18T09:00:00Z",
+      "publishedBy": "NewBoi",
+      "changeNote": "Clarified the F2 block length",
+      "rules": [
+        {
+          "code": "U1",
+          "category": "Underage",
+          "title": "Under 18",
+          "summary": "You must be 18 or older to play.",
+          "details": "Accounts of under-18s are blocked until the player's age is verified. Registration rejects a date of birth under 18.",
+          "action": "PermanentBlock",
+          "defaultDurationDays": null,
+          "detection": "Automatic",
+          "isActive": true,
+          "appealable": true
+        },
+        {
+          "code": "F1",
+          "category": "Fraud",
+          "title": "Multiple accounts or bonus farming",
+          "summary": "One account per person; no farming free credits.",
+          "details": "Running several accounts, or creating accounts to collect free credits, blocks every account involved and removes their bonus credits.",
+          "action": "PermanentBlock",
+          "defaultDurationDays": null,
+          "detection": "AdminReview",
+          "isActive": true,
+          "appealable": true
+        },
+        {
+          "code": "F2",
+          "category": "FairPlay",
+          "title": "Cheating or exploiting bugs",
+          "summary": "No bots, scripts or bug exploits.",
+          "details": "Using scripts or bots, or knowingly exploiting a bug, leads to a 7-day block or, after review, a permanent one.",
+          "action": "TemporaryBlock",
+          "defaultDurationDays": 7,
+          "detection": "AdminReview",
+          "isActive": true,
+          "appealable": true
+        },
+        {
+          "code": "P1",
+          "category": "Payment",
+          "title": "Payment fraud",
+          "summary": "No stolen cards, chargebacks or payment fraud.",
+          "details": "Payment fraud, chargebacks or a stolen card permanently blocks the account and freezes its purchases.",
+          "action": "PermanentBlock",
+          "defaultDurationDays": null,
+          "detection": "AdminReview",
+          "isActive": true,
+          "appealable": true
+        },
+        {
+          "code": "P2",
+          "category": "Payment",
+          "title": "Payment tampering",
+          "summary": "Altered payment notifications pause the account for review.",
+          "details": "A payment notification whose amount doesn't match the order blocks the account until an admin has reviewed it.",
+          "action": "TemporaryBlock",
+          "defaultDurationDays": 7,
+          "detection": "Automatic",
+          "isActive": true,
+          "appealable": true
+        },
+        {
+          "code": "C1",
+          "category": "Conduct",
+          "title": "Abusive name or behaviour",
+          "summary": "Keep usernames and lobby behaviour respectful.",
+          "details": "First offence: a warning. Second: a 3-day block. After that: a permanent block.",
+          "action": "Escalating",
+          "defaultDurationDays": 3,
+          "detection": "AdminReview",
+          "isActive": true,
+          "appealable": true
+        },
+        {
+          "code": "R1",
+          "category": "ResponsiblePlay",
+          "title": "Self-exclusion",
+          "summary": "Take a break for 24 hours, 7 or 30 days.",
+          "details": "You can pause your own account for 24 hours, 7 days or 30 days. It can't be undone early.",
+          "action": "Restriction",
+          "defaultDurationDays": null,
+          "detection": "Automatic",
+          "isActive": true,
+          "appealable": false
+        },
+        {
+          "code": "R2",
+          "category": "ResponsiblePlay",
+          "title": "Loss limit reached",
+          "summary": "Your own loss limit pauses play until it resets.",
+          "details": "When you reach the daily or weekly loss limit you set, betting pauses until the limit resets.",
+          "action": "Restriction",
+          "defaultDurationDays": null,
+          "detection": "Automatic",
+          "isActive": true,
+          "appealable": false
+        }
+      ]
+    },
+    "history": [
+      {
+        "version": 2,
+        "label": "v2.0",
+        "effectiveFromUtc": "2026-10-18T09:00:00Z",
+        "publishedBy": "NewBoi",
+        "changeNote": "Clarified the F2 block length"
+      },
+      {
+        "version": 1,
+        "label": "v1.0",
+        "effectiveFromUtc": "2026-10-15T14:47:47Z",
+        "publishedBy": "system",
+        "changeNote": "First published rule set"
+      }
+    ]
+  },
+  "/admin/sanctions": [
+    {
+      "id": "5a000000-0000-4000-8000-000000000001",
+      "userId": "00000000-0000-4000-8000-0000000000a2",
+      "username": "NightHawk",
+      "ruleCode": "F2",
+      "ruleTitle": "Cheating or exploiting bugs",
+      "ruleSetVersion": 2,
+      "action": "TemporaryBlock",
+      "startsAtUtc": "2026-10-18T10:12:00Z",
+      "endsAtUtc": "2026-10-25T10:12:00Z",
+      "appliedBy": "NewBoi",
+      "internalNote": "Auto-clicker seen in 3 rounds",
+      "status": "Active",
+      "liftedAtUtc": null,
+      "liftedBy": null,
+      "liftReason": null
+    },
+    {
+      "id": "5a000000-0000-4000-8000-000000000002",
+      "userId": "00000000-0000-4000-8000-0000000000a3",
+      "username": "SkyRider",
+      "ruleCode": "C1",
+      "ruleTitle": "Abusive name or behaviour",
+      "ruleSetVersion": 1,
+      "action": "Warning",
+      "startsAtUtc": "2026-10-16T08:00:00Z",
+      "endsAtUtc": null,
+      "appliedBy": "NewBoi",
+      "internalNote": null,
+      "status": "Expired",
+      "liftedAtUtc": null,
+      "liftedBy": null,
+      "liftReason": null
+    },
+    {
+      "id": "5a000000-0000-4000-8000-000000000003",
+      "userId": "00000000-0000-4000-8000-0000000000a4",
+      "username": "Maverick",
+      "ruleCode": "P2",
+      "ruleTitle": "Payment tampering",
+      "ruleSetVersion": 1,
+      "action": "TemporaryBlock",
+      "startsAtUtc": "2026-10-15T15:00:00Z",
+      "endsAtUtc": "2026-10-22T15:00:00Z",
+      "appliedBy": "system",
+      "internalNote": "ITN amount mismatch",
+      "status": "Lifted",
+      "liftedAtUtc": "2026-10-16T09:00:00Z",
+      "liftedBy": "NewBoi",
+      "liftReason": "Sandbox test payment, not fraud"
+    }
+  ],
+  "/admin/appeals": [
+    {
+      "id": "6b000000-0000-4000-8000-000000000001",
+      "sanctionId": "5a000000-0000-4000-8000-000000000001",
+      "username": "NightHawk",
+      "ruleCode": "F2",
+      "message": "I was not using a bot, I just click fast. Please check again.",
+      "status": "Open",
+      "createdAtUtc": "2026-10-18T12:30:00Z",
+      "response": null
+    },
+    {
+      "id": "6b000000-0000-4000-8000-000000000002",
+      "sanctionId": "5a000000-0000-4000-8000-000000000003",
+      "username": "Maverick",
+      "ruleCode": "P2",
+      "message": "That was a test payment from the sandbox.",
+      "status": "Overturned",
+      "createdAtUtc": "2026-10-15T16:00:00Z",
+      "response": "Confirmed: sandbox payment. Block lifted."
+    }
+  ],
+  "/admin/audit-log": [
+    {
+      "id": "7c000000-0000-4000-8000-000000000001",
+      "createdAtUtc": "2026-10-18T10:12:00Z",
+      "action": "sanction.applied",
+      "actorUserId": null,
+      "actor": "NewBoi",
+      "targetUserId": "00000000-0000-4000-8000-0000000000a2",
+      "ruleCode": "F2",
+      "details": "TemporaryBlock for 7 days under v2.0"
+    },
+    {
+      "id": "7c000000-0000-4000-8000-000000000002",
+      "createdAtUtc": "2026-10-18T09:00:00Z",
+      "action": "rules.published",
+      "actorUserId": null,
+      "actor": "NewBoi",
+      "targetUserId": null,
+      "ruleCode": "F2",
+      "details": "v2.0: Clarified the F2 block length"
+    },
+    {
+      "id": "7c000000-0000-4000-8000-000000000003",
+      "createdAtUtc": "2026-10-16T09:00:00Z",
+      "action": "sanction.lifted",
+      "actorUserId": null,
+      "actor": "NewBoi",
+      "targetUserId": "00000000-0000-4000-8000-0000000000a4",
+      "ruleCode": "P2",
+      "details": "Sandbox test payment, not fraud"
+    }
+  ]
 }

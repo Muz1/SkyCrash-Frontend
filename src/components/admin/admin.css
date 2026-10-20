@@ -2519,3 +2519,20 @@
   flex-shrink: 1;
   min-width: 0;
 }
+
+/* Long option text (rule names) never pushes a toolbar wider than the screen. */
+.admin-console .adm-toolbar .adm-select,
+.admin-console .adm-modal .adm-select {
+  max-width: 100%;
+  min-width: 0;
+  text-overflow: ellipsis;
+}
+@media (pointer: coarse) {
+  .admin-console .adm-btn {
+    min-width: 44px;
+  }
+}
+.admin-console .adm-modal,
+.admin-console .adm-modal-body > * {
+  min-width: 0;
+}

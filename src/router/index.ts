@@ -96,6 +96,8 @@ const router = createRouter({
       component: () => import('../views/admin/AdminManagementView.vue'),
       meta: { ...admin, requiresManager: true },
     },
+    // Account Rules: rule set + versions, sanctions, appeals, audit log (?tab=).
+    { path: '/admin/rules', name: 'admin-rules', component: () => import('../views/admin/AdminRulesView.vue'), meta: admin },
     // Older reports kept reachable by URL but no longer in the navigation.
     { path: '/admin/reports', name: 'admin-reports', component: AdminReportsView, meta: admin },
   ],
