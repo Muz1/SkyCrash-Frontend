@@ -226,7 +226,7 @@ onBeforeUnmount(() => {
         <button
           v-if="needsEmail"
           type="button"
-          class="ml-1 font-bold text-ember underline underline-offset-2 pointer-coarse:min-h-11 disabled:opacity-50"
+          class="ml-1 font-bold text-ember underline underline-offset-2 pointer-coarse:min-h-11 pointer-coarse:min-w-11 disabled:opacity-50"
           :disabled="resender.sending.value"
           @click="resender.resend()"
         >

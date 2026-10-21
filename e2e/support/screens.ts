@@ -154,6 +154,119 @@ export const PLAYER_SCREENS: Screen[] = [
   { name: 'lobby (in squadron)', path: '/lobby' },
   { name: 'lobby (not in one)', path: '/lobby', mock: { overrides: { '/lobby/mine': null } } },
   { name: 'profile', path: '/profile' },
+  // ---- account safety and fairness (October 2026) ----
+  { name: 'rules (guest)', path: '/rules', mock: { role: 'guest' }, prepare: (p) => heading(p, /account rules/i) },
+  {
+    name: 'rules review (new version)',
+    path: '/rules?review=1',
+    mock: { overrides: { '/rules/me': { ...(playerFixtures['/rules/me'] as object), mustAcceptRules: true, acceptedRuleSetVersion: 0 } } },
+    prepare: async (p) => {
+      await expect(p.getByRole('dialog', { name: /rules updated/i })).toBeVisible()
+    },
+  },
+  {
+    name: 'verify email (success)',
+    path: '/verify-email?token=e2e-token',
+    mock: { role: 'guest' },
+    prepare: async (p) => {
+      await expect(p.getByText(/email verified/i).first()).toBeVisible()
+    },
+  },
+  {
+    name: 'verify email (expired link)',
+    path: '/verify-email?token=e2e-token',
+    mock: { verifyEmail: 'expired', profile: { emailVerified: false } },
+    prepare: async (p) => {
+      await expect(p.getByRole('button', { name: /resend/i })).toBeVisible()
+    },
+  },
+  {
+    name: 'login code step',
+    path: '/login',
+    mock: { role: 'guest', login: 'otp' },
+    prepare: async (p) => {
+      await p.getByLabel('Email').fill('ace@test.local')
+      await p.getByLabel('Password').fill('secret-password')
+      await p.getByRole('button', { name: /^login$/i }).click()
+      await heading(p, /check your email/i)
+    },
+  },
+  {
+    name: 'blocked login + appeal',
+    path: '/login',
+    mock: { role: 'guest', login: 'blocked' },
+    prepare: async (p) => {
+      await p.getByLabel('Email').fill('ace@test.local')
+      await p.getByLabel('Password').fill('secret-password')
+      await p.getByRole('button', { name: /^login$/i }).click()
+      await heading(p, /account blocked/i)
+      await expect(p.getByRole('button', { name: /send appeal/i })).toBeVisible()
+    },
+  },
+  {
+    name: 'profile (email not verified, restricted)',
+    path: '/profile',
+    mock: {
+      profile: { emailVerified: false },
+      overrides: {
+        '/rules/me': {
+          status: 'Restricted',
+          activeSanctions: [
+            {
+              id: '5a1c7e00-0000-4000-8000-0000000000c1',
+              ruleCode: 'C1',
+              ruleTitle: 'Abusive name or behaviour',
+              ruleSummary: 'Keep usernames and lobby behaviour respectful.',
+              ruleSetVersion: 1,
+              action: 'TemporaryBlock',
+              startsAtUtc: '2026-10-19T09:00:00Z',
+              endsAtUtc: '2030-10-22T09:00:00Z',
+              appealable: true,
+              appealPending: false,
+            },
+          ],
+          currentRuleSetVersion: 1,
+          acceptedRuleSetVersion: 1,
+          mustAcceptRules: false,
+        },
+      },
+    },
+    prepare: async (p) => {
+      await expect(p.getByText(/verify your email/i).first()).toBeVisible()
+      await expect(p.getByRole('button', { name: /^appeal$/i })).toBeVisible()
+    },
+  },
+  {
+    name: 'self-exclusion confirm',
+    path: '/profile#take-a-break',
+    prepare: async (p) => {
+      await p.getByRole('button', { name: /^7 days$/i }).click()
+      await expect(p.getByRole('alertdialog')).toBeVisible()
+    },
+  },
+  {
+    name: 'reality check',
+    path: '/game',
+    mock: { overrides: { '/responsible-play/session': { ...(playerFixtures['/responsible-play/session'] as object), minutesPlayed: 31 } } },
+    prepare: async (p) => {
+      await skipDailyBriefing(p)
+      // The first load already showed (and remembered) it under the daily briefing.
+      await p.addInitScript(() => sessionStorage.removeItem('skycrash_reality_check_at'))
+      await p.reload()
+      await expect(p.getByRole('dialog', { name: /reality check/i })).toBeVisible()
+    },
+  },
+  {
+    name: 'game rules modal',
+    path: '/game',
+    prepare: async (p) => {
+      await skipDailyBriefing(p)
+      await p.reload()
+      await p.getByRole('button', { name: /^game rules$/i }).first().click()
+      await p.getByRole('button', { name: /^game rules$/i }).last().click()
+      await expect(p.getByRole('dialog', { name: /game rules/i })).toBeVisible()
+    },
+  },
   {
     name: 'admin invite',
     path: '/invite/e2e-token',

@@ -31,7 +31,7 @@ describe('verifyRound (backend crash-vectors.json)', () => {
       if (!result.match) failures.push(`${v.roundId} verdict`)
     }
     expect(failures).toEqual([])
-  })
+  }, 30_000) // 2 000 Web Crypto calls: slow when the whole suite runs in parallel
 
   it('flags a crash point the seed does not produce', async () => {
     const v = all[0]!

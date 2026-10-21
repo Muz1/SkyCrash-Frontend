@@ -179,7 +179,7 @@ async function handleSave() {
                 <span class="inline-flex items-center gap-1"><MailWarning class="h-3.5 w-3.5" aria-hidden="true" /> {{ en.verifyEmail.unverifiedBadge }}</span>
                 <button
                   type="button"
-                  class="underline underline-offset-2 disabled:opacity-50 pointer-coarse:min-h-11"
+                  class="underline underline-offset-2 disabled:opacity-50 pointer-coarse:min-h-11 pointer-coarse:min-w-11"
                   :disabled="resender.sending.value"
                   @click="resender.resend()"
                 >

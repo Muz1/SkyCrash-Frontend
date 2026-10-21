@@ -56,7 +56,7 @@ watch(isPlayer, loadStanding)
       <span class="min-w-0 flex-1 truncate">{{ en.rules.updatedBanner }}</span>
       <button
         type="button"
-        class="shrink-0 font-display text-[0.625rem] font-black uppercase tracking-[0.14em] text-magenta underline-offset-2 hover:underline pointer-coarse:min-h-11"
+        class="shrink-0 font-display text-[0.625rem] font-black uppercase tracking-[0.14em] text-magenta underline-offset-2 hover:underline pointer-coarse:min-h-11 pointer-coarse:min-w-11"
         @click="reviewing = true"
       >
         {{ en.rules.viewChanges }}
@@ -67,7 +67,7 @@ watch(isPlayer, loadStanding)
       <span class="min-w-0 flex-1 truncate">{{ message ?? en.verifyEmail.banner }}</span>
       <button
         type="button"
-        class="shrink-0 font-display text-[0.625rem] font-black uppercase tracking-[0.14em] text-ember underline-offset-2 hover:underline disabled:opacity-50 pointer-coarse:min-h-11"
+        class="shrink-0 font-display text-[0.625rem] font-black uppercase tracking-[0.14em] text-ember underline-offset-2 hover:underline disabled:opacity-50 pointer-coarse:min-h-11 pointer-coarse:min-w-11"
         :disabled="sending"
         @click="resend"
       >
