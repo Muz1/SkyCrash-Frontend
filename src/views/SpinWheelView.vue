@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import Shell from '@/components/sky/Shell.vue'
 import SpinWheelPanel from '@/components/sky/SpinWheelPanel.vue'
+import { en } from '@/copy/en'
 </script>
 
 <template>
@@ -13,7 +14,7 @@ import SpinWheelPanel from '@/components/sky/SpinWheelPanel.vue'
         Spin the Wheel
       </h1>
       <p class="mt-1 text-center text-sm leading-snug text-foreground/90 sm:text-base">
-        Out of fuel? Spin for free credits. One spin every 5 minutes.
+        {{ en.spin.subtitle }}
       </p>
       <SpinWheelPanel class="mt-2 sm:mt-4" />
       <RouterLink
