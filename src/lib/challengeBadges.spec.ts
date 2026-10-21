@@ -31,16 +31,17 @@ const achievementNames = new Set(Object.values(ACHIEVEMENT_BADGES).map((b) => b.
 
 describe('challenge badges (brief 2.4)', () => {
   it('has a badge for every backend challenge badge key', () => {
-    for (const key of BACKEND_BADGE_KEYS) expect(challengeBadgeFor(key), key).not.toBeNull()
+    for (const key of BACKEND_BADGE_KEYS) expect({ key, hasBadge: challengeBadgeFor(key) !== null }).toEqual({ key, hasBadge: true })
     expect([...CHALLENGE_BADGE_KEYS].sort()).toEqual([...BACKEND_BADGE_KEYS].sort())
   })
 
   it('never resolves to an achievement badge asset', () => {
     for (const key of CHALLENGE_BADGE_KEYS) {
       const badge = CHALLENGE_BADGES[key]
-      expect(achievementSources.has(badge.src), `${key} reuses achievement art`).toBe(false)
-      expect(badge.src, key).not.toMatch(/\/achievements\//)
-      expect(achievementNames.has(badge.name), `${key} reuses an achievement name`).toBe(false)
+      // The key is in the object so a failure names the offending badge.
+      expect({ key, reusesArt: achievementSources.has(badge.src) }).toEqual({ key, reusesArt: false })
+      expect({ key, src: badge.src }).not.toEqual({ key, src: expect.stringContaining('/achievements/') })
+      expect({ key, reusesName: achievementNames.has(badge.name) }).toEqual({ key, reusesName: false })
     }
   })
 
