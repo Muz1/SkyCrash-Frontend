@@ -43,3 +43,13 @@ __screenshots__/
 /playwright-report/
 /blob-report/
 /playwright/.cache/
+
+# Local environment and tooling (never commit)
+.env
+.env.local
+.claude/
+# Exported reports (may contain player data)
+/*.pdf
+# Playwright output
+test-results/
+playwright-report/
