@@ -2379,8 +2379,38 @@
   "/admin/feedback/submissions": {
     "page": 1,
     "pageSize": 20,
-    "totalCount": 4,
+    "totalCount": 6,
     "items": [
+      {
+        "feedbackId": "8d000000-0000-4000-8000-000000000001",
+        "playerId": "00000000-0000-4000-8000-0000000000a2",
+        "username": "NightHawk",
+        "createdAtUtc": "2026-10-15T13:50:15.973771Z",
+        "rating": 2,
+        "sentiment": "Negative",
+        "categories": [
+          "Rewards"
+        ],
+        "likedText": null,
+        "improveText": "I keep chasing my losses and I am losing my money faster than I can afford. Is there a way to set a limit before I play?",
+        "additionalComment": "Maybe show a reminder after an hour of play, and make the loss limit easier to find on the profile page.",
+        "recommend": null,
+        "rewardReceived": false,
+        "creditsAwarded": 0,
+        "roundsPlayedAtSubmit": 8,
+        "cashOutsAtSubmit": 7,
+        "roundsPlayedNow": 8,
+        "tags": [
+          "Rewards"
+        ],
+        "isConcern": true,
+        "concernPhrases": [
+          "chasing my losses",
+          "losing my money"
+        ],
+        "isDuplicate": false,
+        "submissionsByPlayer": 2
+      },
       {
         "feedbackId": "26e00655-af67-457f-bf19-813e7eee50c2",
         "playerId": "8eca636b-6b89-4194-964b-7c0b71339522",
@@ -2399,7 +2429,14 @@
         "creditsAwarded": 500,
         "roundsPlayedAtSubmit": 8,
         "cashOutsAtSubmit": 7,
-        "roundsPlayedNow": 8
+        "roundsPlayedNow": 8,
+        "tags": [
+          "Rewards"
+        ],
+        "isConcern": false,
+        "concernPhrases": [],
+        "isDuplicate": false,
+        "submissionsByPlayer": 1
       },
       {
         "feedbackId": "5252b475-94d4-4ce8-9e13-fe705b99dcff",
@@ -2420,7 +2457,15 @@
         "creditsAwarded": 500,
         "roundsPlayedAtSubmit": 8,
         "cashOutsAtSubmit": 7,
-        "roundsPlayedNow": 8
+        "roundsPlayedNow": 8,
+        "tags": [
+          "Better UI",
+          "Multiplayer features"
+        ],
+        "isConcern": false,
+        "concernPhrases": [],
+        "isDuplicate": false,
+        "submissionsByPlayer": 1
       },
       {
         "feedbackId": "7caf1d5b-ee76-473f-9d98-fcdc0a1890bb",
@@ -2440,7 +2485,14 @@
         "creditsAwarded": 500,
         "roundsPlayedAtSubmit": 8,
         "cashOutsAtSubmit": 7,
-        "roundsPlayedNow": 8
+        "roundsPlayedNow": 8,
+        "tags": [
+          "Sound/music improvements"
+        ],
+        "isConcern": false,
+        "concernPhrases": [],
+        "isDuplicate": false,
+        "submissionsByPlayer": 1
       },
       {
         "feedbackId": "c2237f7a-b7f1-4288-a4e6-ab0c61c663fc",
@@ -2461,9 +2513,78 @@
         "creditsAwarded": 500,
         "roundsPlayedAtSubmit": 8,
         "cashOutsAtSubmit": 7,
-        "roundsPlayedNow": 8
+        "roundsPlayedNow": 8,
+        "tags": [
+          "More skies",
+          "More plane skins"
+        ],
+        "isConcern": false,
+        "concernPhrases": [],
+        "isDuplicate": false,
+        "submissionsByPlayer": 1
+      },
+      {
+        "feedbackId": "8d000000-0000-4000-8000-000000000002",
+        "playerId": "00000000-0000-4000-8000-0000000000a2",
+        "username": "NightHawk",
+        "createdAtUtc": "2026-10-15T13:50:15.973771Z",
+        "rating": 3,
+        "sentiment": "Neutral",
+        "categories": [],
+        "likedText": null,
+        "improveText": null,
+        "additionalComment": null,
+        "recommend": null,
+        "rewardReceived": false,
+        "creditsAwarded": 0,
+        "roundsPlayedAtSubmit": 8,
+        "cashOutsAtSubmit": 7,
+        "roundsPlayedNow": 8,
+        "tags": [],
+        "isConcern": false,
+        "concernPhrases": [],
+        "isDuplicate": true,
+        "submissionsByPlayer": 2
       }
-    ]
+    ],
+    "summary": {
+      "averageRating": 3.33,
+      "countByRating": [
+        {
+          "label": "5",
+          "count": 1
+        },
+        {
+          "label": "4",
+          "count": 2
+        },
+        {
+          "label": "3",
+          "count": 1
+        },
+        {
+          "label": "2",
+          "count": 2
+        },
+        {
+          "label": "1",
+          "count": 0
+        }
+      ],
+      "topRequestedTags": [
+        {
+          "label": "New plane skins",
+          "count": 2
+        },
+        {
+          "label": "Rewards",
+          "count": 1
+        }
+      ],
+      "concernCount": 1,
+      "duplicateCount": 1,
+      "playersWithSeveralSubmissions": 1
+    }
   },
   "/admin/feedback/insights": {
     "range": {
