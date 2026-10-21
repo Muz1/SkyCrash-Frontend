@@ -2536,3 +2536,7 @@
 .admin-console .adm-modal-body > * {
   min-width: 0;
 }
+/* WebKit counts a select's long option text as overflow of the page; clip it inside the control. */
+.admin-console .adm-select {
+  overflow: hidden;
+}
