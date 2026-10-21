@@ -10,6 +10,7 @@ import { useReport } from '@/composables/useReport'
 import { getAdvisorRecommendations, askAdvisor } from '@/services/adminAnalyticsService'
 import { ABOUT } from '@/lib/reportAbout'
 import type { AdvisorChatMessage } from '@/types/insights'
+import { admin as copy } from '@/copy/admin'
 
 // Recommended changes for the selected dates, and a chat to ask follow-up questions.
 const { query, data, loading, error } = useReport(getAdvisorRecommendations)
@@ -40,7 +41,10 @@ async function ask(text?: string) {
     const m = axios.isAxiosError(err)
       ? (err.response?.data as { message?: string })?.message
       : undefined
-    chatError.value = m ?? 'The advisor could not answer. Please try again.'
+    const status = axios.isAxiosError(err) ? err.response?.status : undefined
+    // 503 = no AI key, 502 = the AI didn't answer: not an error the admin can fix here.
+    chatError.value =
+      status === 503 || status === 502 ? `${copy.ai.unavailable}. Try again later.` : (m ?? 'The advisor could not answer. Please try again.')
     messages.value.pop()
     draft.value = question
   } finally {
@@ -75,11 +79,14 @@ async function scrollDown() {
       >
         <template #actions>
           <AdminPill
-            :label="data.source === 'gemini' ? 'Gemini AI' : 'Rule-based (no AI key set)'"
+            :label="data.source === 'gemini' ? 'Gemini AI' : 'Rule-based'"
             :tone="data.source === 'gemini' ? 'accent' : 'neutral'"
             :dot="false"
           />
         </template>
+        <p v-if="data.source !== 'gemini'" class="adm-callout adm-callout--info mb-4" role="status">
+          <span><strong>{{ copy.ai.unavailable }}.</strong> {{ copy.ai.unavailableHint }}</span>
+        </p>
         <ol class="flex flex-col gap-4">
           <li
             v-for="(r, i) in data.recommendations"
@@ -120,10 +127,10 @@ async function scrollDown() {
           caption="Answers use the numbers for this period"
           accent="blue"
         >
-          <p v-if="!data.aiAvailable" class="adm-callout">
+          <p v-if="!data.aiAvailable" class="adm-callout adm-callout--info">
             <span>
-              Chat needs a Gemini API key. Add one as <strong>Gemini:ApiKey</strong> in the API's appsettings.json (or user secrets) and
-              restart the API. The recommendations above still work without it.
+              <strong>{{ copy.ai.unavailable }}.</strong> Chat needs a Gemini API key (<strong>Gemini:ApiKey</strong> in the API settings).
+              The recommendations above still work without it.
             </span>
           </p>
           <template v-else>

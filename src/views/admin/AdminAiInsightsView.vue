@@ -8,6 +8,7 @@ import { useReport } from '@/composables/useReport'
 import { getFeedbackInsights } from '@/services/adminAnalyticsService'
 import { ABOUT } from '@/lib/reportAbout'
 import { pct, plural } from '@/lib/reportFormat'
+import { admin as copy } from '@/copy/admin'
 
 const { query, data, loading, error } = useReport(getFeedbackInsights)
 
@@ -39,7 +40,7 @@ const sentimentTone = { Positive: 'success', Negative: 'danger', Mixed: 'warning
       <AdminPanel title="Summary" :caption="`${plural(data.analysed, 'submission')} analysed`" accent="magenta">
         <template #actions>
           <AdminPill
-            :label="data.insights.source === 'gemini' ? 'Gemini AI' : 'Keyword analysis (no AI key set)'"
+            :label="data.insights.source === 'gemini' ? 'Gemini AI' : 'Rule-based'"
             :tone="data.insights.source === 'gemini' ? 'accent' : 'neutral'"
             :dot="false"
           />
@@ -51,11 +52,14 @@ const sentimentTone = { Positive: 'success', Negative: 'danger', Mixed: 'warning
             Edit keywords
           </RouterLink>
         </template>
+        <p v-if="data.insights.source !== 'gemini'" class="adm-callout adm-callout--info mb-2" role="status">
+          <span><strong>{{ copy.ai.unavailable }}.</strong> {{ copy.ai.unavailableHint }}</span>
+        </p>
         <p v-if="data.insights.source !== 'gemini'" class="adm-note mb-4">
-          No Gemini key is set, so topics come from keyword matching: a comment using a theme's keywords counts towards that topic.
+          Topics come from keyword matching: a comment using a theme's keywords counts towards that topic.
           You can change the themes and keywords on the Feedback Keywords page.
         </p>
-        <p v-if="data.insights.warning" class="adm-callout mb-4"><CircleAlert aria-hidden="true" />{{ data.insights.warning }}</p>
+        <p v-if="data.insights.warning && data.insights.source === 'gemini'" class="adm-callout mb-4"><CircleAlert aria-hidden="true" />{{ data.insights.warning }}</p>
         <p class="flex gap-3 text-[1.125rem] font-semibold leading-relaxed text-[var(--adm-text)]">
           <Sparkles class="mt-1 h-5 w-5 shrink-0 text-[var(--neon-magenta)]" aria-hidden="true" />
           {{ data.insights.summary || 'No written feedback in this range yet.' }}
