@@ -2,12 +2,19 @@
 import { onMounted } from 'vue'
 import { usePaymentStore } from '@/stores/paymentStore'
 import NeonPanel from './NeonPanel.vue'
+import { creditWhole, zar } from '@/lib/format'
+import { en } from '@/copy/en'
 
 const paymentStore = usePaymentStore()
 
 onMounted(() => {
   paymentStore.fetchPacks()
 })
+
+/** Credits per R10 for a pack, from the pack's own price and size. */
+function perTenRand(pack: { priceZar: number; credits: number }) {
+  return pack.priceZar > 0 ? creditWhole((pack.credits / pack.priceZar) * 10) : '—'
+}
 
 function buyPack(packId: string) {
   // Note: this navigates the whole page away to PayFast's hosted checkout.
@@ -37,10 +44,12 @@ function buyPack(packId: string) {
         :disabled="paymentStore.isRedirecting"
         @click="buyPack(pack.id)"
       >
-        <span class="block font-arcade text-sm text-lime">{{ pack.credits.toLocaleString() }}</span>
+        <span class="block font-arcade text-sm text-lime">{{ creditWhole(pack.credits) }}</span>
+        <span class="block text-[0.625rem] uppercase tracking-[0.2em] text-lime/80">{{ en.common.credits }}</span>
         <span class="mt-1 block text-[0.625rem] uppercase tracking-[0.2em] text-muted-foreground">
-          R{{ pack.priceZar.toFixed(2) }}
+          {{ zar(pack.priceZar) }}
         </span>
+        <span class="mt-0.5 block text-[0.625rem] text-foreground/70">{{ en.wallet.rate(perTenRand(pack)) }}</span>
       </button>
     </div>
 

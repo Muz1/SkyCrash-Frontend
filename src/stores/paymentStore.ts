@@ -4,12 +4,17 @@ import * as paymentService from '@/services/paymentService'
 import { usePlayerStore } from '@/stores/playerStore'
 import { useWalletStore } from '@/stores/walletStore'
 import type { CreditPack } from '@/types'
+import { en } from '@/copy/en'
 
 // Balance just before leaving for PayFast, so on return we can tell whether the
 // credits have landed - even if PayFast's ITN arrived before the redirect did.
 const PRE_CHECKOUT_BALANCE_KEY = 'skycrash.preCheckoutBalance'
 
 function extractErrorMessage(err: unknown): string {
+  // 403 with a code: say what to do (verify email) or that the account can't buy now.
+  const code = (err as { response?: { status?: number; data?: { code?: unknown } } })?.response
+  if (code?.status === 403 && code.data?.code === 'email-unverified') return en.verifyEmail.neededBuy
+  if (code?.status === 403 && code.data?.code === 'restricted') return en.wallet.restricted
   if (
     typeof err === 'object' &&
     err !== null &&
