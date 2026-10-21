@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { useRouter } from 'vue-router'
 import { useHangarStore } from '@/stores/hangarStore'
 import { useLobbyMates } from '@/composables/useLobbyMates'
 import { CRAFTS, RARITY_STYLE, getCraft, type CraftId, type Rarity } from '@/lib/craft'
@@ -19,6 +20,7 @@ import { polishCopy } from '@/copy/polish'
 const copy = polishCopy.hangar
 
 const hangarStore = useHangarStore()
+const router = useRouter()
 // Lobby-mates cruise past behind the hangar too.
 const { mates } = useLobbyMates({ fetch: true })
 
@@ -80,21 +82,40 @@ function equipPreview() {
 }
 watch([previewCraft, previewSky, tab], () => (equipNote.value = ''))
 
-/** First tap previews a plane; tapping the previewed plane again equips it. */
-function tryOn(id: CraftId) {
-  if (id === previewCraft.value) {
-    equipCraft()
-    return
+// One tap does it all: a plane equips and moves you on to the skies; a sky equips and takes
+// you to the game. The short pause lets the player see what they picked land in the bay.
+const STEP_DELAY_MS = 700
+let stepTimer: ReturnType<typeof setTimeout> | null = null
+function nextStep(go: () => void) {
+  if (stepTimer) clearTimeout(stepTimer)
+  stepTimer = setTimeout(() => {
+    stepTimer = null
+    go()
+  }, STEP_DELAY_MS)
+}
+onBeforeUnmount(() => {
+  if (stepTimer) clearTimeout(stepTimer)
+})
+
+/** Tapping a plane equips it, then opens the Skies tab. */
+async function tryOn(id: CraftId) {
+  if (id !== previewCraft.value) {
+    outgoing.value = previewCraft.value
+    previewCraft.value = id
+    enterKey.value += 1
   }
-  outgoing.value = previewCraft.value
-  previewCraft.value = id
-  enterKey.value += 1
+  // After the preview watcher has run, so the "equipped" note isn't cleared straight away.
+  await nextTick()
+  equipCraft()
+  nextStep(() => (tab.value = 'skies'))
 }
 
-/** Same for skies: first tap previews, second tap equips. */
-function pickSky(id: SkinId) {
-  if (id === previewSky.value) equipSky()
-  else previewSky.value = id
+/** Tapping a sky equips it, then takes you to play. */
+async function pickSky(id: SkinId) {
+  previewSky.value = id
+  await nextTick()
+  equipSky()
+  nextStep(() => router.push('/game'))
 }
 
 watch(outgoing, (value) => {
@@ -170,7 +191,7 @@ function rarityBadgeClass(rarity: Rarity) {
         Loadout · Aircraft &amp; Skies
       </p>
       <p class="mt-2 max-w-2xl text-base text-foreground/90">
-        Choose the plane you fly and the sky you fly in. Tap a card to preview it, tap it again to equip.
+        Tap a plane, then a sky. Then you fly.
         Your lobby-mates see your plane in their game. All {{ CRAFTS.length }} planes and {{ SKY_SKINS.length }} skies are unlocked.
       </p>
 
@@ -347,7 +368,7 @@ function rarityBadgeClass(rarity: Rarity) {
                   Equipped
                 </span>
                 <span v-else :class="cn('mt-1 block text-xs leading-snug', previewCraft === c.id ? 'font-bold text-ember' : 'text-muted-foreground')">
-                  {{ previewCraft === c.id ? copy.tapAgain : 'Tap to preview' }}
+                  {{ copy.tapAgain }}
                 </span>
               </span>
               <span

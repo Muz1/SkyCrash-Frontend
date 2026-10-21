@@ -30,7 +30,7 @@ export const polishCopy = {
 
   hangar: {
     newTag: 'New',
-    tapAgain: 'Tap again to equip',
+    tapAgain: 'Tap to equip',
     equip: 'Equip',
     equipped: 'Equipped',
     proceed: 'Proceed to game',
