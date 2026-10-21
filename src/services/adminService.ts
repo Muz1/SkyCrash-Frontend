@@ -14,12 +14,20 @@ export async function demotePlayer(playerId: string): Promise<void> {
   await api.post(`/admin/players/${playerId}/demote`)
 }
 
-export async function blockPlayer(playerId: string): Promise<void> {
-  await api.post(`/admin/players/${playerId}/block`)
+/** Every block cites an Account Rule; durationDays null = the rule's default. */
+export async function blockPlayer(
+  playerId: string,
+  body: { ruleCode: string; durationDays: number | null; internalNote?: string },
+): Promise<void> {
+  await api.post(`/admin/players/${playerId}/block`, body)
 }
 
-export async function unblockPlayer(playerId: string): Promise<void> {
-  await api.post(`/admin/players/${playerId}/unblock`)
+export async function unblockPlayer(playerId: string, reason?: string): Promise<void> {
+  await api.post(`/admin/players/${playerId}/unblock`, { reason })
+}
+
+export async function setTestAccount(playerId: string, isTestAccount: boolean): Promise<void> {
+  await api.put(`/admin/players/${playerId}/test-account`, { isTestAccount })
 }
 
 export async function adjustBalance(playerId: string, amount: number, reason: string): Promise<{ newBalance: number }> {

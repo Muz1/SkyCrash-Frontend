@@ -22,6 +22,8 @@ import {
   ShieldCheck,
   Repeat,
   UserSearch,
+  Scale,
+  HeartPulse,
 } from '@lucide/vue'
 import { usePlayerStore } from '@/stores/playerStore'
 
@@ -30,7 +32,13 @@ const route = useRoute()
 const playerStore = usePlayerStore()
 
 const groups = computed(() => [
-  { label: null, items: [{ to: '/admin', label: 'Overview', icon: LayoutDashboard }] },
+  {
+    label: null,
+    items: [
+      { to: '/admin', label: 'Overview', icon: LayoutDashboard },
+      { to: '/admin/health', label: 'System Health', icon: HeartPulse },
+    ],
+  },
   {
     label: 'Game Analytics',
     items: [
@@ -62,6 +70,7 @@ const groups = computed(() => [
     label: 'Game Management',
     items: [
       { to: '/admin/players', label: 'Players', icon: UserCog },
+      { to: '/admin/rules', label: 'Account Rules', icon: Scale },
       { to: '/admin/rounds', label: 'Live Round', icon: Radio },
       { to: '/admin/lobbies', label: 'Lobbies', icon: Armchair },
       { to: '/admin/audio', label: 'Audio', icon: Volume2 },

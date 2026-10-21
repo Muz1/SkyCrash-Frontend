@@ -1,9 +1,12 @@
 <script setup lang="ts">
 import { computed, type Component } from 'vue'
+import AdminInfo from './AdminInfo.vue'
 
 const props = withDefaults(
   defineProps<{
     label: string
+    /** Definition shown behind an ⓘ next to the label. */
+    info?: string
     caption?: string
     icon?: Component
     tone?: 'magenta' | 'violet' | 'blue' | 'ember' | 'lime'
@@ -28,7 +31,10 @@ const style = computed(() => ({ '--adm-kpi-tone': TONES[props.tone] }))
 <template>
   <div :class="['adm-kpi', large && 'adm-kpi--lg', fill && 'adm-kpi--fill']" :style="style">
     <div class="adm-kpi-head">
-      <span class="adm-kpi-label">{{ label }}</span>
+      <span class="adm-kpi-label-row">
+        <span class="adm-kpi-label">{{ label }}</span>
+        <AdminInfo v-if="info" :term="label" :text="info" />
+      </span>
       <span v-if="icon" class="adm-kpi-icon" aria-hidden="true"><component :is="icon" /></span>
     </div>
     <div class="flex flex-col gap-1.5">

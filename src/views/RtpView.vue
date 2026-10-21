@@ -12,6 +12,9 @@ import AdminLoading from '@/components/admin/AdminLoading.vue'
 import HouseEdgeConfirmModal from '@/components/HouseEdgeConfirmModal.vue'
 import ExportPdfButton from '@/components/sky/ExportPdfButton.vue'
 import { buildRtpReport } from '@/lib/adminReports'
+import { getPublicGameRules } from '@/services/adminOpsService'
+import { count } from '@/lib/reportFormat'
+import type { PublicGameRules } from '@/types/admin'
 
 const rtpStore = useRtpStore()
 const adminSettingsStore = useAdminSettingsStore()
@@ -51,7 +54,27 @@ const rtpChart = computed(() => {
   }
 })
 
+// Published caps (GET /api/settings/public → rules). Caps limit how much one bet, round or day
+// can lose; they don't move RTP: a stop at any target m ≤ the max multiplier wins with
+// P = (1 − edge) / m and pays m, so every strategy returns 100% − edge.
+const rules = ref<PublicGameRules | null>(null)
+const TARGETS = [1.5, 2, 5, 10, 25, 50, 100]
+const capRows = computed(() => {
+  const r = rules.value
+  if (!r) return []
+  const rtp = 100 - r.houseEdgePercentage
+  return TARGETS.filter((t) => t <= r.maxMultiplier).map((t) => ({
+    target: t,
+    winChance: ((1 - r.houseEdgePercentage / 100) / t) * 100,
+    rtp,
+    atCap: t === r.maxMultiplier,
+  }))
+})
+
 onMounted(async () => {
+  getPublicGameRules()
+    .then((r) => (rules.value = r))
+    .catch(() => (rules.value = null))
   rtpStore.fetchSummary()
   await adminSettingsStore.fetchSettings()
   if (adminSettingsStore.settings) {
@@ -225,6 +248,60 @@ function handleSaved() {
           <AdminLoading />
         </AdminPanel>
       </div>
+
+      <AdminPanel
+        v-if="rules"
+        title="Caps and RTP"
+        :caption="`Max multiplier ${rules.maxMultiplier}×: RTP stays ${100 - rules.houseEdgePercentage}% at every cash-out target`"
+        accent="lime"
+      >
+        <div class="grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.3fr)]">
+          <dl class="grid grid-cols-2 gap-x-4 gap-y-3 text-[0.9375rem]">
+            <div>
+              <dt class="adm-label">Max multiplier</dt>
+              <dd class="adm-num m-0 text-[1.25rem] font-bold text-[var(--adm-text)]">{{ rules.maxMultiplier }}×</dd>
+            </div>
+            <div>
+              <dt class="adm-label">Theoretical RTP</dt>
+              <dd class="adm-num m-0 text-[1.25rem] font-bold text-[var(--adm-text)]">{{ 100 - rules.houseEdgePercentage }}%</dd>
+            </div>
+            <div>
+              <dt class="adm-label">Max profit / bet</dt>
+              <dd class="adm-num m-0 text-[var(--adm-text)]">{{ count(rules.maxProfitPerBet) }} credits</dd>
+            </div>
+            <div>
+              <dt class="adm-label">Round liability</dt>
+              <dd class="adm-num m-0 text-[var(--adm-text)]">{{ count(rules.maxRoundLiability) }} credits</dd>
+            </div>
+            <div>
+              <dt class="adm-label">Bet range</dt>
+              <dd class="adm-num m-0 text-[var(--adm-text)]">{{ count(rules.minBet) }}–{{ count(rules.maxBet) }}</dd>
+            </div>
+            <div>
+              <dt class="adm-label">Formula</dt>
+              <dd class="adm-num m-0 text-[var(--adm-text)]">v{{ rules.crashFormulaVersion }}</dd>
+            </div>
+          </dl>
+          <div>
+            <p class="adm-label">RTP by cash-out target (with caps)</p>
+            <ul class="flex flex-col gap-2" aria-label="RTP by cash-out target">
+              <li v-for="row in capRows" :key="row.target" class="grid grid-cols-[3.5rem_minmax(0,1fr)_4rem] items-center gap-3">
+                <span class="adm-num font-bold text-[var(--adm-text)]">{{ row.target }}×</span>
+                <span class="relative h-3 rounded-full bg-[var(--adm-surface-3)]" :title="`Wins ${row.winChance.toFixed(2)}% of rounds`">
+                  <span class="absolute inset-y-0 left-0 rounded-full" :style="{ width: `${row.rtp}%`, background: row.atCap ? '#f59e0b' : '#22c55e' }" />
+                </span>
+                <span class="adm-num text-right text-[var(--adm-text)]">{{ row.rtp }}%</span>
+              </li>
+            </ul>
+            <p class="adm-note mt-3">
+              Caps limit how much one bet, round or day can lose; they don't change RTP. A cash-out at m wins
+              {{ 100 - rules.houseEdgePercentage }}/m % of rounds and pays m, so every target returns
+              {{ 100 - rules.houseEdgePercentage }}%. At {{ rules.maxMultiplier }}× the round ends and everyone still flying is
+              paid {{ rules.maxMultiplier }}× (orange bar).
+            </p>
+          </div>
+        </div>
+      </AdminPanel>
     </AdminPage>
 
     <HouseEdgeConfirmModal

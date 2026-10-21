@@ -1,5 +1,5 @@
 // "About this report" text for every admin report, kept together so the wording stays
-// consistent. Money is in credits, treated as 1 credit = R1.
+// consistent. Money is in credits (play money); only PayFast purchases are rands.
 
 export interface AboutContent {
   measures: string
@@ -9,7 +9,7 @@ export interface AboutContent {
 }
 
 const PROFIT_RULE =
-  'Credits are treated as real money (1 credit = R1). The house gains what players lose and loses what they win. Every free credit handed out (challenge, feedback and spin-wheel rewards, demo top-ups, admin adjustments) also counts as a cost. Purchases are neutral because the player paid for them.'
+  'Credits are play money; only PayFast purchases are rands. The house gains what players lose and loses what they win. Every free credit handed out (challenge, feedback and spin-wheel rewards, demo top-ups, admin adjustments) also counts as a cost. Purchases are neutral because the player paid for them.'
 
 export const ABOUT: Record<string, AboutContent> = {
   overview: {
@@ -27,18 +27,19 @@ export const ABOUT: Record<string, AboutContent> = {
     useFor: 'Start here each day. Spot quiet days, payout spikes or a drop in active players, then open the matching detailed report.',
   },
   revenue: {
-    measures: 'How much money flows through the game and what the house keeps after free credits.',
+    measures: 'How many credits flow through the game, what the house keeps before and after bonus credits, and the real money taken through PayFast. Credits are play money; only PayFast purchases are rands. Test accounts are left out unless "Include test accounts" is on.',
     numbers: [
-      { term: 'Total wagered', definition: 'Sum of stakes on resolved bets.' },
-      { term: 'Total payouts', definition: 'Credits paid to players who cashed out before the crash (stake × cash-out multiplier).' },
-      { term: 'Gross revenue', definition: 'Total wagered − total payouts.' },
-      { term: 'Free credits given', definition: 'Challenge, feedback and wheel rewards, demo top-ups and net admin adjustments.' },
-      { term: 'Net profit', definition: `Gross revenue − free credits given. ${PROFIT_RULE}` },
-      { term: 'Profit margin', definition: 'Net profit as a percentage of total wagered.' },
-      { term: 'Expected from house edge', definition: 'What the configured house edge predicts the house keeps (wagered × edge). Over many bets gross revenue moves towards this figure; over a few bets luck dominates.' },
+      { term: 'GGR', definition: 'Gross gaming revenue: total wagered − total payouts (credits), split into cash and bonus stakes.' },
+      { term: 'Expected from house edge', definition: 'Wagered × house edge. The gap to GGR is shown in standard deviations (z): within ±2 is normal luck.' },
+      { term: 'Actual vs theoretical RTP', definition: 'Payouts ÷ wagered against 100% − house edge (99%). The sample-size note says how far luck can move it.' },
+      { term: 'Bonus cost', definition: 'Free credits granted (wheel, achievements, challenges, feedback, admin top-ups), by source. Bonus forfeited expired unwagered.' },
+      { term: 'NGR', definition: 'Net gaming revenue: GGR − bonus cost.' },
+      { term: 'Hold % / NGR margin', definition: 'GGR ÷ wagered and NGR ÷ wagered.' },
+      { term: 'Purchases', definition: 'PayFast credit-pack purchases in rands, how many, and the credits sold.' },
+      { term: 'Largest wins / cap events', definition: 'The ten biggest payouts, and the bets a risk cap (100× max multiplier, 10 000 max profit, round liability) cashed out.' },
     ],
-    charts: 'Bets vs payouts compares the two money flows per day. Revenue & profit shows gross revenue and net profit per day; a day below zero means players won more than they lost (plus giveaways). Free credits shows where giveaways came from.',
-    useFor: 'Check the game is profitable, judge whether giveaways are too generous, and confirm the house edge is behaving as configured.',
+    charts: 'Bets vs payouts compares the two credit flows per day. Revenue & profit shows GGR and NGR per day; below zero means players won more than they lost (plus bonuses). A marked day had a cap fire or one win larger than half that day’s wagers; hover the marker for the note.',
+    useFor: 'Check the game earns its edge, see whether one lucky win explains a bad day, judge bonus generosity, and reconcile the books.',
   },
   gamePerformance: {
     measures: 'How the crash rounds themselves behave: how long they last and where they crash.',

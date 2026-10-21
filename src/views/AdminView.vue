@@ -10,12 +10,50 @@ import AdminPanel from '@/components/admin/AdminPanel.vue'
 import AdminButton from '@/components/admin/AdminButton.vue'
 import AdminPill from '@/components/admin/AdminPill.vue'
 import AdjustBalanceModal from '@/components/AdjustBalanceModal.vue'
+import BlockPlayerDialog from '@/components/admin/BlockPlayerDialog.vue'
+import ReasonDialog from '@/components/admin/ReasonDialog.vue'
+import { admin as copy } from '@/copy/admin'
 import ExportPdfButton from '@/components/sky/ExportPdfButton.vue'
 import { buildPlayersReport } from '@/lib/adminReports'
 
 const adminStore = useAdminStore()
 const authStore = useAuthStore()
 const modalTarget = ref<{ playerId: string; username: string } | null>(null)
+const blockTarget = ref<{ playerId: string; username: string } | null>(null)
+const unblockTarget = ref<{ playerId: string; username: string } | null>(null)
+const blockDialog = ref<InstanceType<typeof BlockPlayerDialog> | null>(null)
+const unblockDialog = ref<InstanceType<typeof ReasonDialog> | null>(null)
+const testError = ref('')
+
+async function applyBlock(body: { ruleCode: string; durationDays: number | null; internalNote?: string }) {
+  if (!blockTarget.value) return
+  try {
+    await adminStore.block(blockTarget.value.playerId, body)
+    blockTarget.value = null
+  } catch (err) {
+    blockDialog.value?.fail(err)
+  }
+}
+
+async function applyUnblock(reason: string) {
+  if (!unblockTarget.value) return
+  try {
+    await adminStore.unblock(unblockTarget.value.playerId, reason)
+    unblockTarget.value = null
+  } catch (err) {
+    unblockDialog.value?.fail(err)
+  }
+}
+
+async function toggleTest(playerId: string, value: boolean) {
+  testError.value = ''
+  try {
+    await adminStore.setTestAccount(playerId, value)
+  } catch {
+    testError.value = 'Could not change the test-account flag. Is the API up to date?'
+    await adminStore.fetchPlayers()
+  }
+}
 
 const BLOCKED_LABELS = { all: 'All accounts', active: 'Active only', blocked: 'Blocked only' } as const
 const ROLE_LABELS = { all: 'All roles', admin: 'Admins only', player: 'Players only' } as const
@@ -32,6 +70,7 @@ function buildReport() {
 
 // Display-only summaries of the list already loaded.
 const blockedCount = computed(() => adminStore.players.filter((p) => p.isBlocked).length)
+const testCount = computed(() => adminStore.players.filter((p) => p.isTestAccount).length)
 // Only managers can change who is an admin (the API enforces this too).
 const isManager = computed(() => !!usePlayerStore().profile?.isManager)
 const adminCount = computed(() => adminStore.players.filter((p) => p.isAdmin).length)
@@ -44,7 +83,7 @@ onMounted(() => {
 
 <template>
   <AdminShell
-    help-text="Search, filter and sort every player account. Promote/demote grants or removes admin access (managers only; see the Admin Roles tab). Block immediately prevents that player from logging in or playing, and disconnects any live session — unblock restores access. Adjust changes a player's credit balance directly, for support or correction purposes, and is logged."
+    help-text="Search, filter and sort every player account. Promote/demote grants or removes admin access (managers only; see the Admin Roles tab). Block applies an Account Rule (pick the rule, the duration is pre-filled) and disconnects any live session; Unblock asks for a reason. Test accounts are left out of reports. Adjust changes a player's credit balance directly, for support or correction purposes, and is logged."
   >
     <AdminPage :page-export="false" title="Player Management" eyebrow="Accounts" subtitle="Search, filter and manage every player account.">
       <template #actions>
@@ -54,7 +93,7 @@ onMounted(() => {
       <AdminPanel title="Players" accent="magenta" fill flush>
         <template #actions>
           <span class="adm-panel-caption adm-num">
-            {{ adminStore.players.length }} accounts · {{ adminCount }} admins · {{ blockedCount }} blocked
+            {{ adminStore.players.length }} accounts · {{ adminCount }} admins · {{ blockedCount }} blocked · {{ testCount }} test
           </span>
         </template>
 
@@ -85,6 +124,16 @@ onMounted(() => {
               <option value="admin">Admins Only</option>
               <option value="player">Players Only</option>
             </select>
+            <select v-model="adminStore.verifiedFilter" class="adm-select" aria-label="Email verified" @change="adminStore.fetchPlayers">
+              <option value="all">Any Email</option>
+              <option value="verified">Verified Only</option>
+              <option value="unverified">Unverified Only</option>
+            </select>
+            <select v-model="adminStore.testFilter" class="adm-select" aria-label="Test accounts" @change="adminStore.fetchPlayers">
+              <option value="all">Test + Real</option>
+              <option value="real">Real Only</option>
+              <option value="test">Test Only</option>
+            </select>
             <select v-model="adminStore.sortBy" class="adm-select" aria-label="Sort by" @change="adminStore.fetchPlayers">
               <option value="username">Sort: Username</option>
               <option value="email">Sort: Email</option>
@@ -110,9 +159,10 @@ onMounted(() => {
           </div>
         </template>
 
+        <p v-if="testError" class="adm-error mx-4 mt-3" role="alert">{{ testError }}</p>
         <div class="adm-table-wrap">
           <!-- One card per player on phones (see .adm-table--cards in admin.css). -->
-          <table class="adm-table adm-table--cards min-w-[62.5rem]">
+          <table class="adm-table adm-table--cards min-w-[75rem]">
             <thead>
               <tr>
                 <th>Username</th>
@@ -120,6 +170,8 @@ onMounted(() => {
                 <th class="adm-num">Balance</th>
                 <th>Role</th>
                 <th>Status</th>
+                <th>Email ✓</th>
+                <th>Test</th>
                 <th>Last Seen</th>
                 <th class="adm-num">Actions</th>
               </tr>
@@ -136,6 +188,22 @@ onMounted(() => {
                 <td class="adm-num adm-strong" data-label="Balance">{{ balanceFormat.format(player.creditBalance) }}</td>
                 <td data-label="Role"><AdminPill :label="player.isManager ? 'Manager' : player.isAdmin ? 'Admin' : 'Player'" :dot="false" /></td>
                 <td data-label="Status"><AdminPill :label="player.isBlocked ? 'Blocked' : 'Active'" /></td>
+                <td data-label="Email ✓">
+                  <AdminPill :label="player.emailVerified ? 'Verified' : 'Unverified'" :tone="player.emailVerified ? 'success' : 'warning'" :dot="false" />
+                </td>
+                <td data-label="Test">
+                  <label class="adm-switch" :title="player.isAdmin ? 'Admins never bet' : 'Test accounts are left out of reports'">
+                    <input
+                      type="checkbox"
+                      :checked="!!player.isTestAccount"
+                      :disabled="player.isAdmin"
+                      :aria-label="`Test account: ${player.username}`"
+                      @change="toggleTest(player.playerId, ($event.target as HTMLInputElement).checked)"
+                    />
+                    <span class="adm-switch-track" aria-hidden="true" />
+                    <span>{{ player.isTestAccount ? 'Test' : 'Real' }}</span>
+                  </label>
+                </td>
                 <td class="adm-muted adm-num-inline" data-label="Last Seen">{{ new Date(player.lastSeenUtc).toLocaleString() }}</td>
                 <td class="adm-actions">
                   <div>
@@ -155,11 +223,16 @@ onMounted(() => {
                       size="sm"
                       variant="danger"
                       :disabled="player.playerId === authStore.playerId"
-                      @click="adminStore.block(player.playerId)"
+                      @click="blockTarget = { playerId: player.playerId, username: player.username }"
                     >
                       Block
                     </AdminButton>
-                    <AdminButton v-else size="sm" variant="success" @click="adminStore.unblock(player.playerId)">
+                    <AdminButton
+                      v-else
+                      size="sm"
+                      variant="success"
+                      @click="unblockTarget = { playerId: player.playerId, username: player.username }"
+                    >
                       Unblock
                     </AdminButton>
                     <AdminButton
@@ -173,7 +246,7 @@ onMounted(() => {
                 </td>
               </tr>
               <tr v-if="adminStore.players.length === 0">
-                <td colspan="7" class="adm-empty">
+                <td colspan="9" class="adm-empty">
                   {{ adminStore.isLoading ? 'Loading players…' : 'No players match these filters.' }}
                 </td>
               </tr>
@@ -188,6 +261,25 @@ onMounted(() => {
       :player-id="modalTarget.playerId"
       :username="modalTarget.username"
       @close="modalTarget = null"
+    />
+    <BlockPlayerDialog
+      v-if="blockTarget"
+      ref="blockDialog"
+      :username="blockTarget.username"
+      @close="blockTarget = null"
+      @submit="applyBlock"
+    />
+    <ReasonDialog
+      v-if="unblockTarget"
+      ref="unblockDialog"
+      :title="`${copy.players.unblockTitle}: ${unblockTarget.username}`"
+      :sub="copy.players.unblockSub"
+      placeholder="e.g. Appeal upheld; ID checked"
+      confirm="Unblock"
+      variant="success"
+      tone="#22c55e"
+      @close="unblockTarget = null"
+      @submit="applyUnblock"
     />
   </AdminShell>
 </template>

@@ -7,7 +7,7 @@ import AdminTrendChart from '@/components/admin/AdminTrendChart.vue'
 import { useReport } from '@/composables/useReport'
 import { getOverview } from '@/services/adminAnalyticsService'
 import { ABOUT } from '@/lib/reportAbout'
-import { count, mult, rand } from '@/lib/reportFormat'
+import { count, mult, cr } from '@/lib/reportFormat'
 
 const { query, data, loading, error } = useReport(getOverview)
 </script>
@@ -23,6 +23,7 @@ const { query, data, loading, error } = useReport(getOverview)
     :loading="loading"
     :error="error"
     :info="data?.range"
+    test-toggle
   >
     <template v-if="data">
       <div class="adm-kpis">
@@ -39,13 +40,13 @@ const { query, data, loading, error } = useReport(getOverview)
           <span class="adm-num">{{ count(data.activeGames) }}</span>
         </AdminKpi>
         <AdminKpi label="Total wagered" :icon="Coins" tone="blue">
-          <span class="adm-num">{{ rand(data.totalWagered) }}</span>
+          <span class="adm-num">{{ cr(data.totalWagered) }}</span>
         </AdminKpi>
         <AdminKpi label="Total payouts" :icon="HandCoins" tone="ember">
-          <span class="adm-num">{{ rand(data.totalPayouts) }}</span>
+          <span class="adm-num">{{ cr(data.totalPayouts) }}</span>
         </AdminKpi>
         <AdminKpi label="Profit" :icon="TrendingUp" :tone="data.netProfit >= 0 ? 'lime' : 'magenta'" caption="Net, after free credits">
-          <span class="adm-num">{{ rand(data.netProfit) }}</span>
+          <span class="adm-num">{{ cr(data.netProfit) }}</span>
         </AdminKpi>
         <AdminKpi label="Average multiplier" :icon="Rocket" tone="violet" caption="Average crash point">
           <span class="adm-num">{{ mult(data.averageCrashMultiplier) }}</span>
@@ -64,7 +65,7 @@ const { query, data, loading, error } = useReport(getOverview)
               { name: 'Wagered', values: data.dailyWagered.map((d) => d.value) },
               { name: 'Paid out', values: data.dailyPayouts.map((d) => d.value) },
             ]"
-            :format="rand"
+            :format="cr"
             :height="230"
           />
         </AdminPanel>

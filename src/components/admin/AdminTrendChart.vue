@@ -20,11 +20,15 @@ const props = withDefaults(
     series: Series[]
     format?: (v: number) => string
     height?: number
+    /** Per-day note (same order as dates). A day with one gets a marker; its tooltip shows the note. */
+    annotations?: (string | null | undefined)[]
   }>(),
   { height: 200, format: (v: number) => v.toLocaleString() },
 )
 
 const showTable = ref(false)
+const note = (i: number) => props.annotations?.[i] || ''
+const marks = computed(() => props.dates.map((_, i) => i).filter((i) => !!note(i)))
 const active = ref<number | null>(null)
 
 const all = computed(() => props.series.flatMap((s) => s.values))
@@ -95,12 +99,14 @@ const xLabels = computed(() => {
           <tr>
             <th scope="col">Date</th>
             <th v-for="s in series" :key="s.name" scope="col" class="adm-num">{{ s.name }}</th>
+            <th v-if="marks.length" scope="col">Note</th>
           </tr>
         </thead>
         <tbody>
           <tr v-for="(d, i) in dates" :key="d">
             <th scope="row" class="adm-num-inline">{{ shortDate(d) }}</th>
             <td v-for="s in series" :key="s.name" class="adm-num">{{ format(s.values[i] ?? 0) }}</td>
+            <td v-if="marks.length" class="whitespace-normal">{{ note(i) }}</td>
           </tr>
         </tbody>
       </table>
@@ -138,6 +144,8 @@ const xLabels = computed(() => {
               vector-effect="non-scaling-stroke"
             />
           </svg>
+          <!-- annotated days (cap fired / one huge win): a dashed line with a flag at the top -->
+          <span v-for="i in marks" :key="`a-${i}`" class="adm-trend-mark" :style="{ left: `${x(i)}%` }" aria-hidden="true" />
           <!-- markers live in HTML so they stay round on a stretched SVG -->
           <template v-for="p in paths" :key="`m-${p.name}`">
             <span
@@ -166,7 +174,7 @@ const xLabels = computed(() => {
               role="listitem"
               tabindex="0"
               class="adm-trend-hit"
-              :aria-label="`${shortDate(d)}: ${series.map((s) => `${s.name} ${format(s.values[i] ?? 0)}`).join(', ')}`"
+              :aria-label="`${shortDate(d)}: ${series.map((s) => `${s.name} ${format(s.values[i] ?? 0)}`).join(', ')}${note(i) ? `. Note: ${note(i)}` : ''}`"
               @mouseenter="active = i"
               @mouseleave="active = null"
               @focus="active = i"
@@ -185,6 +193,7 @@ const xLabels = computed(() => {
               <span class="adm-legend-swatch" :style="{ background: `var(--adm-chart-${si + 1})` }" aria-hidden="true" />
               {{ s.name }} <b class="adm-num">{{ format(s.values[active] ?? 0) }}</b>
             </span>
+            <span v-if="note(active)" class="adm-tooltip-note">⚑ {{ note(active) }}</span>
           </div>
         </div>
       </div>

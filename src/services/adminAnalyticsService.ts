@@ -26,9 +26,15 @@ import type {
   AdvisorChatMessage,
 } from '@/types/insights'
 
-// Every report takes the same ?range=&from=&to= query (see ReportFilter.vue).
+// Every report takes the same ?range=&from=&to= query (see ReportFilter.vue), plus
+// ?includeTest=true when the "Include test accounts" toggle is on.
 function params(q: ReportQuery, extra: Record<string, unknown> = {}) {
-  return { range: q.range, ...(q.range === 'custom' ? { from: q.from, to: q.to } : {}), ...extra }
+  return {
+    range: q.range,
+    ...(q.range === 'custom' ? { from: q.from, to: q.to } : {}),
+    ...(q.includeTest ? { includeTest: true } : {}),
+    ...extra,
+  }
 }
 
 async function get<T>(url: string, q: ReportQuery, extra?: Record<string, unknown>): Promise<T> {
@@ -46,6 +52,35 @@ export const getFeedbackAnalytics = (q: ReportQuery) => get<FeedbackAnalytics>('
 export const getFeedbackInsights = (q: ReportQuery) => get<FeedbackInsightsReport>('/admin/feedback/insights', q)
 export const getFeedbackSubmissions = (q: ReportQuery, filters: FeedbackSubmissionFilters) =>
   get<FeedbackSubmissionsPage>('/admin/feedback/submissions', q, { ...filters })
+
+/** The most rows the API returns in one page; exports ask for this so nothing is left out. */
+export const FEEDBACK_EXPORT_PAGE_SIZE = 1000
+
+/**
+ * Every submission matching the filters (not just the page on screen), for the PDF export.
+ * Pages through at the API's maximum page size until totalCount rows are in hand.
+ */
+export async function getAllFeedbackSubmissions(
+  q: ReportQuery,
+  filters: FeedbackSubmissionFilters,
+  fetchPage: typeof getFeedbackSubmissions = getFeedbackSubmissions,
+): Promise<FeedbackSubmissionsPage> {
+  const first = await fetchPage(q, { ...filters, page: 1, pageSize: FEEDBACK_EXPORT_PAGE_SIZE })
+  const items = [...first.items]
+  let page = 1
+  while (items.length < first.totalCount && page * FEEDBACK_EXPORT_PAGE_SIZE < first.totalCount) {
+    page++
+    const next = await fetchPage(q, { ...filters, page, pageSize: FEEDBACK_EXPORT_PAGE_SIZE })
+    if (!next.items.length) break
+    items.push(...next.items)
+  }
+  return { ...first, page: 1, pageSize: items.length, items }
+}
+
+/** CSV of every submission in the range (server-built). */
+export async function getFeedbackSubmissionsCsv(q: ReportQuery): Promise<Blob> {
+  return (await api.get<Blob>('/admin/feedback/submissions.csv', { params: params(q), responseType: 'blob' })).data
+}
 
 export async function getSkinUsage(): Promise<SkinUsageReport> {
   return (await api.get<SkinUsageReport>('/admin/analytics/skins')).data

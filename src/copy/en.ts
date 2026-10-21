@@ -4,7 +4,10 @@
  * what to do. Longer explanations live behind an ⓘ (InfoTip). Older screens still have
  * their text inline; a later pass moves them here too.
  */
+import { admin } from './admin'
+
 export const en = {
+  admin,
   common: {
     close: 'Close',
     cancel: 'Cancel',
@@ -257,3 +260,5 @@ export const en = {
 } as const
 
 export type Copy = typeof en
+
+export default en

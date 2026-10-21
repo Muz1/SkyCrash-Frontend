@@ -11,7 +11,7 @@ import AdminTrendChart from '@/components/admin/AdminTrendChart.vue'
 import { useReport } from '@/composables/useReport'
 import * as service from '@/services/adminAnalyticsService'
 import { ABOUT } from '@/lib/reportAbout'
-import { count, pct, plural, rand } from '@/lib/reportFormat'
+import { count, pct, plural, cr } from '@/lib/reportFormat'
 import type { FeedbackSettings } from '@/types/insights'
 
 const { query, data, loading, error } = useReport(service.getFeedbackAnalytics)
@@ -93,7 +93,7 @@ async function save() {
           <span class="adm-num">{{ pct(data.positivePercentage) }}</span>
         </AdminKpi>
         <AdminKpi label="Rewards paid" :icon="Gift" tone="violet" :caption="plural(data.rewardedSubmissions, 'rewarded submission')">
-          <span class="adm-num">{{ rand(data.creditsAwarded) }}</span>
+          <span class="adm-num">{{ cr(data.creditsAwarded) }}</span>
         </AdminKpi>
       </div>
 

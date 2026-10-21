@@ -14,6 +14,9 @@ import logo from '@/assets/logo-skycrash.png'
 import AdminTabs from './AdminTabs.vue'
 import HelpTip from './HelpTip.vue'
 import '@/components/admin/admin.css'
+import { useHouseLossAlert } from '@/composables/useHouseLossAlert'
+import { cr } from '@/lib/reportFormat'
+import { admin as copy } from '@/copy/admin'
 
 defineProps<{ helpText?: string }>()
 
@@ -47,7 +50,9 @@ watch(theme, (value) => {
 // Remember how far it was scrolled (module-level, shared by all instances) and put it back,
 // so picking a report lower down the menu doesn't jump the menu back to the top.
 const sidebar = ref<HTMLElement | null>(null)
+const houseLoss = useHouseLossAlert()
 onMounted(() => {
+  houseLoss.listen()
   if (!sidebar.value) return
   sidebar.value.scrollTop = sidebarScroll.top
   sidebar.value.scrollLeft = sidebarScroll.left
@@ -184,6 +189,16 @@ function handleLogout() {
       </aside>
       <div v-if="drawerOpen" class="adm-drawer-backdrop" aria-hidden="true" @click="closeDrawer" />
       <main class="adm-main">
+        <div v-if="houseLoss.alert.value" class="adm-banner adm-banner--global" role="alert">
+          <p>
+            <strong>{{ copy.health.lossBanner }}</strong>
+            Today's NGR {{ cr(houseLoss.alert.value.netGamingRevenueToday) }} (limit −{{ cr(houseLoss.alert.value.limit) }} credits).
+          </p>
+          <RouterLink to="/admin/health" class="adm-btn adm-btn--secondary adm-btn--sm">Review &amp; resume</RouterLink>
+          <button type="button" class="adm-btn adm-btn--ghost adm-btn--sm" aria-label="Dismiss loss-limit alert" @click="houseLoss.dismiss()">
+            <X aria-hidden="true" />
+          </button>
+        </div>
         <slot />
       </main>
     </div>
