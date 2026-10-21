@@ -13,7 +13,7 @@ const emit = defineEmits<{ pick: [] }>()
 
 const MAX_COUNTRY = 60
 const fieldClass =
-  'mt-1 w-full border-2 border-violet/50 bg-[oklch(0.15_0.05_285)] px-3 py-2 text-base text-foreground placeholder:text-foreground/50 focus:border-electric focus:outline-none'
+  'mt-1 w-full border-2 border-violet/50 bg-[oklch(0.15_0.05_285)] px-3 py-2 text-base text-foreground placeholder:text-foreground/70 focus:border-electric focus:outline-none'
 const questionClass = 'block text-base font-bold leading-snug text-foreground'
 const hintClass = 'font-normal text-foreground/65'
 

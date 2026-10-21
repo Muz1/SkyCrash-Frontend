@@ -114,7 +114,7 @@ onMounted(() => {
         {{ copy.landing.fullTutorial }}
       </button>
 
-      <p class="mt-4 font-arcade text-[0.5rem] uppercase tracking-[0.3em] text-violet [@media(max-height:900px)]:hidden">
+      <p class="mt-4 font-arcade text-[0.5rem] uppercase tracking-[0.3em] text-[#c4b5fd] [@media(max-height:900px)]:hidden">
         High risk. High thrill. Beat the sky.
       </p>
     </div>
