@@ -256,7 +256,7 @@ onBeforeUnmount(() => {
 })
 
 const fieldClass =
-  'mt-1 w-full resize-y border-2 border-violet/50 bg-[oklch(0.15_0.05_285)] px-3 py-1.5 text-base leading-relaxed text-foreground placeholder:text-foreground/50 focus:border-electric focus:outline-none'
+  'mt-1 w-full resize-y border-2 border-violet/50 bg-[oklch(0.15_0.05_285)] px-3 py-1.5 text-base leading-relaxed text-foreground placeholder:text-foreground/70 focus:border-electric focus:outline-none'
 const questionClass = 'block text-base font-bold leading-snug text-foreground'
 </script>
 
@@ -478,7 +478,7 @@ const questionClass = 'block text-base font-bold leading-snug text-foreground'
                   :key="option.tag"
                   :class="
                     cn(
-                      'flex min-h-11 cursor-pointer items-center gap-2 border-2 px-2.5 text-sm font-bold transition-colors focus-within:ring-2 focus-within:ring-electric',
+                      'flex min-h-11 min-w-0 cursor-pointer items-center gap-2 border-2 px-2.5 text-sm font-bold transition-colors [overflow-wrap:anywhere] focus-within:ring-2 focus-within:ring-electric',
                       wishes.includes(option.tag)
                         ? 'border-electric bg-electric/20 text-foreground'
                         : 'border-violet/50 text-foreground/90 hover:border-electric',
@@ -527,7 +527,7 @@ const questionClass = 'block text-base font-bold leading-snug text-foreground'
             {{ fb.error.value }}
           </p>
 
-          <div class="grid grid-cols-2 gap-3 md:col-span-2 md:flex md:justify-end">
+          <div class="grid grid-cols-2 gap-2 min-[360px]:gap-3 md:col-span-2 md:flex md:justify-end">
             <ArcadeButton variant="ghost" @click="fb.dismiss()">Maybe later</ArcadeButton>
             <ArcadeButton type="submit" variant="primary">Continue</ArcadeButton>
           </div>

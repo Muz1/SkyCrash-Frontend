@@ -206,14 +206,14 @@ function rarityBadgeClass(rarity: Rarity) {
         </span>
       </section>
 
-      <div class="mt-5 flex gap-2">
+      <div class="mt-5 flex flex-wrap gap-2">
         <button
           v-for="t in (['aircraft', 'skies'] as Tab[])"
           :key="t"
           type="button"
           :class="
             cn(
-              'clip-hud border-2 px-5 py-2 font-arcade text-[0.5625rem] uppercase tracking-[0.2em] transition-all duration-150 pointer-coarse:min-h-11',
+              'clip-hud border-2 px-4 py-2 font-arcade text-[0.5625rem] uppercase tracking-[0.16em] min-[360px]:px-5 transition-all duration-150 pointer-coarse:min-h-11',
               tab === t
                 ? 'border-ember bg-[image:var(--grad-sunset)] text-void [box-shadow:var(--glow-ember)]'
                 : 'border-violet/50 text-muted-foreground hover:border-electric hover:text-electric',
@@ -225,7 +225,7 @@ function rarityBadgeClass(rarity: Rarity) {
         </button>
       </div>
 
-      <div class="mt-6 grid gap-5 lg:grid-cols-[minmax(0,1.25fr)_minmax(0,1fr)]">
+      <div class="mt-6 grid grid-cols-1 gap-5 lg:grid-cols-[minmax(0,1.25fr)_minmax(0,1fr)]">
         <section aria-label="Preview" class="neon-panel clip-hud relative min-h-[18.75rem] overflow-hidden p-4 sm:min-h-[23.75rem]">
           <SkyEnvironment
             v-if="tab === 'skies'"
@@ -264,7 +264,7 @@ function rarityBadgeClass(rarity: Rarity) {
           </p>
         </section>
 
-        <section aria-label="Details" class="neon-panel clip-hud p-5">
+        <section aria-label="Details" class="neon-panel clip-hud min-w-0 p-5 [overflow-wrap:anywhere]">
           <div v-if="tab === 'aircraft'" class="animate-sky-pop">
             <p class="font-display text-2xl font-black uppercase tracking-[0.2em] text-foreground">{{ active.name }}</p>
             <div class="mt-2">
