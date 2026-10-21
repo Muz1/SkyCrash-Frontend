@@ -95,7 +95,7 @@ function handleSaved() {
     help-text="Theoretical RTP is derived directly from the configured house edge — it's the payout rate the math guarantees over the long run. All-Time / Last 24 Hours show the ACTUAL rate paid out to real players, for comparison. Changing the house edge affects every round from the moment it's saved onward, and requires re-entering your password to confirm — it never changes a round already in progress."
   >
     <AdminPage :page-export="false"
-      title="RTP & House Edge"
+      title="Return to Player (RTP) & House Edge"
       eyebrow="Game economics"
       subtitle="Configured house edge versus the return-to-player actually paid out."
     >
@@ -105,7 +105,7 @@ function handleSaved() {
 
       <div v-if="rtpStore.summary" class="grid shrink-0 gap-4 md:grid-cols-3">
         <AdminKpi
-          label="Theoretical RTP"
+          label="Theoretical return to player (RTP)"
           :icon="Percent"
           tone="ember"
           :caption="`House edge ${rtpStore.summary.houseEdgePercentage}% — the long-run payout rate the math guarantees`"
@@ -113,7 +113,7 @@ function handleSaved() {
         >
           <span class="adm-num">{{ rtpStore.summary.theoreticalRtpPercentage }}%</span>
         </AdminKpi>
-        <AdminKpi label="All-Time · Actual RTP" :icon="History" tone="blue" large>
+        <AdminKpi label="All time · actual return to player" :icon="History" tone="blue" large>
           <span class="adm-num">{{ rtpStore.summary.allTime.actualRtpPercentage }}%</span>
           <template #caption>
             <span class="adm-num">
@@ -122,7 +122,7 @@ function handleSaved() {
             </span>
           </template>
         </AdminKpi>
-        <AdminKpi label="Last 24 Hours · Actual RTP" :icon="Clock" tone="lime" large>
+        <AdminKpi label="Last 24 hours · actual return to player" :icon="Clock" tone="lime" large>
           <span class="adm-num">{{ rtpStore.summary.last24Hours.actualRtpPercentage }}%</span>
           <template #caption>
             <span class="adm-num">
@@ -180,7 +180,7 @@ function handleSaved() {
 
         <AdminPanel
           v-if="rtpStore.summary"
-          title="Actual vs Theoretical RTP"
+          title="Actual vs theoretical return to player"
           caption="Distance of the actual payout rate from the configured target, in percentage points"
           accent="ember"
           fill

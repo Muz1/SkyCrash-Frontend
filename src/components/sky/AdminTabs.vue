@@ -53,7 +53,7 @@ const groups = computed(() => [
     label: 'Revenue & Profit',
     items: [
       { to: '/admin/revenue', label: 'Revenue & Profit', icon: Coins },
-      { to: '/rtp', label: 'RTP & House Edge', icon: Percent },
+      { to: '/rtp', label: 'Return to Player & House Edge', icon: Percent },
     ],
   },
   {

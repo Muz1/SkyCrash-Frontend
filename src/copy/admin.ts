@@ -3,7 +3,7 @@
 
 export const admin = {
   credits: {
-    note: 'Credits are play money; only PayFast purchases are rands.',
+    note: 'All amounts are in rands (R).',
   },
   testToggle: {
     label: 'Include test accounts',
@@ -12,22 +12,22 @@ export const admin = {
   revenue: {
     title: 'Revenue & Profit',
     eyebrow: 'Money',
-    subtitle: 'What players wager, win and what the house keeps. Credits are play money; only PayFast purchases are rands.',
+    subtitle: 'What players wager, win and what the house keeps. All amounts in rands (R).',
     kpi: {
-      ggr: { label: 'GGR', info: 'Gross gaming revenue: total wagered − total payouts, in credits. Split into GGR on cash-credit stakes and on bonus-credit stakes.' },
+      ggr: { label: 'Gross gaming revenue (GGR)', info: 'Total wagered − total payouts. Split into stakes paid with bought credits and with bonus credits.' },
       expected: {
         label: 'Expected from house edge',
         info: 'What the house edge predicts the house keeps: wagered × edge. The gap to actual GGR is measured in standard deviations of normal luck (z).',
       },
-      rtp: { label: 'Actual RTP', info: 'Return to player: payouts ÷ wagered. The theoretical RTP is 100% − house edge. Small samples swing far from it.' },
+      rtp: { label: 'Actual return to player (RTP)', info: 'Payouts ÷ wagered. The theoretical return to player is 100% − house edge. Small samples swing far from it.' },
       bonusCost: { label: 'Bonus cost', info: 'Free credits granted in the range (wheel, achievements, challenges, feedback, admin top-ups), by source. Forfeited bonus expired unwagered.' },
-      ngr: { label: 'NGR', info: 'Net gaming revenue: GGR − bonus cost.' },
-      hold: { label: 'Hold %', info: 'GGR ÷ wagered. Over many bets this moves towards the house edge.' },
-      ngrMargin: { label: 'NGR margin', info: 'NGR ÷ wagered.' },
-      purchases: { label: 'Purchases', info: 'Real money from PayFast credit-pack purchases, in rands. The only figure on this page in R.' },
+      ngr: { label: 'Net gaming revenue (NGR)', info: 'Gross gaming revenue − bonus cost.' },
+      hold: { label: 'Hold percentage', info: 'Gross gaming revenue ÷ wagered. Over many bets this moves towards the house edge.' },
+      ngrMargin: { label: 'Net gaming revenue margin', info: 'Net gaming revenue ÷ wagered.' },
+      purchases: { label: 'Purchases', info: 'Money paid through PayFast for credit packs.' },
       wagered: { label: 'Wagered', info: 'Sum of stakes on resolved bets, split into cash and bonus credits.' },
-      payouts: { label: 'Payouts', info: 'Credits paid to players who cashed out (stake × cash-out multiplier).' },
-      avgBet: { label: 'Avg bet', info: 'Total wagered ÷ resolved bets.' },
+      payouts: { label: 'Payouts', info: 'Paid to players who cashed out (stake × cash-out multiplier).' },
+      avgBet: { label: 'Average bet', info: 'Total wagered ÷ resolved bets.' },
     },
     largestWins: { title: 'Largest wins', caption: 'Top 10 payouts in the range' },
     capEvents: { title: 'Cap events', caption: 'Bets cashed out by a risk cap', empty: 'No caps fired in this range.' },

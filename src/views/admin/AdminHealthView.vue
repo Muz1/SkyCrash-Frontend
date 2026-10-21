@@ -112,7 +112,7 @@ const lossUsed = computed(() => {
       </div>
       <AdminLoading v-else-if="!error" text="Checking…" />
 
-      <AdminPanel title="Daily loss circuit breaker" caption="Pauses new bets when today's NGR (UTC) falls below −limit" accent="ember">
+      <AdminPanel title="Daily loss circuit breaker" caption="Pauses new bets when today's net gaming revenue (NGR, UTC day) falls below −limit" accent="ember">
         <template v-if="risk" #actions>
           <span :class="['adm-badge', risk.status.bettingPaused ? 'adm-badge--bad' : 'adm-badge--ok']">
             {{ risk.status.bettingPaused ? 'Bets paused' : risk.status.resumedByAdmin ? 'Resumed by admin' : 'Betting open' }}
@@ -124,7 +124,7 @@ const lossUsed = computed(() => {
         <p v-if="riskError" class="adm-error" role="alert">{{ riskError }}</p>
         <template v-if="risk">
           <p class="adm-num text-[1.125rem] font-semibold text-[var(--adm-text)]">
-            Today's NGR {{ cr(risk.status.netGamingRevenueToday) }} · limit −{{ cr(risk.status.dailyHouseLossLimit) }}
+            Today's net gaming revenue {{ cr(risk.status.netGamingRevenueToday) }} · limit −{{ cr(risk.status.dailyHouseLossLimit) }}
           </p>
           <div class="relative mt-2 h-3 rounded-full bg-[var(--adm-surface-3)]" role="img" :aria-label="`${lossUsed.toFixed(0)}% of the daily loss limit used`">
             <span class="absolute inset-y-0 left-0 rounded-full" :style="{ width: `${lossUsed}%`, background: lossUsed >= 100 ? '#ef4444' : lossUsed >= 60 ? '#f59e0b' : '#22c55e' }" />

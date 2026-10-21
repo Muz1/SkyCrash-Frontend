@@ -1,5 +1,5 @@
 // "About this report" text for every admin report, kept together so the wording stays
-// consistent. Money is in credits (play money); only PayFast purchases are rands.
+// consistent. All amounts are shown in rands (R).
 
 export interface AboutContent {
   measures: string
@@ -9,7 +9,7 @@ export interface AboutContent {
 }
 
 const PROFIT_RULE =
-  'Credits are play money; only PayFast purchases are rands. The house gains what players lose and loses what they win. Every free credit handed out (challenge, feedback and spin-wheel rewards, demo top-ups, admin adjustments) also counts as a cost. Purchases are neutral because the player paid for them.'
+  'All amounts are in rands (R). The house gains what players lose and loses what they win. Every free credit handed out (challenge, feedback and spin-wheel rewards, demo top-ups, admin adjustments) also counts as a cost. Purchases are neutral because the player paid for them.'
 
 export const ABOUT: Record<string, AboutContent> = {
   overview: {
@@ -27,14 +27,14 @@ export const ABOUT: Record<string, AboutContent> = {
     useFor: 'Start here each day. Spot quiet days, payout spikes or a drop in active players, then open the matching detailed report.',
   },
   revenue: {
-    measures: 'How many credits flow through the game, what the house keeps before and after bonus credits, and the real money taken through PayFast. Credits are play money; only PayFast purchases are rands. Test accounts are left out unless "Include test accounts" is on.',
+    measures: 'How many credits flow through the game, what the house keeps before and after bonus credits, and the real money taken through PayFast. All amounts are in rands (R). Test accounts are left out unless "Include test accounts" is on.',
     numbers: [
-      { term: 'GGR', definition: 'Gross gaming revenue: total wagered − total payouts (credits), split into cash and bonus stakes.' },
+      { term: 'Gross gaming revenue (GGR)', definition: 'Total wagered − total payouts, split into bought-credit and bonus-credit stakes.' },
       { term: 'Expected from house edge', definition: 'Wagered × house edge. The gap to GGR is shown in standard deviations (z): within ±2 is normal luck.' },
-      { term: 'Actual vs theoretical RTP', definition: 'Payouts ÷ wagered against 100% − house edge (99%). The sample-size note says how far luck can move it.' },
+      { term: 'Actual vs theoretical return to player (RTP)', definition: 'Payouts ÷ wagered against 100% − house edge (99%). The sample-size note says how far luck can move it.' },
       { term: 'Bonus cost', definition: 'Free credits granted (wheel, achievements, challenges, feedback, admin top-ups), by source. Bonus forfeited expired unwagered.' },
-      { term: 'NGR', definition: 'Net gaming revenue: GGR − bonus cost.' },
-      { term: 'Hold % / NGR margin', definition: 'GGR ÷ wagered and NGR ÷ wagered.' },
+      { term: 'Net gaming revenue (NGR)', definition: 'Gross gaming revenue − bonus cost.' },
+      { term: 'Hold percentage / net gaming revenue margin', definition: 'Gross gaming revenue ÷ wagered, and net gaming revenue ÷ wagered.' },
       { term: 'Purchases', definition: 'PayFast credit-pack purchases in rands, how many, and the credits sold.' },
       { term: 'Largest wins / cap events', definition: 'The ten biggest payouts, and the bets a risk cap (100× max multiplier, 10 000 max profit, round liability) cashed out.' },
     ],

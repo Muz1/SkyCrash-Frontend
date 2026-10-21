@@ -1,8 +1,7 @@
 // Number formatting shared by the admin reports.
-// Credits are play money and are shown WITHOUT a currency sign. Only PayFast purchase revenue
-// is real money and is shown in rands (R). Every amount has exactly 2 decimals and the same
-// grouping whatever the browser locale: a no-break space between thousands and a "." decimal
-// point (454 048.40), never "R454 048,4".
+// Every admin amount is shown in rands (1 credit is reported as R1) with exactly 2 decimals and
+// the same grouping whatever the browser locale: a no-break space between thousands and a "."
+// decimal point (R454 048.40), never "R454 048,4".
 
 const NBSP = ' '
 const twoDp = new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
@@ -21,14 +20,15 @@ export const amount = (v: number | null | undefined) => {
   return `${sign(r)}${group(twoDp.format(Math.abs(r)))}`
 }
 
-/** Credits (play money): 2 decimals, no currency sign. */
-export const cr = amount
+/** Report amounts, in rands: R454 048.40. (Defined below zar so it can reuse it.) */
 
 /** Real money from PayFast purchases: R454 048.40. */
 export const zar = (v: number | null | undefined) => {
   const r = Math.round(safe(v) * 100) / 100
   return `${sign(r)}R${group(twoDp.format(Math.abs(r)))}`
 }
+
+export const cr = zar
 
 /** Whole-number counts: 1 234. */
 export const count = (v: number | null | undefined) => group(whole.format(safe(v)))

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { cr } from '@/lib/reportFormat'
 import { computed, onMounted, ref } from 'vue'
 import { Search, ArrowUp, ArrowDown } from '@lucide/vue'
 import { useAdminStore } from '@/stores/adminStore'
@@ -74,7 +75,6 @@ const testCount = computed(() => adminStore.players.filter((p) => p.isTestAccoun
 // Only managers can change who is an admin (the API enforces this too).
 const isManager = computed(() => !!usePlayerStore().profile?.isManager)
 const adminCount = computed(() => adminStore.players.filter((p) => p.isAdmin).length)
-const balanceFormat = new Intl.NumberFormat(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
 
 onMounted(() => {
   adminStore.fetchPlayers()
@@ -185,7 +185,7 @@ onMounted(() => {
                   </span>
                 </td>
                 <td class="adm-muted" data-label="Email">{{ player.email }}</td>
-                <td class="adm-num adm-strong" data-label="Balance">{{ balanceFormat.format(player.creditBalance) }}</td>
+                <td class="adm-num adm-strong" data-label="Balance">{{ cr(player.creditBalance) }}</td>
                 <td data-label="Role"><AdminPill :label="player.isManager ? 'Manager' : player.isAdmin ? 'Admin' : 'Player'" :dot="false" /></td>
                 <td data-label="Status"><AdminPill :label="player.isBlocked ? 'Blocked' : 'Active'" /></td>
                 <td data-label="Email ✓">

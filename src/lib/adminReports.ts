@@ -174,7 +174,7 @@ export function buildRtpReport(summary: RtpSummary, settings: GameSettings | nul
         'The house edge is the share of every bet the game keeps on average over the long run. Theoretical RTP (Return to Player) is 100% minus the house edge — the payout rate the maths guarantees over a very large number of rounds.',
       rows: [
         ['House edge', `${summary.houseEdgePercentage}%`],
-        ['Theoretical RTP', `${summary.theoreticalRtpPercentage}%`],
+        ['Theoretical return to player (RTP)', `${summary.theoreticalRtpPercentage}%`],
         ['Last changed by', settings?.updatedByUsername ?? '—'],
         ['Last changed on', settings?.updatedByUsername ? formatDateTime(settings.updatedAtUtc) : '—'],
       ],
@@ -182,8 +182,8 @@ export function buildRtpReport(summary: RtpSummary, settings: GameSettings | nul
   ]
 
   for (const [heading, stats, window] of [
-    ['Actual RTP — All Time', summary.allTime, 'since the game launched'],
-    ['Actual RTP — Last 24 Hours', summary.last24Hours, 'in the last 24 hours'],
+    ['Actual return to player — all time', summary.allTime, 'since the game launched'],
+    ['Actual return to player — last 24 hours', summary.last24Hours, 'in the last 24 hours'],
   ] as const) {
     sections.push({
       kind: 'metrics',
@@ -192,7 +192,7 @@ export function buildRtpReport(summary: RtpSummary, settings: GameSettings | nul
         `The payout rate actually delivered to players ${window}: total paid out divided by total wagered. ` +
         'Over enough bets this should settle close to the theoretical RTP; short windows can swing noticeably either way.',
       rows: [
-        ['Actual RTP', `${stats.actualRtpPercentage}%`],
+        ['Actual return to player (RTP)', `${stats.actualRtpPercentage}%`],
         ['Difference from theoretical', `${(stats.actualRtpPercentage - summary.theoreticalRtpPercentage).toFixed(2)} percentage points`],
         ['Bets resolved', stats.betsResolved],
         ['Total wagered', stats.totalWagered],
@@ -202,7 +202,7 @@ export function buildRtpReport(summary: RtpSummary, settings: GameSettings | nul
   }
 
   return {
-    title: 'RTP & House Edge Report',
+    title: 'Return to Player (RTP) & House Edge Report',
     fileName: 'skycrash-rtp',
     summary:
       'Compares the configured house edge with the return actually paid to players. A large, persistent gap between actual and theoretical RTP can indicate unusual player behaviour or a problem worth investigating.',
@@ -299,29 +299,29 @@ export function buildRevenueReport(r: RevenueReport): ReportDefinition {
     fileName: 'skycrash-revenue',
     summary:
       `${range}. ${r.includesTestAccounts ? 'Test accounts included.' : 'Test accounts excluded.'} ` +
-      'All amounts are credits except Purchases, which are rands. Credits are play money; only PayFast purchases are rands. ' +
+      'All amounts are in rands (R). ' +
       (r.gapExplanation ? r.gapExplanation : ''),
     sections: [
       {
         kind: 'metrics',
         heading: 'Headline figures',
         description:
-          'GGR = wagered − payouts. NGR = GGR − bonus cost. Hold % = GGR ÷ wagered. NGR margin = NGR ÷ wagered. Expected from house edge = wagered × edge.',
+          'Gross gaming revenue (GGR) = wagered − payouts. Net gaming revenue (NGR) = GGR − bonus cost. Hold percentage = GGR ÷ wagered. NGR margin = NGR ÷ wagered. Expected from house edge = wagered × edge.',
         rows: [
-          ['GGR (credits)', cr(ggr)],
-          ['GGR on cash stakes', cr(r.ggrCash)],
-          ['GGR on bonus stakes', cr(r.ggrBonus)],
+          ['Gross gaming revenue (GGR)', cr(ggr)],
+          ['Gross gaming revenue on bought-credit stakes', cr(r.ggrCash)],
+          ['Gross gaming revenue on bonus-credit stakes', cr(r.ggrBonus)],
           ['Expected from house edge', cr(r.expectedGrossRevenue)],
           ['Gap to expected', cr(r.gapToExpected)],
           ['Gap in std devs (z)', r.gapZScore == null ? '—' : r.gapZScore.toFixed(2)],
-          ['Std dev of GGR', cr(r.ggrStandardDeviation)],
-          ['Actual RTP', pct2(r.actualRtpPercentage)],
-          ['Theoretical RTP', pct2(r.theoreticalRtpPercentage ?? 100 - r.houseEdgePercentage)],
+          ['Standard deviation of gross gaming revenue', cr(r.ggrStandardDeviation)],
+          ['Actual return to player (RTP)', pct2(r.actualRtpPercentage)],
+          ['Theoretical return to player (RTP)', pct2(r.theoreticalRtpPercentage ?? 100 - r.houseEdgePercentage)],
           ['Bonus cost', cr(bonusCost)],
           ['Bonus forfeited', cr(r.bonusForfeited)],
-          ['NGR (credits)', cr(ngr)],
+          ['Net gaming revenue (NGR)', cr(ngr)],
           ['Hold %', pct2(r.holdPercentage)],
-          ['NGR margin', pct2(r.ngrMarginPercentage ?? r.profitMarginPercentage)],
+          ['Net gaming revenue margin', pct2(r.ngrMarginPercentage ?? r.profitMarginPercentage)],
           ['Wagered', cr(r.totalWagered)],
           ['Payouts', cr(r.totalPayouts)],
           ['Resolved bets', count(r.betCount)],
@@ -335,7 +335,7 @@ export function buildRevenueReport(r: RevenueReport): ReportDefinition {
       {
         kind: 'table',
         heading: 'Bonus cost by source',
-        description: 'Free credits granted in the range, by where they came from (credits).',
+        description: 'Free credits granted in the range, by where they came from.',
         columns: ['Source', 'Credits'],
         rows: bySource.map((b) => [b.label, cr(b.amount)]),
         emptyText: 'No bonus credits were granted in this range.',
@@ -369,7 +369,7 @@ export function buildRevenueReport(r: RevenueReport): ReportDefinition {
         kind: 'table',
         heading: 'Daily breakdown',
         description: 'Per UTC day. A note marks days where a cap fired or one win paid more than half the day’s wagers.',
-        columns: ['Date', 'Wagered', 'Payouts', 'GGR', 'NGR', 'Purchases (R)', 'Caps', 'Note'],
+        columns: ['Date', 'Wagered', 'Payouts', 'Gross gaming revenue', 'Net gaming revenue', 'Purchases', 'Caps', 'Note'],
         rows: r.daily.map((d) => [
           longDate(d.date),
           cr(d.wagered),

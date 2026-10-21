@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { cr } from '@/lib/reportFormat'
 import { onMounted, onUnmounted } from 'vue'
 import { Users, Radio, Hash, RefreshCw, Coins, Gauge } from '@lucide/vue'
 import { useOperationsStore } from '@/stores/operationsStore'
@@ -50,7 +51,7 @@ onUnmounted(() => {
           <span class="adm-num">{{ operationsStore.metrics.roundsLastHour }}</span>
         </AdminKpi>
         <AdminKpi label="Wagered (Last Hour)" :icon="Coins" tone="ember" caption="Credits staked in 60 minutes" large fill>
-          <span class="adm-num">{{ operationsStore.metrics.totalWageredLastHour }}</span>
+          <span class="adm-num">{{ cr(operationsStore.metrics.totalWageredLastHour) }}</span>
         </AdminKpi>
         <AdminKpi label="Active Bets (Round)" :icon="Gauge" tone="blue" caption="Open bets on this round" large fill>
           <span class="adm-num">{{ operationsStore.metrics.activeBetsThisRound }}</span>

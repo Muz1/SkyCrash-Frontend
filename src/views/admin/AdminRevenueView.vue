@@ -89,13 +89,13 @@ function buildReport() {
             <span class="adm-num">vs {{ pct2(v.theoretical) }} theoretical</span>
           </template>
         </AdminKpi>
-        <AdminKpi :label="k.ngr.label" :info="k.ngr.info" :icon="TrendingUp" :tone="v.ngr >= 0 ? 'lime' : 'magenta'" caption="GGR − bonus cost">
+        <AdminKpi :label="k.ngr.label" :info="k.ngr.info" :icon="TrendingUp" :tone="v.ngr >= 0 ? 'lime' : 'magenta'" caption="Gross gaming revenue − bonus cost">
           <span class="adm-num">{{ cr(v.ngr) }}</span>
         </AdminKpi>
-        <AdminKpi :label="k.hold.label" :info="k.hold.info" :icon="Percent" tone="blue" caption="GGR ÷ wagered">
+        <AdminKpi :label="k.hold.label" :info="k.hold.info" :icon="Percent" tone="blue" caption="Gross gaming revenue ÷ wagered">
           <span class="adm-num">{{ pct2(v.hold) }}</span>
         </AdminKpi>
-        <AdminKpi :label="k.ngrMargin.label" :info="k.ngrMargin.info" :icon="Percent" tone="lime" caption="NGR ÷ wagered">
+        <AdminKpi :label="k.ngrMargin.label" :info="k.ngrMargin.info" :icon="Percent" tone="lime" caption="Net gaming revenue ÷ wagered">
           <span class="adm-num">{{ pct2(v.ngrMargin) }}</span>
         </AdminKpi>
         <AdminKpi :label="k.bonusCost.label" :info="k.bonusCost.info" :icon="Gift" tone="magenta">
@@ -130,7 +130,7 @@ function buildReport() {
       </p>
       <p v-if="data.sampleSizeNote" class="adm-callout">
         <Gauge aria-hidden="true" />
-        <span><strong>RTP sample size:</strong> {{ data.sampleSizeNote }}</span>
+        <span><strong>Return to player (RTP) sample size:</strong> {{ data.sampleSizeNote }}</span>
       </p>
       <p class="adm-note">{{ copy.credits.note }}</p>
 
@@ -148,13 +148,13 @@ function buildReport() {
             :height="240"
           />
         </AdminPanel>
-        <AdminPanel title="Revenue & profit over time" caption="GGR and NGR per day. Below zero is a loss." accent="lime">
+        <AdminPanel title="Revenue & profit over time" caption="Gross and net gaming revenue per day. Below zero is a loss." accent="lime">
           <AdminTrendChart
-            label="Daily GGR and NGR"
+            label="Daily gross and net gaming revenue"
             :dates="data.daily.map((d) => d.date)"
             :series="[
-              { name: 'GGR', values: data.daily.map((d) => d.ggr ?? d.grossRevenue) },
-              { name: 'NGR', values: data.daily.map((d) => d.ngr ?? d.netProfit) },
+              { name: 'Gross gaming revenue', values: data.daily.map((d) => d.ggr ?? d.grossRevenue) },
+              { name: 'Net gaming revenue', values: data.daily.map((d) => d.ngr ?? d.netProfit) },
             ]"
             :annotations="data.daily.map((d) => d.annotation)"
             :format="cr"

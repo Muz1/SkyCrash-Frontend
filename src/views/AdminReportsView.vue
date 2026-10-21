@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { cr } from '@/lib/reportFormat'
 import { onMounted, ref } from 'vue'
 import { Search, ChevronLeft, ChevronRight, UserRound } from '@lucide/vue'
 import * as adminReportsService from '@/services/adminReportsService'
@@ -85,8 +86,8 @@ onMounted(() => {
                     <td><AdminPill :label="r.status" /></td>
                     <td class="adm-num adm-strong">{{ r.crashMultiplier != null ? `${r.crashMultiplier.toFixed(2)}x` : '—' }}</td>
                     <td class="adm-num">{{ r.betCount }}</td>
-                    <td class="adm-num">{{ r.totalWagered }}</td>
-                    <td class="adm-num">{{ r.totalPaidOut }}</td>
+                    <td class="adm-num">{{ cr(r.totalWagered) }}</td>
+                    <td class="adm-num">{{ cr(r.totalPaidOut) }}</td>
                     <td class="adm-muted adm-num-inline">{{ new Date(r.createdAtUtc).toLocaleString() }}</td>
                   </tr>
                   <tr v-if="roundsReport.rounds.length === 0">
@@ -174,10 +175,10 @@ onMounted(() => {
                 <tbody>
                   <tr v-for="b in playerBets" :key="b.betId">
                     <td class="adm-strong adm-num-inline">#{{ b.roundNumber }}</td>
-                    <td class="adm-num">{{ b.amount }}</td>
+                    <td class="adm-num">{{ cr(b.amount) }}</td>
                     <td><AdminPill :label="b.status" /></td>
                     <td class="adm-num">{{ b.cashOutMultiplier != null ? `${b.cashOutMultiplier.toFixed(2)}x` : '—' }}</td>
-                    <td class="adm-num adm-strong">{{ b.payout ?? '—' }}</td>
+                    <td class="adm-num adm-strong">{{ b.payout != null ? cr(b.payout) : '—' }}</td>
                     <td class="adm-muted adm-num-inline">{{ new Date(b.placedAtUtc).toLocaleString() }}</td>
                   </tr>
                   <tr v-if="playerBets.length === 0">
