@@ -3047,7 +3047,9 @@
       "isManager": false,
       "isBlocked": false,
       "memberSinceUtc": "2026-10-15T13:41:37.323856Z",
-      "lastSeenUtc": "2026-10-15T13:50:16.314666Z"
+      "lastSeenUtc": "2026-10-15T13:50:16.314666Z",
+      "emailVerified": true,
+      "isTestAccount": false
     },
     {
       "playerId": "8eca636b-6b89-4194-964b-7c0b71339522",
@@ -3058,7 +3060,9 @@
       "isManager": false,
       "isBlocked": false,
       "memberSinceUtc": "2026-10-15T13:41:37.678041Z",
-      "lastSeenUtc": "2026-10-15T13:50:15.96421Z"
+      "lastSeenUtc": "2026-10-15T13:50:15.96421Z",
+      "emailVerified": false,
+      "isTestAccount": false
     },
     {
       "playerId": "49013fb1-99dc-46be-8724-c1b1d988bfc9",
@@ -3069,7 +3073,9 @@
       "isManager": false,
       "isBlocked": false,
       "memberSinceUtc": "2026-10-15T13:41:37.804785Z",
-      "lastSeenUtc": "2026-10-15T13:41:37.804781Z"
+      "lastSeenUtc": "2026-10-15T13:41:37.804781Z",
+      "emailVerified": true,
+      "isTestAccount": false
     },
     {
       "playerId": "207e0de9-87fc-4c84-a313-16ee1c513be6",
@@ -3080,7 +3086,9 @@
       "isManager": false,
       "isBlocked": false,
       "memberSinceUtc": "2026-10-15T13:41:37.550593Z",
-      "lastSeenUtc": "2026-10-15T13:50:15.818434Z"
+      "lastSeenUtc": "2026-10-15T13:50:15.818434Z",
+      "emailVerified": true,
+      "isTestAccount": false
     },
     {
       "playerId": "665146ab-efe9-47b4-b23e-83d40b3c35a9",
@@ -3091,7 +3099,9 @@
       "isManager": true,
       "isBlocked": false,
       "memberSinceUtc": "2026-10-15T13:40:35.140621Z",
-      "lastSeenUtc": "2026-10-15T13:40:35.140619Z"
+      "lastSeenUtc": "2026-10-15T13:40:35.140619Z",
+      "emailVerified": false,
+      "isTestAccount": false
     },
     {
       "playerId": "56ec2ccb-d5a9-44d8-b0e8-4df3b7669708",
@@ -3102,7 +3112,9 @@
       "isManager": false,
       "isBlocked": false,
       "memberSinceUtc": "2026-10-15T13:41:37.618204Z",
-      "lastSeenUtc": "2026-10-15T13:50:15.898559Z"
+      "lastSeenUtc": "2026-10-15T13:50:15.898559Z",
+      "emailVerified": true,
+      "isTestAccount": false
     },
     {
       "playerId": "f1bfbb38-758b-4e2e-ba58-350eb0c87f6e",
@@ -3113,7 +3125,9 @@
       "isManager": false,
       "isBlocked": false,
       "memberSinceUtc": "2026-10-15T13:41:37.739421Z",
-      "lastSeenUtc": "2026-10-15T13:41:37.739419Z"
+      "lastSeenUtc": "2026-10-15T13:41:37.739419Z",
+      "emailVerified": true,
+      "isTestAccount": true
     }
   ],
   "/admin/rounds/current": {
