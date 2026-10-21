@@ -1,7 +1,7 @@
 // One report per admin page, built from the data that page already has loaded.
 // Every section carries a plain-language description so the PDF reads on its own.
 import { formatDateTime, type ReportDefinition } from '@/lib/pdfReport'
-import { count, cr, longDate, mult, pct2, zar } from '@/lib/reportFormat'
+import { count, cr, dateTime, longDate, mult, pct2, zar } from '@/lib/reportFormat'
 import type { RevenueReport } from '@/types/insights'
 import type {
   AdminPlayerSummary,
@@ -353,7 +353,7 @@ export function buildRevenueReport(r: RevenueReport): ReportDefinition {
           mult(w.crashMultiplier),
           cr(w.payout),
           settledByLabel(w.settledBy),
-          formatDateTime(w.placedAtUtc),
+          dateTime(w.placedAtUtc),
         ]),
         emptyText: 'No winning bets in this range.',
       },

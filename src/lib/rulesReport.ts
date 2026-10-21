@@ -18,6 +18,7 @@ export function buildRulesReport(set: RuleSet): ReportDefinition {
   return {
     title: 'SkyCrash Account Rules',
     fileName: `skycrash-rules-${set.label}`,
+    landscape: true,
     summary:
       `${rulesCoverLine(set)}. Published by ${set.publishedBy || 'system'}` +
       (set.changeNote ? ` — "${set.changeNote}".` : '.') +
@@ -41,7 +42,7 @@ export function buildRulesReport(set: RuleSet): ReportDefinition {
           r.appealable ? 'Yes' : 'No',
         ]),
         emptyText: 'No active rules.',
-        widths: { 0: 0.07, 1: 0.15, 2: 0.2, 3: 0.32, 4: 0.1, 5: 0.09 },
+        widths: { 0: 0.05, 1: 0.15, 2: 0.2, 3: 0.35, 4: 0.1, 5: 0.09, 6: 0.06 },
       },
     ],
   }

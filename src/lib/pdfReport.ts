@@ -38,7 +38,7 @@ function cellText(value: ReportCell): string {
 const NUMERIC = /^[-+]?(R\s?)?[\d\s,.]+(x|%)?$/i
 function isNumericColumn(rows: ReportCell[][], index: number): boolean {
   const values = rows.map((r) => r[index]).filter((v) => v !== null && v !== undefined && v !== '')
-  return values.length > 0 && values.every((v) => typeof v === 'number' || NUMERIC.test(String(v).trim()))
+  return values.length > 0 && values.every((v) => typeof v === 'number' || NUMERIC.test(pdfSafe(String(v))))
 }
 
 export async function exportReportPdf(report: ReportDefinition): Promise<void> {
@@ -75,7 +75,7 @@ export async function exportReportPdf(report: ReportDefinition): Promise<void> {
   function wrap(text: string, size: number, width: number): string[] {
     doc.setFont('helvetica', 'normal')
     doc.setFontSize(size)
-    return doc.splitTextToSize(text, width)
+    return doc.splitTextToSize(pdfSafe(text), width)
   }
 
   function tableEnd(): number {
@@ -115,7 +115,7 @@ export async function exportReportPdf(report: ReportDefinition): Promise<void> {
     doc.text(String(index + 1).padStart(2, '0'), MARGIN, y + 11)
     doc.setFontSize(13)
     doc.setTextColor(...NAVY)
-    doc.text(section.heading, MARGIN + 22, y + 11)
+    doc.text(pdfSafe(section.heading), MARGIN + 22, y + 11)
     doc.setDrawColor(...RULE)
     doc.setLineWidth(0.75)
     doc.line(MARGIN, y + 19, pageWidth - MARGIN, y + 19)
@@ -150,7 +150,7 @@ export async function exportReportPdf(report: ReportDefinition): Promise<void> {
           doc.setFont('helvetica', 'normal')
           doc.setFontSize(7.5)
           doc.setTextColor(...MUTED)
-          doc.text(doc.splitTextToSize(label.toUpperCase(), cardW - 20)[0], x + 10, y + 17)
+          doc.text(doc.splitTextToSize(pdfSafe(label).toUpperCase(), cardW - 20)[0], x + 10, y + 17)
           doc.setFont('helvetica', 'bold')
           doc.setFontSize(14)
           doc.setTextColor(...INK)
@@ -161,7 +161,7 @@ export async function exportReportPdf(report: ReportDefinition): Promise<void> {
         autoTable(doc, {
           startY: y,
           margin: tableMargin,
-          body: section.rows.map(([label, value]) => [label, cellText(value)]),
+          body: section.rows.map(([label, value]) => [pdfSafe(label), cellText(value)]),
           theme: 'plain',
           styles: {
             fontSize: 9.5,
@@ -191,7 +191,7 @@ export async function exportReportPdf(report: ReportDefinition): Promise<void> {
       autoTable(doc, {
         startY: y,
         margin: tableMargin,
-        head: [section.columns],
+        head: [section.columns.map(pdfSafe)],
         body,
         theme: 'plain',
         styles: {
