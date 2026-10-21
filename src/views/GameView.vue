@@ -41,6 +41,8 @@ import GameRulesModal from '@/components/sky/GameRulesModal.vue'
 import WinSummaryCard from '@/components/sky/WinSummaryCard.vue'
 import LiveBetsPanel from '@/components/sky/LiveBetsPanel.vue'
 import AccountNotices from '@/components/sky/AccountNotices.vue'
+import RealityCheckModal from '@/components/sky/RealityCheckModal.vue'
+import { useRealityCheck } from '@/composables/useRealityCheck'
 
 const gameStore = useGameStore()
 const playerStore = usePlayerStore()
@@ -50,6 +52,7 @@ const publicSettings = usePublicSettingsStore()
 /** Published limits (min/max bet, max multiplier, profit cap). Null on older servers. */
 const rules = computed(() => publicSettings.rules)
 const rulesOpen = ref(false)
+const realityCheck = useRealityCheck()
 onMounted(() => void publicSettings.load())
 
 useGameAudio()
@@ -550,5 +553,10 @@ function crashChipClass(value: number) {
     <TutorialOverlay v-if="tutorial.isOpen.value" @close="tutorial.finish" />
 
     <GameRulesModal v-if="rulesOpen" @close="rulesOpen = false" />
+    <RealityCheckModal
+      v-if="realityCheck.isOpen.value && realityCheck.session.value && !tutorial.isOpen.value"
+      :session="realityCheck.session.value"
+      @close="realityCheck.close()"
+    />
   </div>
 </template>
