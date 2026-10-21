@@ -273,8 +273,9 @@ export const PLAYER_SCREENS: Screen[] = [
     prepare: async (p) => {
       await skipDailyBriefing(p)
       await p.reload()
+      // the ⓘ next to "Max win", then the "Game rules" link inside its bubble
       await p.getByRole('button', { name: /^game rules$/i }).first().click()
-      await p.getByRole('button', { name: /^game rules$/i }).last().click()
+      await p.getByRole('tooltip').getByRole('button', { name: /^game rules$/i }).click()
       await expect(p.getByRole('dialog', { name: /game rules/i })).toBeVisible()
     },
   },
