@@ -7,6 +7,8 @@ export interface Toast {
   message: string
   accent: 'lime' | 'ember' | 'magenta' | 'blue'
   imageSrc?: string | null
+  /** Optional link shown on the right, e.g. { label: 'Limits', to: '/profile#responsible-play' }. */
+  action?: { label: string; to: string } | null
 }
 
 let nextId = 1

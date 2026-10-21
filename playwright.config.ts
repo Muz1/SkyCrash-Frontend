@@ -3,7 +3,8 @@ import { defineConfig, devices } from '@playwright/test'
 // Cross-device layout suite. Runs without a backend: every API call and the SignalR hub are
 // answered from e2e/fixtures (see e2e/support/mockApi.ts). The dev server is pointed at a
 // host that does not exist, so a missing stub fails loudly instead of hitting a real API.
-const PORT = 5174
+// E2E_PORT lets several checkouts run the suite side by side without sharing a dev server.
+const PORT = Number(process.env.E2E_PORT ?? 5174)
 const FAKE_API = 'http://api.skycrash.test'
 
 export default defineConfig({

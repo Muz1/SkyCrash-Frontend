@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref, toRef } from 'vue'
-import axios from 'axios'
 import { Timer } from '@lucide/vue'
 import ArcadeButton from './ArcadeButton.vue'
 import logo from '@/assets/logo-skycrash.png'
-import * as walletService from '@/services/walletService'
+import { useResendVerification } from '@/composables/useResendVerification'
+import { creditAmount } from '@/lib/format'
+import { en } from '@/copy/en'
 import { usePlayerStore } from '@/stores/playerStore'
 import { useSpinStore } from '@/stores/spinStore'
 import { useCountdown, formatDuration } from '@/composables/useCountdown'
@@ -24,6 +25,14 @@ const rotation = ref(0)
 const spinning = ref(false)
 const prize = ref<number | null>(null)
 const error = ref<string | null>(null)
+/** The spin needs a verified email: offer Resend right there. */
+const needsEmail = ref(false)
+const resender = useResendVerification()
+/** Balance shown while the wheel turns: the prize is already paid, but the wheel reveals it. */
+const balanceBeforeSpin = ref<number | null>(null)
+const shownBalance = computed(() => balanceBeforeSpin.value ?? playerStore.profile?.creditBalance ?? 0)
+/** "You won X on your last spin": a paid spin this browser never revealed. */
+const lastSpinNote = ref<string | null>(null)
 let timer: ReturnType<typeof setTimeout> | null = null
 
 const reduceMotion =
@@ -83,6 +92,10 @@ function labelStyle(index: number) {
 async function load() {
   await spinStore.load()
   if (spinStore.loadError) error.value = 'The wheel is unavailable right now.'
+  if (spinStore.unseenLastSpin) {
+    lastSpinNote.value = en.spin.lastSpin(creditAmount(spinStore.unseenLastSpin.amount))
+    spinStore.markSeen()
+  }
 }
 
 async function spin() {
@@ -90,27 +103,30 @@ async function spin() {
   spinning.value = true
   prize.value = null
   error.value = null
-  try {
-    const result = await walletService.spinWheel()
-    // Bring the winning label to the pointer at 12 o'clock after six full turns.
-    const current = ((rotation.value % 360) + 360) % 360
-    const destination = (((360 - result.segmentIndex * segmentAngle.value) % 360) + 360) % 360
-    rotation.value += (reduceMotion ? 360 : 360 * 6) + ((destination - current + 360) % 360)
-    timer = setTimeout(() => {
-      prize.value = result.amount
-      spinStore.applyResult(result)
-      if (playerStore.profile) playerStore.profile.creditBalance = result.newBalance
-      spinning.value = false
-      timer = null
-    }, duration)
-  } catch (err: unknown) {
-    const data = axios.isAxiosError(err)
-      ? (err.response?.data as { message?: string; nextSpinAtUtc?: string })
-      : undefined
-    error.value = data?.message ?? 'Spin failed. Please try again.'
-    if (data?.nextSpinAtUtc) spinStore.nextSpinAt = data.nextSpinAtUtc
+  needsEmail.value = false
+  lastSpinNote.value = null
+  balanceBeforeSpin.value = playerStore.profile?.creditBalance ?? null
+  // The store applies the prize (balance, next spin) as soon as the server answers.
+  const outcome = await spinStore.spin()
+  if (!outcome.ok) {
+    error.value = outcome.failure.message
+    needsEmail.value = outcome.failure.kind === 'email-unverified'
+    balanceBeforeSpin.value = null
     spinning.value = false
+    return
   }
+  const result = outcome.result
+  // Bring the winning label to the pointer at 12 o'clock after six full turns.
+  const current = ((rotation.value % 360) + 360) % 360
+  const destination = (((360 - result.segmentIndex * segmentAngle.value) % 360) + 360) % 360
+  rotation.value += (reduceMotion ? 360 : 360 * 6) + ((destination - current + 360) % 360)
+  timer = setTimeout(() => {
+    prize.value = result.amount
+    spinStore.markSeen()
+    balanceBeforeSpin.value = null
+    spinning.value = false
+    timer = null
+  }, duration)
 }
 
 onMounted(load)
@@ -194,7 +210,10 @@ onBeforeUnmount(() => {
           {{ spinning ? 'Spinning…' : 'Spin to earn arcade credits' }}
         </p>
         <p class="mt-2 font-arcade text-[0.625rem] uppercase text-ember">
-          Balance {{ (playerStore.profile?.creditBalance ?? 0).toLocaleString() }}
+          Balance {{ shownBalance.toLocaleString() }}
+        </p>
+        <p v-if="spinStore.spinsLeftToday !== null" class="mt-1 text-sm text-foreground/80">
+          {{ spinStore.spinsLeftToday > 0 ? en.spin.spinsLeft(spinStore.spinsLeftToday) : en.spin.noneLeft }}
         </p>
       </div>
 
@@ -204,6 +223,19 @@ onBeforeUnmount(() => {
         class="mx-auto mt-3 max-w-sm border-2 border-danger bg-danger/15 px-3 py-2 text-sm font-semibold"
       >
         {{ error }}
+        <button
+          v-if="needsEmail"
+          type="button"
+          class="ml-1 font-bold text-ember underline underline-offset-2 pointer-coarse:min-h-11 pointer-coarse:min-w-11 disabled:opacity-50"
+          :disabled="resender.sending.value"
+          @click="resender.resend()"
+        >
+          {{ en.verifyEmail.resend }}
+        </button>
+        <span v-if="resender.message.value" class="block text-xs">{{ resender.message.value }}</span>
+      </p>
+      <p v-if="lastSpinNote" role="status" class="mx-auto mt-3 max-w-sm border-2 border-lime bg-lime/10 px-3 py-2 text-sm font-semibold text-lime">
+        {{ lastSpinNote }}
       </p>
 
       <ArcadeButton
@@ -211,7 +243,7 @@ onBeforeUnmount(() => {
         type="button"
         size="xl"
         class="mt-2 min-w-48 md:mt-4"
-        :disabled="!canSpin"
+        :disabled="!canSpin || spinStore.spinsLeftToday === 0"
         @click="spin"
       >
         {{ spinning ? 'Spinning…' : 'Spin Wheel' }}

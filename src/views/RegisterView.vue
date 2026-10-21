@@ -9,6 +9,11 @@ import CRTOverlay from '@/components/sky/CRTOverlay.vue'
 import SkyEnvironment from '@/components/sky/SkyEnvironment.vue'
 import Wordmark from '@/components/sky/Wordmark.vue'
 import TermsContent from '@/components/sky/TermsContent.vue'
+import SkyModal from '@/components/sky/SkyModal.vue'
+import RulesList from '@/components/sky/RulesList.vue'
+import { useRulesStore } from '@/stores/rulesStore'
+import { isAtLeast18, latestAdultDob } from '@/lib/age'
+import { en } from '@/copy/en'
 
 const authStore = useAuthStore()
 const router = useRouter()
@@ -20,7 +25,20 @@ const password = ref('')
 const confirmPassword = ref('')
 const agreedToTerms = ref(false)
 const showTerms = ref(false)
+/** Age gate (rule U1) and the Account rules tick, both checked by the server too. */
+const dateOfBirth = ref('')
+const agreedToRules = ref(false)
+const showRules = ref(false)
+const maxDob = latestAdultDob()
+const rulesStore = useRulesStore()
+/** Errors that belong to one field, shown under it. */
+const fieldErrors = ref<{ dateOfBirth?: string; password?: string; rules?: string }>({})
 const errorMessage = ref('')
+
+function openRules() {
+  showRules.value = true
+  void rulesStore.loadRules()
+}
 const isSubmitting = ref(false)
 
 const usernameStatus = ref<'idle' | 'checking' | 'available' | 'taken'>('idle')
@@ -56,6 +74,16 @@ function applySuggestion(suggestion: string) {
 
 async function handleSubmit() {
   errorMessage.value = ''
+  fieldErrors.value = {}
+
+  if (!dateOfBirth.value) {
+    fieldErrors.value = { dateOfBirth: en.register.dobRequired }
+    return
+  }
+  if (!isAtLeast18(dateOfBirth.value)) {
+    fieldErrors.value = { dateOfBirth: en.register.under18 }
+    return
+  }
 
   if (password.value !== confirmPassword.value) {
     errorMessage.value = 'Passwords do not match.'
@@ -67,9 +95,21 @@ async function handleSubmit() {
     return
   }
 
+  if (!agreedToRules.value) {
+    fieldErrors.value = { rules: en.register.rulesRequired }
+    return
+  }
+
   isSubmitting.value = true
   try {
-    await authStore.register({ username: username.value, email: email.value, password: password.value, acceptTerms: true })
+    await authStore.register({
+      username: username.value,
+      email: email.value,
+      password: password.value,
+      acceptTerms: true,
+      acceptRules: true,
+      dateOfBirth: dateOfBirth.value,
+    })
     // Back to where they came from (e.g. an admin invite link), else the landing page.
     const redirect = typeof route.query.redirect === 'string' && route.query.redirect.startsWith('/') ? route.query.redirect : '/'
     router.push(redirect)
@@ -80,6 +120,16 @@ async function handleSubmit() {
       errorMessage.value = data.join(' ')
     } else if (data && typeof data === 'object' && 'message' in (data as Record<string, unknown>)) {
       const record = data as Record<string, unknown>
+      if (record.rule === 'U1' || record.field === 'dateOfBirth') {
+        // Under 18 (rule U1): flag the date of birth, not the whole form.
+        fieldErrors.value = { dateOfBirth: en.register.under18 }
+        return
+      }
+      if (record.field === 'password') {
+        // Found in a data breach.
+        fieldErrors.value = { password: en.register.breached }
+        return
+      }
       errorMessage.value = String(record.message)
       if (record.field === 'username' && Array.isArray(record.suggestions)) {
         usernameStatus.value = 'taken'
@@ -100,9 +150,8 @@ async function handleSubmit() {
     <CRTOverlay />
 
     <div class="relative z-10 w-full max-w-md">
-      <RouterLink to="/" class="mb-6 block text-center" aria-label="Back to the Sky Crash home page">
-        <Wordmark compact />
-      </RouterLink>
+      <!-- The logo is itself the link home (see Wordmark). -->
+      <div class="mb-6 flex justify-center"><Wordmark compact /></div>
 
       <form class="neon-panel clip-hud crt-scan p-6 sm:p-8" @submit.prevent="handleSubmit">
         <h1 class="text-center font-display text-xl font-black uppercase tracking-[0.18em] text-lime text-glow-lime">
@@ -135,8 +184,15 @@ async function handleSubmit() {
             </div>
           </div>
           <ArcadeField v-model="email" label="Email" type="email" placeholder="pilot@skycrash.io" required />
-          <ArcadeField v-model="password" label="Password" type="password" placeholder="••••••••" required />
+          <div>
+            <ArcadeField v-model="password" label="Password" type="password" placeholder="••••••••" required />
+            <p v-if="fieldErrors.password" role="alert" class="mt-1 text-sm text-danger">{{ fieldErrors.password }}</p>
+          </div>
           <ArcadeField v-model="confirmPassword" label="Confirm Password" type="password" placeholder="••••••••" required />
+          <div>
+            <ArcadeField v-model="dateOfBirth" :label="en.register.dob" type="date" autocomplete="bday" :max="maxDob" required />
+            <p v-if="fieldErrors.dateOfBirth" role="alert" class="mt-1 text-sm text-danger">{{ fieldErrors.dateOfBirth }}</p>
+          </div>
         </div>
 
         <div class="mt-5 border-2 border-lime/50 bg-lime/5 p-3">
@@ -151,6 +207,18 @@ async function handleSubmit() {
           >
             Read the Terms of Service
           </button>
+          <label class="mt-2 flex cursor-pointer items-start gap-3 text-base text-foreground pointer-coarse:min-h-11 pointer-coarse:items-center">
+            <input v-model="agreedToRules" type="checkbox" class="mt-1 h-5 w-5 shrink-0 accent-[var(--neon-lime)] pointer-coarse:mt-0" />
+            <span>{{ en.register.rulesTick }} {{ en.register.rulesLink }}</span>
+          </label>
+          <button
+            type="button"
+            class="mt-1.5 pl-8 text-sm font-semibold text-electric pointer-coarse:min-h-11 underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-electric"
+            @click="openRules"
+          >
+            {{ en.rules.title }}
+          </button>
+          <p v-if="fieldErrors.rules" role="alert" class="mt-1 text-sm text-danger">{{ fieldErrors.rules }}</p>
         </div>
 
         <p v-if="errorMessage" role="alert" class="mt-4 font-arcade text-[0.5rem] uppercase leading-relaxed text-danger">
@@ -167,6 +235,18 @@ async function handleSubmit() {
         </p>
       </form>
     </div>
+
+    <SkyModal v-if="showRules" :title="en.rules.title" accent="magenta" width="lg" @close="showRules = false">
+      <div class="max-h-[55dvh] overflow-y-auto overflow-x-hidden border-y border-violet/30">
+        <RulesList v-if="rulesStore.ruleSet" :rules="rulesStore.activeRules" />
+        <p v-else-if="rulesStore.ruleSetError" class="py-2 text-sm text-danger">{{ en.rules.loadError }}</p>
+        <p v-else class="py-2 text-sm text-muted-foreground">{{ en.common.loading }}</p>
+      </div>
+      <template #footer>
+        <ArcadeButton type="button" size="md" variant="ghost" @click="showRules = false">{{ en.common.close }}</ArcadeButton>
+        <ArcadeButton type="button" size="md" variant="cash" @click="((agreedToRules = true), (showRules = false))">{{ en.rules.accept }}</ArcadeButton>
+      </template>
+    </SkyModal>
 
     <div v-if="showTerms" class="fixed inset-0 z-[90] grid place-items-center bg-void/80 p-4 backdrop-blur-sm" @click.self="showTerms = false">
       <section role="dialog" aria-modal="true" aria-labelledby="terms-title" class="neon-panel clip-hud flex max-h-[85dvh] w-full max-w-xl flex-col p-5">

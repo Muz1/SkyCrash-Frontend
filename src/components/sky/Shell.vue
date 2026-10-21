@@ -8,6 +8,7 @@ import PageTransition from './PageTransition.vue'
 import CRTOverlay from './CRTOverlay.vue'
 import NavDock from './NavDock.vue'
 import HudHeader from './HudHeader.vue'
+import AccountNotices from './AccountNotices.vue'
 
 const props = withDefaults(
   defineProps<{
@@ -36,6 +37,7 @@ const hangarStore = useHangarStore()
     <PageTransition :craft="hangarStore.craftId" />
     <CRTOverlay />
     <HudHeader v-if="showHud" />
+    <AccountNotices v-if="showHud" />
     <main
       :class="
         cn(

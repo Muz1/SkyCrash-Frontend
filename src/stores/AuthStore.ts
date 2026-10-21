@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import * as authService from '@/services/AuthService'
-import type { LoginPayload, RegisterPayload } from '@/types'
+import type { AuthResponse, LoginPayload, RegisterPayload } from '@/types'
 import { stopConnection } from '@/services/signalr'
 
 export const useAuthStore = defineStore('auth', () => {
@@ -12,7 +12,7 @@ export const useAuthStore = defineStore('auth', () => {
 
   const isAuthenticated = computed(() => !!token.value)
 
-  function setSession(authResponse: { token: string; playerId: string; username: string; email: string }) {
+  function setSession(authResponse: Pick<AuthResponse, 'token' | 'playerId' | 'username' | 'email'>) {
     token.value = authResponse.token
     username.value = authResponse.username
     email.value = authResponse.email
@@ -28,24 +28,31 @@ export const useAuthStore = defineStore('auth', () => {
     setSession(response)
   }
 
-  async function login(payload: LoginPayload) {
-    const response = await authService.login(payload)
-    setSession(response)
+  /**
+   * Step one of signing in. Resolves 'otp' with a challenge id when the server emailed a
+   * code (finish with completeOtp); otherwise the session is live. Throws on 401/403/429.
+   */
+  async function login(payload: LoginPayload): Promise<authService.LoginResult> {
+    const result = await authService.login(payload)
+    if (result.kind === 'session') setSession(result.auth)
+    return result
+  }
+
+  async function completeOtp(challengeId: string, code: string) {
+    setSession(await authService.loginOtp(challengeId, code))
   }
 
   function logout() {
-  token.value = null
-  username.value = null
-  email.value = null
-  playerId.value = null
-  localStorage.removeItem('skycrash_token')
-  localStorage.removeItem('skycrash_username')
-  localStorage.removeItem('skycrash_email')
-  localStorage.removeItem('skycrash_player_id')
-  stopConnection()
-}
+    token.value = null
+    username.value = null
+    email.value = null
+    playerId.value = null
+    localStorage.removeItem('skycrash_token')
+    localStorage.removeItem('skycrash_username')
+    localStorage.removeItem('skycrash_email')
+    localStorage.removeItem('skycrash_player_id')
+    stopConnection()
+  }
 
-
-
-  return { token, username, email, playerId, isAuthenticated, register, login, logout }
+  return { token, username, email, playerId, isAuthenticated, setSession, register, login, completeOtp, logout }
 })

@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue'
-import { useRouter } from 'vue-router'
+import { computed, nextTick, onMounted, ref, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { BadgeCheck, MailWarning } from '@lucide/vue'
 import { usePlayerStore } from '@/stores/playerStore'
 import { useHistoryStore } from '@/stores/historyStore'
 import { useAuthStore } from '@/stores/AuthStore'
@@ -15,8 +16,15 @@ import NeonPanel from '@/components/sky/NeonPanel.vue'
 import ArcadeField from '@/components/sky/ArcadeField.vue'
 import ArcadeButton from '@/components/sky/ArcadeButton.vue'
 import AchievementBadge from '@/components/sky/AchievementBadge.vue'
+import AccountStandingCard from '@/components/sky/AccountStandingCard.vue'
+import ResponsiblePlayPanel from '@/components/sky/ResponsiblePlayPanel.vue'
+import { useRulesStore } from '@/stores/rulesStore'
+import { useResendVerification } from '@/composables/useResendVerification'
+import { en } from '@/copy/en'
 
 const router = useRouter()
+const route = useRoute()
+const resender = useResendVerification()
 const playerStore = usePlayerStore()
 const historyStore = useHistoryStore()
 const authStore = useAuthStore()
@@ -39,6 +47,11 @@ onMounted(async () => {
     username.value = playerStore.profile.username
   }
   historyStore.fetchBets(1)
+  // Links such as /profile#responsible-play (from a refused-bet toast) land on that section.
+  if (route.hash) {
+    await nextTick()
+    setTimeout(() => document.querySelector(route.hash)?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 250)
+  }
 })
 
 watch(
@@ -86,6 +99,7 @@ function handleLogout() {
   useChallengeStore().clear()
   useSpinStore().clear()
   usePrivateLobbyStore().clear()
+  useRulesStore().clear()
   router.push('/login')
 }
 
@@ -158,6 +172,21 @@ async function handleSave() {
               <p class="font-arcade text-[0.5rem] uppercase tracking-[0.3em] text-ember">
                 Pilot since {{ new Date(playerStore.profile.memberSinceUtc).toLocaleDateString() }}
               </p>
+              <p v-if="playerStore.profile.emailVerified === true" class="mt-1 inline-flex items-center gap-1 text-xs font-semibold text-lime">
+                <BadgeCheck class="h-3.5 w-3.5" aria-hidden="true" /> {{ en.verifyEmail.badge }}
+              </p>
+              <p v-else-if="playerStore.profile.emailVerified === false" class="mt-1 flex flex-wrap items-center gap-x-2 text-xs font-semibold text-ember">
+                <span class="inline-flex items-center gap-1"><MailWarning class="h-3.5 w-3.5" aria-hidden="true" /> {{ en.verifyEmail.unverifiedBadge }}</span>
+                <button
+                  type="button"
+                  class="underline underline-offset-2 disabled:opacity-50 pointer-coarse:min-h-11 pointer-coarse:min-w-11"
+                  :disabled="resender.sending.value"
+                  @click="resender.resend()"
+                >
+                  {{ en.verifyEmail.resend }}
+                </button>
+                <span v-if="resender.message.value" class="text-foreground/80">{{ resender.message.value }}</span>
+              </p>
             </div>
           </div>
 
@@ -204,6 +233,10 @@ async function handleSave() {
             </ArcadeButton>
           </form>
         </NeonPanel>
+
+        <AccountStandingCard class="mt-5" />
+
+        <ResponsiblePlayPanel class="mt-5" />
 
         <NeonPanel class="mt-5" accent="lime">
           <RouterLink to="/missions" class="block">

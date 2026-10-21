@@ -28,7 +28,36 @@ export interface MockOptions {
   phase?: RoundPhase
   /** Leave the first-visit "How to play" strip on the game screen (dismissed by default). */
   showHowTo?: boolean
+  /** How POST /auth/login answers: signed in (default), the 6-digit code step, blocked or locked out. */
+  login?: 'session' | 'otp' | 'blocked' | 'locked'
+  /** Answer for POST /auth/verify-email (default verified). */
+  verifyEmail?: 'verified' | 'alreadyVerified' | 'expired' | 'used' | 'invalid'
 }
+
+/** A permanent, appealable block (rule F1), as the 403 from a blocked login carries it. */
+export const BLOCKED_LOGIN = {
+  message: 'Account blocked.',
+  sanction: {
+    id: '5a1c7e00-0000-4000-8000-0000000000b1',
+    ruleCode: 'F1',
+    ruleTitle: 'Multiple accounts or bonus farming',
+    ruleSummary: 'One account per person; no farming free credits.',
+    ruleSetVersion: 1,
+    action: 'PermanentBlock',
+    startsAtUtc: '2026-10-18T09:00:00Z',
+    endsAtUtc: null,
+    appealable: true,
+    appealPending: false,
+  },
+  appealToken: 'e2e-appeal-token',
+}
+
+/** Everyone's bets on the fake round, for the live-bets panel. */
+export const LIVE_BETS = [
+  { username: 'SkyQueen', amount: 500, status: 'CashedOut', cashOutMultiplier: 2.1, payout: 1050 },
+  { username: 'NewBoi', amount: 250, status: 'Placed', cashOutMultiplier: null, payout: null },
+  { username: 'Turbo_88', amount: 100, status: 'Placed', cashOutMultiplier: null, payout: null },
+]
 
 const FAKE_TOKEN = 'e2e-fake-jwt'
 
@@ -92,7 +121,22 @@ export async function mockApi(page: Page, opts: MockOptions = {}): Promise<{ unk
     }
 
     // Writes: answer with something plausible so the UI keeps going.
-    if (path === '/auth/login' || path === '/auth/register') return json(authResponse)
+    if (path === '/auth/login') {
+      if (opts.login === 'otp') return json({ otpRequired: true, challengeId: 'e2e-challenge', message: 'Code sent to your email.' }, 202)
+      if (opts.login === 'blocked') return json(BLOCKED_LOGIN, 403)
+      if (opts.login === 'locked') return json({ message: 'Too many tries. Wait 15 minutes.' }, 429)
+      return json(authResponse)
+    }
+    if (path === '/auth/register' || path === '/auth/login/otp') return json({ ...authResponse, emailVerified: false })
+    if (path === '/auth/verify-email') {
+      const status = opts.verifyEmail ?? 'verified'
+      return json({ status }, status === 'verified' || status === 'alreadyVerified' ? 200 : 400)
+    }
+    if (path === '/auth/resend-verification') return json({ message: 'Link sent. Check your inbox.' })
+    if (path === '/responsible-play/limits') return json(fixtures['/responsible-play/limits'])
+    if (path === '/rules/me/self-exclusion') return json({ endsAtUtc: new Date(Date.now() + 86_400_000).toISOString(), message: 'Break started.' })
+    if (path === '/rules/me/accept') return route.fulfill({ status: 204, body: '' })
+    if (path === '/rules/appeals') return json({ message: 'Appeal sent.' })
     if (path === '/players/me' || path === '/players/me/accept-terms') return json(profile)
     if (path === '/players/me/heartbeat' || path === '/players/me/tutorial-complete' || path === '/lobby/leave') {
       return route.fulfill({ status: 204, body: '' })
@@ -150,7 +194,8 @@ async function mockHub(page: Page, phase: RoundPhase) {
           continue
         }
         if (msg.type === 1 && msg.invocationId) {
-          send({ type: 3, invocationId: msg.invocationId, result: msg.target === 'GetLobbyRoundBets' ? [] : null })
+          const result = msg.target === 'GetLobbyRoundBets' ? [] : msg.target === 'GetLiveRoundBets' ? LIVE_BETS : null
+          send({ type: 3, invocationId: msg.invocationId, result })
         }
       }
     })

@@ -12,10 +12,16 @@
     "equippedSkyId": null,
     "hasAcceptedTerms": true,
     "currentTermsVersion": "2026-10-02",
-    "hasCompletedTutorial": true
+    "hasCompletedTutorial": true,
+    "emailVerified": true,
+    "bonusBalance": 1250
   },
   "/wallet/balance": {
-    "creditBalance": 23979.5
+    "creditBalance": 23979.5,
+    "bonusBalance": 1250,
+    "cashBalance": 22729.5,
+    "bonusWageringRemaining": 4320.5,
+    "bonusExpiresAtUtc": "2030-10-27T12:00:00Z"
   },
   "/wallet/transactions": [
     {
@@ -177,25 +183,29 @@
     "secondsUntilNextSpin": 0,
     "cooldownSeconds": 300,
     "segments": [
-      1500,
-      4000,
-      2000,
-      7500,
-      2500,
-      5000,
-      3000,
-      10000
+      10,
+      100,
+      20,
+      250,
+      25,
+      50,
+      30,
+      500
     ],
     "odds": [
-      0.24,
-      0.11,
-      0.22,
-      0.03,
-      0.18,
+      0.26,
       0.06,
-      0.14,
-      0.02
-    ]
+      0.22,
+      0.02,
+      0.18,
+      0.12,
+      0.13,
+      0.01
+    ],
+    "expectedValue": 37.4,
+    "dailySpinLimit": 3,
+    "spinsLeftToday": 2,
+    "lastSpin": null
   },
   "/achievements": [
     {
@@ -357,88 +367,102 @@
   },
   "/rounds/history": [
     {
-      "roundId": "854be1ac-ee58-425d-8a4a-3804a55a38b9",
+      "roundId": "a1087763-b1d4-cdee-671c-d9288f18c2c0",
       "roundNumber": 14,
-      "crashMultiplier": 24.65,
-      "crashedAtUtc": "2026-10-15T13:49:54.112564Z"
+      "crashMultiplier": 2.95,
+      "crashedAtUtc": "2026-10-15T13:49:54.112564Z",
+      "maxMultiplierReached": false
     },
     {
       "roundId": "f3bb593c-3284-44a0-be1b-91b826f8e359",
       "roundNumber": 13,
       "crashMultiplier": 1.17,
-      "crashedAtUtc": "2026-10-15T13:48:47.679703Z"
+      "crashedAtUtc": "2026-10-15T13:48:47.679703Z",
+      "maxMultiplierReached": false
     },
     {
       "roundId": "02f1d32e-f4a4-4cba-ba62-a4383f8be4d1",
       "roundNumber": 12,
       "crashMultiplier": 3.39,
-      "crashedAtUtc": "2026-10-15T13:48:32.063767Z"
+      "crashedAtUtc": "2026-10-15T13:48:32.063767Z",
+      "maxMultiplierReached": false
     },
     {
       "roundId": "08759925-effe-421d-972f-203cef5596cf",
       "roundNumber": 11,
       "crashMultiplier": 4.27,
-      "crashedAtUtc": "2026-10-15T13:47:58.66406Z"
+      "crashedAtUtc": "2026-10-15T13:47:58.66406Z",
+      "maxMultiplierReached": false
     },
     {
       "roundId": "42a5c587-2501-473f-a20d-1d172d704c5f",
       "roundNumber": 10,
       "crashMultiplier": 9.19,
-      "crashedAtUtc": "2026-10-15T13:47:21.38301Z"
+      "crashedAtUtc": "2026-10-15T13:47:21.38301Z",
+      "maxMultiplierReached": false
     },
     {
       "roundId": "dc189257-408b-42e3-b3aa-5dbf5b7f6c0f",
       "roundNumber": 9,
       "crashMultiplier": 4.33,
-      "crashedAtUtc": "2026-10-15T13:46:31.315354Z"
+      "crashedAtUtc": "2026-10-15T13:46:31.315354Z",
+      "maxMultiplierReached": false
     },
     {
       "roundId": "ef792749-b0c1-4fdf-b544-f4027ebd2799",
       "roundNumber": 8,
       "crashMultiplier": 28.08,
-      "crashedAtUtc": "2026-10-15T13:45:53.795021Z"
+      "crashedAtUtc": "2026-10-15T13:45:53.795021Z",
+      "maxMultiplierReached": false
     },
     {
       "roundId": "19f29f46-60e0-4f52-9344-a6099f0d5647",
       "roundNumber": 7,
       "crashMultiplier": 4.27,
-      "crashedAtUtc": "2026-10-15T13:44:45.152924Z"
+      "crashedAtUtc": "2026-10-15T13:44:45.152924Z",
+      "maxMultiplierReached": false
     },
     {
       "roundId": "211c2c64-9411-402f-8748-01374f5e5613",
       "roundNumber": 6,
       "crashMultiplier": 15.25,
-      "crashedAtUtc": "2026-10-15T13:44:07.941837Z"
+      "crashedAtUtc": "2026-10-15T13:44:07.941837Z",
+      "maxMultiplierReached": false
     },
     {
       "roundId": "e4c92d85-1da6-47d5-ab62-74c1270c2d94",
       "roundNumber": 5,
       "crashMultiplier": 3.23,
-      "crashedAtUtc": "2026-10-15T13:43:09.416192Z"
+      "crashedAtUtc": "2026-10-15T13:43:09.416192Z",
+      "maxMultiplierReached": false
     },
     {
       "roundId": "515a69a0-e16a-41cf-881c-96567b56a671",
       "roundNumber": 4,
       "crashMultiplier": 4.82,
-      "crashedAtUtc": "2026-10-15T13:42:36.851973Z"
+      "crashedAtUtc": "2026-10-15T13:42:36.851973Z",
+      "maxMultiplierReached": false
     },
     {
       "roundId": "4f880bc1-06e9-4f56-a167-809d3a58b6b3",
       "roundNumber": 3,
       "crashMultiplier": 1.53,
-      "crashedAtUtc": "2026-10-15T13:41:57.466323Z"
+      "crashedAtUtc": "2026-10-15T13:41:57.466323Z",
+      "maxMultiplierReached": false
     },
     {
       "roundId": "87e36242-3792-4997-9be4-15e7881bf055",
       "roundNumber": 2,
       "crashMultiplier": 6.59,
-      "crashedAtUtc": "2026-10-15T13:41:37.378772Z"
+      "crashedAtUtc": "2026-10-15T13:41:37.378772Z",
+      "maxMultiplierReached": false
     },
     {
       "roundId": "b51f8be6-e4c8-4dbc-8414-5d5c8e8f75a7",
       "roundNumber": 1,
       "crashMultiplier": 1.38,
-      "crashedAtUtc": "2026-10-15T13:40:52.87928Z"
+      "crashedAtUtc": "2026-10-15T13:40:52.87928Z",
+      "maxMultiplierReached": false
     }
   ],
   "/players/me/bet-history": [
@@ -516,6 +540,7 @@
     }
   ],
   "/leaderboard": {
+    "period": "all",
     "biggestWins": [
       {
         "username": "SkyLark_ZA",
@@ -729,6 +754,165 @@
       "plane": 70,
       "game": 80
     },
-    "paymentsEnabled": false
+    "paymentsEnabled": false,
+    "rules": {
+      "houseEdgePercentage": 1,
+      "theoreticalRtpPercentage": 99,
+      "crashFormulaVersion": 2,
+      "minBet": 10,
+      "maxBet": 1000,
+      "maxMultiplier": 100,
+      "maxProfitPerBet": 10000,
+      "maxRoundLiability": 50000,
+      "maxBetFromBonusBalance": 200,
+      "bonusWageringMultiple": 5,
+      "bonusExpiryDays": 7,
+      "bettingPaused": false
+    },
+    "googleClientId": null
+  },
+  "/rounds/:id/verify": {
+    "roundId": "a1087763-b1d4-cdee-671c-d9288f18c2c0",
+    "roundNumber": 14,
+    "serverSeedHash": "4cb334eb410aa5d7a5e2abcec731c1660ffa86a8c3a8bb26009a587b362059dd",
+    "serverSeed": "1fe44103a06164ceb0fab2e9d024c902",
+    "hmacMessage": "a1087763-b1d4-cdee-671c-d9288f18c2c0",
+    "clientSeed": null,
+    "houseEdge": 0.01,
+    "maxMultiplier": 100,
+    "formulaVersion": 2,
+    "crashMultiplier": 2.95,
+    "maxMultiplierReached": false,
+    "crashedAtUtc": "2026-10-15T13:49:54.112564Z"
+  },
+  "/rules": {
+    "version": 1,
+    "label": "1.0",
+    "effectiveFromUtc": "2026-10-15T00:00:00Z",
+    "publishedBy": "SkyCrash",
+    "changeNote": "First published rule set.",
+    "rules": [
+      {
+        "code": "U1",
+        "category": "Underage",
+        "title": "Under 18",
+        "summary": "You must be 18 or older to play.",
+        "details": "Accounts of under-18s are blocked until the player's age is verified. Registration rejects a date of birth under 18.",
+        "action": "PermanentBlock",
+        "defaultDurationDays": null,
+        "detection": "Automatic",
+        "isActive": true,
+        "appealable": true
+      },
+      {
+        "code": "F1",
+        "category": "Fraud",
+        "title": "Multiple accounts or bonus farming",
+        "summary": "One account per person; no farming free credits.",
+        "details": "Running several accounts, or creating accounts to collect free credits, blocks every account involved and removes their bonus credits.",
+        "action": "PermanentBlock",
+        "defaultDurationDays": null,
+        "detection": "AdminReview",
+        "isActive": true,
+        "appealable": true
+      },
+      {
+        "code": "F2",
+        "category": "FairPlay",
+        "title": "Cheating or exploiting bugs",
+        "summary": "No bots, scripts or bug exploits.",
+        "details": "Using scripts or bots, or knowingly exploiting a bug, leads to a 7-day block or, after review, a permanent one.",
+        "action": "TemporaryBlock",
+        "defaultDurationDays": 7,
+        "detection": "AdminReview",
+        "isActive": true,
+        "appealable": true
+      },
+      {
+        "code": "P1",
+        "category": "Payment",
+        "title": "Payment fraud",
+        "summary": "No stolen cards, chargebacks or payment fraud.",
+        "details": "Payment fraud, chargebacks or a stolen card permanently blocks the account and freezes its purchases.",
+        "action": "PermanentBlock",
+        "defaultDurationDays": null,
+        "detection": "AdminReview",
+        "isActive": true,
+        "appealable": true
+      },
+      {
+        "code": "P2",
+        "category": "Payment",
+        "title": "Payment tampering",
+        "summary": "Altered payment notifications pause the account for review.",
+        "details": "A payment notification whose amount doesn't match the order blocks the account until an admin has reviewed it.",
+        "action": "TemporaryBlock",
+        "defaultDurationDays": 7,
+        "detection": "Automatic",
+        "isActive": true,
+        "appealable": true
+      },
+      {
+        "code": "C1",
+        "category": "Conduct",
+        "title": "Abusive name or behaviour",
+        "summary": "Keep usernames and lobby behaviour respectful.",
+        "details": "First offence: a warning. Second: a 3-day block. After that: a permanent block.",
+        "action": "Escalating",
+        "defaultDurationDays": 3,
+        "detection": "AdminReview",
+        "isActive": true,
+        "appealable": true
+      },
+      {
+        "code": "R1",
+        "category": "ResponsiblePlay",
+        "title": "Self-exclusion",
+        "summary": "Take a break for 24 hours, 7 or 30 days.",
+        "details": "You can pause your own account for 24 hours, 7 days or 30 days. It can't be undone early.",
+        "action": "Restriction",
+        "defaultDurationDays": null,
+        "detection": "Automatic",
+        "isActive": true,
+        "appealable": false
+      },
+      {
+        "code": "R2",
+        "category": "ResponsiblePlay",
+        "title": "Loss limit reached",
+        "summary": "Your own loss limit pauses play until it resets.",
+        "details": "When you reach the daily or weekly loss limit you set, betting pauses until the limit resets.",
+        "action": "Restriction",
+        "defaultDurationDays": null,
+        "detection": "Automatic",
+        "isActive": true,
+        "appealable": false
+      }
+    ]
+  },
+  "/rules/me": {
+    "status": "GoodStanding",
+    "activeSanctions": [],
+    "currentRuleSetVersion": 1,
+    "acceptedRuleSetVersion": 1,
+    "mustAcceptRules": false
+  },
+  "/responsible-play/limits": {
+    "daily": 2000,
+    "weekly": null,
+    "pendingDaily": null,
+    "pendingWeekly": null,
+    "pendingFromUtc": null,
+    "netLossToday": 350.5,
+    "netLossThisWeek": 1200
+  },
+  "/responsible-play/session": {
+    "startedAtUtc": "2026-10-20T08:00:00.000Z",
+    "minutesPlayed": 12,
+    "bets": 9,
+    "wagered": 2250,
+    "won": 1980.5,
+    "netResult": -269.5,
+    "reminderMinutes": 30
   }
 }

@@ -309,6 +309,68 @@ class SoundEngine {
     this.duck(0.2, 1.4)
   }
 
+  /**
+   * Crash while my bet was still flying: the full boom plus a falling "lost it" tone, so it
+   * is clearly different from a crash I only watched.
+   */
+  crashLost() {
+    this.crash()
+    const ctx = this.gameCtx()
+    if (!ctx) return
+    const t = ctx.currentTime + 0.18
+    const out = this.cue ?? this.gameGain
+    const osc = ctx.createOscillator()
+    osc.type = 'square'
+    osc.frequency.setValueAtTime(440, t)
+    osc.frequency.exponentialRampToValueAtTime(110, t + 0.7)
+    const g = ctx.createGain()
+    g.gain.setValueAtTime(0.0001, t)
+    g.gain.exponentialRampToValueAtTime(0.09, t + 0.04)
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 0.75)
+    osc.connect(g).connect(out)
+    osc.start(t)
+    osc.stop(t + 0.8)
+  }
+
+  /**
+   * Crash after I already cashed out: a soft, distant thump and a little "phew" blip. The
+   * engine stops, but nothing that sounds like losing.
+   */
+  crashSafe() {
+    this.flying = false
+    this.stopEngine()
+    const ctx = this.gameCtx()
+    if (!ctx) return
+    const t = ctx.currentTime
+    const out = this.claimCue(ctx)
+    const thump = ctx.createOscillator()
+    thump.type = 'sine'
+    thump.frequency.setValueAtTime(90, t)
+    thump.frequency.exponentialRampToValueAtTime(40, t + 0.4)
+    const g = ctx.createGain()
+    g.gain.setValueAtTime(0.25, t)
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 0.45)
+    thump.connect(g).connect(out)
+    thump.start(t)
+    thump.stop(t + 0.5)
+    this.blip(ctx, t + 0.12, 784, 0.12, 0.07, 'triangle', out)
+    this.blip(ctx, t + 0.22, 1175, 0.18, 0.06, 'triangle', out)
+    this.duck(0.6, 0.5)
+  }
+
+  /** The round reached the max multiplier: everyone still flying was paid. A short fanfare. */
+  maxReached() {
+    this.flying = false
+    this.stopEngine()
+    const ctx = this.gameCtx()
+    if (!ctx) return
+    const t = ctx.currentTime
+    const out = this.claimCue(ctx)
+    ;[523, 659, 784, 1047, 1319, 1568].forEach((f, i) => this.blip(ctx, t + i * 0.08, f, 0.2, 0.12, 'square', out))
+    this.blip(ctx, t + 0.5, 2093, 0.6, 0.09, 'triangle', out)
+    this.duck(0.3, 1.1)
+  }
+
   /** The round is over without a watched crash (snapshot, leaving the screen): just silence the drone. */
   landed() {
     this.flying = false

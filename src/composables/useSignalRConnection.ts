@@ -12,7 +12,10 @@ import { useChallengeStore } from '@/stores/challengeStore'
 import { useSpinStore } from '@/stores/spinStore'
 import { badgeFor } from '@/lib/achievements'
 import { challengeBadgeFor } from '@/lib/challengeBadges'
-import type { OnlinePlayer } from '@/types'
+import * as gameService from '@/services/gameService'
+import { en } from '@/copy/en'
+import { creditAmount } from '@/lib/format'
+import type { CashOutReason, OnlinePlayer } from '@/types'
 
 
 type RoundSnapshot = {
@@ -30,6 +33,9 @@ type RoundWaitingPayload = {
   roundNumber: number
   serverSeedHash: string
   countdownSeconds: number
+  houseEdge?: number
+  maxMultiplier?: number
+  formulaVersion?: number
 }
 
 type MultiplierTickPayload = {
@@ -39,6 +45,8 @@ type MultiplierTickPayload = {
 type RoundCrashedPayload = {
   crashMultiplier: number
   serverSeed: string
+  /** The round ended at the cap: everyone still flying was paid. */
+  maxMultiplierReached?: boolean
 }
 
 type BetConfirmedPayload = {
@@ -49,6 +57,8 @@ type BetConfirmedPayload = {
 
 type BetRejectedPayload = {
   message: string
+  /** restricted | rules-required | loss-limit (other refusals have no code). */
+  code?: string
 }
 
 type BetPlacedByPlayerPayload = {
@@ -63,6 +73,24 @@ type CashOutConfirmedPayload = {
   cashOutMultiplier: number
   payout: number
   auto?: boolean
+  reason?: CashOutReason
+}
+
+type LiveBetPayload = { username: string; amount: number }
+type LiveCashOutPayload = { username: string; cashOutMultiplier: number; payout: number; reason?: CashOutReason }
+
+/** Short toast for a refused bet, with a link to the screen that fixes it. */
+function betRejectedToast(payload: BetRejectedPayload) {
+  switch (payload.code) {
+    case 'restricted':
+      return { message: en.rejected.restricted, action: { label: en.rejected.viewAccount, to: '/profile#account-status' } }
+    case 'rules-required':
+      return { message: en.rejected.rulesRequired, action: { label: en.rejected.viewRules, to: '/rules?review=1' } }
+    case 'loss-limit':
+      return { message: payload.message || en.rejected.lossLimit, action: { label: en.rejected.viewLimits, to: '/profile#responsible-play' } }
+    default:
+      return { message: payload.message, action: null }
+  }
 }
 
 type CashOutRejectedPayload = {
@@ -157,8 +185,16 @@ export function useSignalRConnection() {
 
     const gameStore = useGameStore()
 
+    /** The public live-bets board, e.g. after joining or reloading mid-round. */
+    const loadLiveBets = () =>
+      gameService
+        .getLiveRoundBets()
+        .then((bets) => gameStore.applyLiveBets(bets ?? []))
+        .catch(() => undefined)
+
     connection.on('RoundSnapshot', (snapshot: RoundSnapshot) => {
       gameStore.applySnapshot(snapshot)
+      void loadLiveBets()
     })
     connection.on('RoundWaiting', (payload: RoundWaitingPayload) => {
       gameStore.onRoundWaiting(payload)
@@ -178,14 +214,30 @@ export function useSignalRConnection() {
     })
     connection.on('BetRejected', (payload: BetRejectedPayload) => {
       gameStore.onBetRejected(payload)
+      const toast = betRejectedToast(payload)
+      useToastStore().push({ title: en.rejected.title, message: toast.message, accent: 'magenta', action: toast.action }, 6000)
+    })
+    connection.on('LiveBet', (payload: LiveBetPayload) => {
+      gameStore.onLiveBet(payload)
+    })
+    connection.on('LiveCashOut', (payload: LiveCashOutPayload) => {
+      gameStore.onLiveCashOut(payload)
     })
     connection.on('BetPlacedByPlayer', (payload: BetPlacedByPlayerPayload) => {
       gameStore.onBetPlacedByPlayer(payload)
     })
     connection.on('CashOutConfirmed', (payload: CashOutConfirmedPayload) => {
-  gameStore.onCashOutConfirmed(payload)
-  usePlayerStore().fetchProfile()
-})
+      gameStore.onCashOutConfirmed(payload)
+      usePlayerStore().fetchProfile()
+      // A cap cashed the bet out for me: say so, briefly.
+      if (payload.reason === 'ProfitCap' || payload.reason === 'RoundLiability') {
+        useToastStore().push({
+          title: en.round.maxWinToast,
+          message: en.round.maxWinMessage(creditAmount(payload.payout)),
+          accent: 'lime',
+        })
+      }
+    })
 connection.on('CashOutRejected', (payload: CashOutRejectedPayload) => {
   gameStore.onCashOutRejected(payload)
 })

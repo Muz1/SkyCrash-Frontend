@@ -15,6 +15,11 @@ const props = withDefaults(
     priority?: boolean
     /** 0 → 1 ascent progress, only used by the "taking-off" skin. */
     progress?: number
+    /**
+     * Cosmetic sky stage while a round climbs: 1 at 10x, 2 at 50x, 3 at 100x. Pure CSS
+     * (gradients and a colour filter), so it never touches timing or maths.
+     */
+    milestone?: 0 | 1 | 2 | 3
   }>(),
   {
     skin: 'sunset-runway',
@@ -22,8 +27,18 @@ const props = withDefaults(
     dim: 0.35,
     priority: false,
     progress: 0,
+    milestone: 0,
   },
 )
+
+/** Each milestone tints the sky a little further towards the edge of space. */
+const MILESTONE_GLOW = [
+  'transparent',
+  'radial-gradient(ellipse at 50% -10%, color-mix(in oklab, var(--neon-orange) 45%, transparent), transparent 65%)',
+  'radial-gradient(ellipse at 50% -10%, color-mix(in oklab, var(--neon-violet) 60%, transparent), transparent 70%), radial-gradient(ellipse at 80% 20%, color-mix(in oklab, var(--neon-blue) 35%, transparent), transparent 55%)',
+  'radial-gradient(ellipse at 50% -15%, color-mix(in oklab, var(--neon-lime) 45%, transparent), transparent 70%), radial-gradient(ellipse at 20% 30%, color-mix(in oklab, var(--neon-magenta) 40%, transparent), transparent 60%)',
+] as const
+const MILESTONE_FILTER = ['none', 'saturate(1.15)', 'saturate(1.3) hue-rotate(-18deg)', 'saturate(1.45) hue-rotate(-36deg) brightness(1.08)'] as const
 
 const ascent = computed(() => props.skin === 'taking-off')
 const layers = computed(() => ascentLayers(props.progress))
@@ -62,7 +77,11 @@ watch(
 </script>
 
 <template>
-  <div aria-hidden :class="cn('absolute inset-0 overflow-hidden', props.class)">
+  <div
+    aria-hidden
+    :class="cn('absolute inset-0 overflow-hidden transition-[filter] duration-[1200ms] ease-out', props.class)"
+    :style="{ filter: MILESTONE_FILTER[props.milestone] }"
+  >
     <div v-if="ascent" class="absolute inset-0">
       <img
         :src="sunsetRunway"
@@ -171,6 +190,14 @@ watch(
     <div
       class="absolute inset-0"
       style="background: radial-gradient(ellipse at 50% 120%, color-mix(in oklab, var(--neon-magenta) 22%, transparent), transparent 60%)"
+    />
+    <!-- milestone glow: fades between stages, sits above the dimming so it reads clearly -->
+    <div
+      v-for="(glow, i) in MILESTONE_GLOW.slice(1)"
+      :key="i"
+      data-sky-milestone
+      class="absolute inset-0 transition-opacity duration-[1200ms] ease-out motion-reduce:transition-none"
+      :style="{ background: glow, opacity: props.milestone === i + 1 ? 1 : 0 }"
     />
   </div>
 </template>

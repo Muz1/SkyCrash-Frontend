@@ -11,6 +11,11 @@ import BuyCreditsPanel from '@/components/sky/BuyCreditsPanel.vue'
 import SpinTimerChip from '@/components/sky/SpinTimerChip.vue'
 import { useSpinStore } from '@/stores/spinStore'
 import { usePublicSettingsStore } from '@/stores/publicSettingsStore'
+import InfoTip from '@/components/sky/InfoTip.vue'
+import * as walletService from '@/services/walletService'
+import { creditAmount, dateShort } from '@/lib/format'
+import { en } from '@/copy/en'
+import type { WalletBalanceDetail } from '@/types'
 
 const route = useRoute()
 const router = useRouter()
@@ -25,9 +30,15 @@ const publicSettings = usePublicSettingsStore()
 const purchaseStatus = ref<'success' | 'cancelled' | null>(null)
 const isAwaitingCredit = ref(false)
 const wasCredited = ref(false)
+/** Cash vs bonus split (bonus must be wagered before it turns into cash). */
+const balance = ref<WalletBalanceDetail | null>(null)
 
 onMounted(async () => {
   walletStore.fetchTransactions()
+  walletService
+    .getBalance()
+    .then((b) => (balance.value = b))
+    .catch(() => undefined)
   if (!spinStore.status) void spinStore.load()
   // "Buy credits" in the top bar links to #buy-credits: scroll the panel into view once it's shown.
   void publicSettings.load().then(async () => {
@@ -64,6 +75,23 @@ onMounted(async () => {
         </p>
         <p class="mt-2 font-arcade text-[0.5rem] uppercase tracking-[0.4em] text-muted-foreground">Arcade balance</p>
 
+        <dl v-if="balance" class="mx-auto mt-4 grid max-w-sm grid-cols-2 gap-2 text-left">
+          <div class="clip-hud border border-violet/40 bg-void/50 p-2">
+            <dt class="font-arcade text-[0.4375rem] uppercase tracking-[0.2em] text-muted-foreground">{{ en.wallet.cash }}</dt>
+            <dd class="mt-1 font-arcade text-xs tabular-nums text-foreground">{{ creditAmount(balance.cashBalance) }}</dd>
+          </div>
+          <div class="clip-hud border border-violet/40 bg-void/50 p-2">
+            <dt class="font-arcade text-[0.4375rem] uppercase tracking-[0.2em] text-muted-foreground">{{ en.wallet.bonus }}</dt>
+            <dd class="mt-1 font-arcade text-xs tabular-nums text-ember">{{ creditAmount(balance.bonusBalance) }}</dd>
+          </div>
+        </dl>
+        <p v-if="balance && balance.bonusBalance > 0" class="mt-2 flex items-center justify-center gap-1 text-sm text-foreground/85">
+          <span>
+            {{ en.wallet.wagering(creditAmount(balance.bonusWageringRemaining)) }}<template v-if="balance.bonusExpiresAtUtc"> · {{ en.wallet.expires(dateShort(balance.bonusExpiresAtUtc)) }}</template>
+          </span>
+          <InfoTip :text="en.wallet.bonusInfo" :label="en.wallet.bonus" align="right" />
+        </p>
+
         <!-- Free credits only come from the spin wheel (its own page). -->
         <RouterLink
           to="/spin"
@@ -71,7 +99,7 @@ onMounted(async () => {
         >
           <span class="block font-arcade text-base text-ember">Spin the wheel</span>
           <span class="mt-1 block font-display text-xs uppercase tracking-[0.2em] text-foreground/80">
-            Free credits<template v-if="spinStore.topPrize"> · up to {{ spinStore.topPrize.toLocaleString() }}</template> · every 5 minutes
+            Free credits<template v-if="spinStore.topPrize"> · up to {{ spinStore.topPrize.toLocaleString() }}</template><template v-if="spinStore.spinsLeftToday !== null"> · {{ en.spin.spinsLeft(spinStore.spinsLeftToday) }}</template>
           </span>
         </RouterLink>
         <div class="mt-2 flex justify-center"><SpinTimerChip /></div>
