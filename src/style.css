@@ -575,8 +575,9 @@
   }
 }
 
-/* ---------- Hangar navigation: lit while a custom loadout is equipped ---------- */
-/* drop-shadow (not box-shadow) so the glow follows clip-hud shapes instead of being clipped. */
+/* ---------- Hangar navigation: a few pulses while the hangar has something new ---------- */
+/* drop-shadow (not box-shadow) so the glow follows clip-hud shapes instead of being clipped.
+   Three pulses, then it settles: it used to loop forever whenever a custom loadout was on. */
 @keyframes hangar-glow {
   0%,
   100% {
@@ -587,7 +588,7 @@
   }
 }
 @utility hangar-glow {
-  animation: hangar-glow 2.4s ease-in-out infinite;
+  animation: hangar-glow 2.4s ease-in-out 3;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -608,4 +609,99 @@
     animation-iteration-count: 1 !important;
     transition-duration: 0.001ms !important;
   }
+}
+
+/* ---------- Accessibility: text size (100 / 125 / 150%, see composables/useTextSize.ts) ---------- */
+/* Only text grows, not spacing or panel widths, so layouts keep fitting a 320px phone. Small
+   and body sizes scale fully; display sizes scale half as much so headings don't overflow. */
+:root[data-text-size] {
+  --text-scale-lg: calc(1 + (var(--text-scale) - 1) / 2);
+  --text-xs: calc(0.75rem * var(--text-scale));
+  --text-sm: calc(0.875rem * var(--text-scale));
+  --text-base: calc(1rem * var(--text-scale));
+  --text-lg: calc(1.125rem * var(--text-scale));
+  --text-xl: calc(1.25rem * var(--text-scale-lg));
+  --text-2xl: calc(1.5rem * var(--text-scale-lg));
+  --text-3xl: calc(1.875rem * var(--text-scale-lg));
+  --text-4xl: calc(2.25rem * var(--text-scale-lg));
+}
+:root[data-text-size] body {
+  font-size: calc(1rem * var(--text-scale));
+}
+/* The pixel-font labels use fixed arbitrary sizes; scale the common ones too. */
+:root[data-text-size] [class~="text-[0.375rem]"] {
+  font-size: calc(0.375rem * var(--text-scale));
+}
+:root[data-text-size] [class~="text-[0.4375rem]"] {
+  font-size: calc(0.4375rem * var(--text-scale));
+}
+:root[data-text-size] [class~="text-[0.5rem]"] {
+  font-size: calc(0.5rem * var(--text-scale));
+}
+:root[data-text-size] [class~="text-[0.5625rem]"] {
+  font-size: calc(0.5625rem * var(--text-scale));
+}
+:root[data-text-size] [class~="text-[0.625rem]"] {
+  font-size: calc(0.625rem * var(--text-scale));
+}
+:root[data-text-size] [class~="text-[0.6875rem]"] {
+  font-size: calc(0.6875rem * var(--text-scale));
+}
+:root[data-text-size] [class~="text-[0.75rem]"] {
+  font-size: calc(0.75rem * var(--text-scale));
+}
+:root[data-text-size] [class~="text-[0.7812rem]"] {
+  font-size: calc(0.7812rem * var(--text-scale));
+}
+:root[data-text-size] [class~="text-[0.8125rem]"] {
+  font-size: calc(0.8125rem * var(--text-scale));
+}
+:root[data-text-size] [class~="text-[0.8438rem]"] {
+  font-size: calc(0.8438rem * var(--text-scale));
+}
+:root[data-text-size] [class~="text-[0.875rem]"] {
+  font-size: calc(0.875rem * var(--text-scale));
+}
+:root[data-text-size] [class~="text-[0.9062rem]"] {
+  font-size: calc(0.9062rem * var(--text-scale));
+}
+:root[data-text-size] [class~="text-[0.9375rem]"] {
+  font-size: calc(0.9375rem * var(--text-scale));
+}
+:root[data-text-size] [class~="text-[1rem]"] {
+  font-size: calc(1rem * var(--text-scale));
+}
+:root[data-text-size] [class~="text-[1.125rem]"] {
+  font-size: calc(1.125rem * var(--text-scale));
+}
+
+/* ---------- Accessibility: visible keyboard focus everywhere ---------- */
+/* In the base layer, so components with their own focus ring (focus-visible:ring-*) keep it. */
+@layer base {
+  :focus-visible {
+    outline: 2px solid #67e8f9;
+    outline-offset: 2px;
+  }
+}
+/* clip-hud shapes clip outlines and rings drawn outside them, so draw the ring inside. */
+.clip-hud:focus-visible,
+.clip-hud:has(> :focus-visible:not(input)) {
+  outline: 3px solid #67e8f9 !important;
+  outline-offset: -5px !important;
+}
+a:focus-visible > .clip-hud {
+  outline: 3px solid #67e8f9;
+  outline-offset: -5px;
+}
+/* The top bar (icons plus an already-large credit readout) and the bottom nav dock (seven
+   44px icon targets) keep their normal size: growing them would push a 320px phone sideways. */
+:root[data-text-size] header,
+:root[data-text-size] #nav-dock {
+  --text-scale: 1;
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.25rem;
+  --text-2xl: 1.5rem;
 }

@@ -4,6 +4,7 @@ import { X } from '@lucide/vue'
 import { useAudioStore } from '@/stores/audioStore'
 import { soundEngine, type AudioChannel } from '@/lib/soundEngine'
 import { cn } from '@/lib/cn'
+import TextSizeSetting from './TextSizeSetting.vue'
 
 /**
  * Audio mixer popover: master, music, plane sounds (engine hum) and game
@@ -86,7 +87,7 @@ onBeforeUnmount(() => {
     role="dialog"
     aria-modal="false"
     aria-labelledby="sound-settings-title"
-    class="clip-hud w-[min(22rem,calc(100vw-2rem))] border-2 border-electric bg-void p-4 text-foreground [box-shadow:inset_0_0_24px_color-mix(in_oklab,var(--neon-blue)_18%,transparent)]"
+    class="clip-hud max-h-[calc(100dvh-10.5rem)] w-[min(22rem,calc(100vw-2rem))] overflow-y-auto border-2 border-electric bg-void p-4 text-foreground [box-shadow:inset_0_0_24px_color-mix(in_oklab,var(--neon-blue)_18%,transparent)]"
   >
     <div class="flex items-center justify-between gap-2">
       <h2 id="sound-settings-title" class="font-display text-xs font-black uppercase tracking-[0.3em] text-electric">
@@ -95,7 +96,7 @@ onBeforeUnmount(() => {
       <button
         type="button"
         aria-label="Close audio settings"
-        class="grid h-8 w-8 place-items-center border-2 border-violet/60 text-foreground transition-colors hover:border-electric hover:text-electric focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-electric"
+        class="grid h-8 w-8 place-items-center pointer-coarse:h-11 pointer-coarse:w-11 border-2 border-violet/60 text-foreground transition-colors hover:border-electric hover:text-electric focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-electric"
         @click="emit('close')"
       >
         <X class="h-4 w-4" aria-hidden="true" />
@@ -107,7 +108,7 @@ onBeforeUnmount(() => {
         <div class="flex items-center justify-between gap-2">
           <label :for="`sound-${ch.id}`" class="min-w-0">
             <span class="block font-arcade text-[0.5625rem] uppercase leading-tight text-foreground">{{ ch.label }}</span>
-            <span class="mt-1 block text-xs leading-tight text-muted-foreground">{{ ch.hint }}</span>
+            <span class="mt-1 block text-xs leading-tight text-[#c4b5fd]">{{ ch.hint }}</span>
           </label>
           <label
             :class="
@@ -149,5 +150,10 @@ onBeforeUnmount(() => {
         </div>
       </li>
     </ul>
+
+    <!-- Accessibility: bigger text everywhere. -->
+    <div class="mt-4 border-t-2 border-violet/40 pt-3">
+      <TextSizeSetting />
+    </div>
   </div>
 </template>

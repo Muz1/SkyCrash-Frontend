@@ -145,6 +145,8 @@ export function pdfSafe(text: string): string {
     .replace(/[ -   ]/g, ' ')
     .replace(/[‘’]/g, "'")
     .replace(/[“”]/g, '"')
-    .replace(/[​-‍️]|\p{Extended_Pictographic}/gu, '')
+    // Zero-width characters and the emoji variation selector (kept outside the class so it
+    // isn't read as a combining sequence).
+    .replace(/[\u200B-\u200D]|\uFE0F|\p{Extended_Pictographic}/gu, '')
     .trim()
 }

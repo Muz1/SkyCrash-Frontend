@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, ref, watch } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useHangarStore } from '@/stores/hangarStore'
 import { useLobbyMates } from '@/composables/useLobbyMates'
 import { CRAFTS, RARITY_STYLE, getCraft, type CraftId, type Rarity } from '@/lib/craft'
@@ -14,6 +14,9 @@ import NavDock from '@/components/sky/NavDock.vue'
 import Aircraft from '@/components/sky/Aircraft.vue'
 import ArcadeButton from '@/components/sky/ArcadeButton.vue'
 import LobbyFleet from '@/components/sky/LobbyFleet.vue'
+import { polishCopy } from '@/copy/polish'
+
+const copy = polishCopy.hangar
 
 const hangarStore = useHangarStore()
 // Lobby-mates cruise past behind the hangar too.
@@ -50,11 +53,48 @@ watch(
   },
 )
 
+// What was new when the page opened keeps its "New" tag for this visit; from now on it's seen,
+// so the hangar button stops pulsing.
+const newItems = new Set(hangarStore.unseen)
+onMounted(() => hangarStore.markAllSeen())
+
+/** Announced to screen readers (and shown in the action bar) after an equip. */
+const equipNote = ref('')
+
+function equipCraft() {
+  if (craftEquipped.value) return
+  hangarStore.setCraft(previewCraft.value)
+  equipNote.value = copy.equippedToast(active.value.name)
+}
+function equipSky() {
+  if (skyEquipped.value) return
+  hangarStore.setSkin(previewSky.value)
+  equipNote.value = copy.equippedToast(activeSky.value.name)
+}
+
+const previewEquipped = computed(() => (tab.value === 'aircraft' ? craftEquipped.value : skyEquipped.value))
+const previewName = computed(() => (tab.value === 'aircraft' ? active.value.name : activeSky.value.name))
+function equipPreview() {
+  if (tab.value === 'aircraft') equipCraft()
+  else equipSky()
+}
+watch([previewCraft, previewSky, tab], () => (equipNote.value = ''))
+
+/** First tap previews a plane; tapping the previewed plane again equips it. */
 function tryOn(id: CraftId) {
-  if (id === previewCraft.value) return
+  if (id === previewCraft.value) {
+    equipCraft()
+    return
+  }
   outgoing.value = previewCraft.value
   previewCraft.value = id
   enterKey.value += 1
+}
+
+/** Same for skies: first tap previews, second tap equips. */
+function pickSky(id: SkinId) {
+  if (id === previewSky.value) equipSky()
+  else previewSky.value = id
 }
 
 watch(outgoing, (value) => {
@@ -87,6 +127,21 @@ watch(
 )
 onBeforeUnmount(stopAscent)
 
+const newTagClass =
+  'absolute right-2 top-2 bg-ember px-1.5 py-1 font-arcade text-[0.4375rem] uppercase leading-none text-void [box-shadow:var(--glow-ember)]'
+
+function craftLabel(id: CraftId, name: string, rarity: string) {
+  const isNew = newItems.has(`craft:${id}`) ? ', new' : ''
+  const state = hangarStore.craftId === id ? ', equipped' : previewCraft.value === id ? `, ${copy.tapAgain.toLowerCase()}` : ''
+  return `${name}, ${rarity}${isNew}${state}`
+}
+
+function skyLabel(id: SkinId, name: string) {
+  const isNew = newItems.has(`sky:${id}`) ? ', new' : ''
+  const state = hangarStore.skinId === id ? ', equipped' : previewSky.value === id ? `, ${copy.tapAgain.toLowerCase()}` : ''
+  return `${name}${isNew}${state}`
+}
+
 function rarityBadgeClass(rarity: Rarity) {
   const s = RARITY_STYLE[rarity]
   return cn(
@@ -115,7 +170,7 @@ function rarityBadgeClass(rarity: Rarity) {
         Loadout · Aircraft &amp; Skies
       </p>
       <p class="mt-2 max-w-2xl text-base text-foreground/90">
-        Choose the plane you fly and the sky you fly in. Tap any card to preview it, then equip it.
+        Choose the plane you fly and the sky you fly in. Tap a card to preview it, tap it again to equip.
         Your lobby-mates see your plane in their game. All {{ CRAFTS.length }} planes and {{ SKY_SKINS.length }} skies are unlocked.
       </p>
 
@@ -151,14 +206,14 @@ function rarityBadgeClass(rarity: Rarity) {
         </span>
       </section>
 
-      <div class="mt-5 flex gap-2">
+      <div class="mt-5 flex flex-wrap gap-2">
         <button
           v-for="t in (['aircraft', 'skies'] as Tab[])"
           :key="t"
           type="button"
           :class="
             cn(
-              'clip-hud border-2 px-5 py-2 font-arcade text-[0.5625rem] uppercase tracking-[0.2em] transition-all duration-150 pointer-coarse:min-h-11',
+              'clip-hud border-2 px-4 py-2 font-arcade text-[0.5625rem] uppercase tracking-[0.16em] min-[360px]:px-5 transition-all duration-150 pointer-coarse:min-h-11',
               tab === t
                 ? 'border-ember bg-[image:var(--grad-sunset)] text-void [box-shadow:var(--glow-ember)]'
                 : 'border-violet/50 text-muted-foreground hover:border-electric hover:text-electric',
@@ -170,7 +225,7 @@ function rarityBadgeClass(rarity: Rarity) {
         </button>
       </div>
 
-      <div class="mt-6 grid gap-5 lg:grid-cols-[minmax(0,1.25fr)_minmax(0,1fr)]">
+      <div class="mt-6 grid grid-cols-1 gap-5 lg:grid-cols-[minmax(0,1.25fr)_minmax(0,1fr)]">
         <section aria-label="Preview" class="neon-panel clip-hud relative min-h-[18.75rem] overflow-hidden p-4 sm:min-h-[23.75rem]">
           <SkyEnvironment
             v-if="tab === 'skies'"
@@ -209,7 +264,7 @@ function rarityBadgeClass(rarity: Rarity) {
           </p>
         </section>
 
-        <section aria-label="Details" class="neon-panel clip-hud p-5">
+        <section aria-label="Details" class="neon-panel clip-hud min-w-0 p-5 [overflow-wrap:anywhere]">
           <div v-if="tab === 'aircraft'" class="animate-sky-pop">
             <p class="font-display text-2xl font-black uppercase tracking-[0.2em] text-foreground">{{ active.name }}</p>
             <div class="mt-2">
@@ -232,12 +287,9 @@ function rarityBadgeClass(rarity: Rarity) {
               >
                 <Check class="h-5 w-5" aria-hidden="true" /> Equipped
               </p>
-              <ArcadeButton v-else size="lg" variant="primary" @click="hangarStore.setCraft(previewCraft)">
-                Equip Aircraft
+              <ArcadeButton v-else size="lg" variant="primary" @click="equipCraft">
+                {{ copy.equip }}
               </ArcadeButton>
-              <RouterLink to="/game" class="block">
-                <ArcadeButton size="sm" variant="blue" class="w-full">To The Runway</ArcadeButton>
-              </RouterLink>
             </div>
           </div>
           <div v-else class="animate-sky-pop">
@@ -257,12 +309,9 @@ function rarityBadgeClass(rarity: Rarity) {
               >
                 <Check class="h-5 w-5" aria-hidden="true" /> Equipped
               </p>
-              <ArcadeButton v-else size="lg" variant="primary" @click="hangarStore.setSkin(previewSky)">
-                Equip Sky
+              <ArcadeButton v-else size="lg" variant="primary" @click="equipSky">
+                {{ copy.equip }}
               </ArcadeButton>
-              <RouterLink to="/game" class="block">
-                <ArcadeButton size="sm" variant="blue" class="w-full">To The Runway</ArcadeButton>
-              </RouterLink>
             </div>
           </div>
         </section>
@@ -274,7 +323,7 @@ function rarityBadgeClass(rarity: Rarity) {
             <button
               type="button"
               :aria-pressed="previewCraft === c.id"
-              :aria-label="`${c.name}, ${c.rarity}${hangarStore.craftId === c.id ? ', equipped' : ''}`"
+              :aria-label="craftLabel(c.id, c.name, c.rarity)"
               :class="
                 cn(
                   'clip-hud relative flex w-full items-center gap-3 border-2 bg-void/60 p-3 text-left transition-all duration-150 hover:-translate-y-0.5',
@@ -297,8 +346,8 @@ function rarityBadgeClass(rarity: Rarity) {
                 >
                   Equipped
                 </span>
-                <span v-else class="mt-1 block text-xs leading-snug text-muted-foreground">
-                  Unlocked · {{ previewCraft === c.id ? 'On the pad' : 'Tap to try on' }}
+                <span v-else :class="cn('mt-1 block text-xs leading-snug', previewCraft === c.id ? 'font-bold text-ember' : 'text-muted-foreground')">
+                  {{ previewCraft === c.id ? copy.tapAgain : 'Tap to preview' }}
                 </span>
               </span>
               <span
@@ -308,6 +357,7 @@ function rarityBadgeClass(rarity: Rarity) {
               >
                 <Check class="h-4 w-4" />
               </span>
+              <span v-else-if="newItems.has(`craft:${c.id}`)" aria-hidden="true" :class="newTagClass">{{ copy.newTag }}</span>
             </button>
           </li>
         </ul>
@@ -316,7 +366,7 @@ function rarityBadgeClass(rarity: Rarity) {
             <button
               type="button"
               :aria-pressed="previewSky === s.id"
-              :aria-label="`${s.name}${hangarStore.skinId === s.id ? ', equipped' : ''}`"
+              :aria-label="skyLabel(s.id, s.name)"
               :class="
                 cn(
                   'clip-hud relative w-full overflow-hidden border-2 text-left transition-all duration-150 hover:-translate-y-0.5',
@@ -327,9 +377,10 @@ function rarityBadgeClass(rarity: Rarity) {
                       : 'border-violet/40 hover:border-magenta',
                 )
               "
-              @click="previewSky = s.id"
+              @click="pickSky(s.id)"
             >
               <img :src="s.src" alt="" width="1920" height="1088" loading="lazy" class="h-20 w-full object-cover" />
+              <span v-if="hangarStore.skinId !== s.id && newItems.has(`sky:${s.id}`)" aria-hidden="true" :class="newTagClass">{{ copy.newTag }}</span>
               <span
                 v-if="hangarStore.skinId === s.id"
                 aria-hidden="true"
@@ -356,7 +407,7 @@ function rarityBadgeClass(rarity: Rarity) {
             <button
               type="button"
               :aria-pressed="previewSky === 'taking-off'"
-              :aria-label="`Taking Off${hangarStore.skinId === 'taking-off' ? ', equipped' : ''}`"
+              :aria-label="skyLabel('taking-off', 'Taking Off')"
               :class="
                 cn(
                   'clip-hud relative h-full w-full border-2 p-3 text-left transition-all duration-150 hover:-translate-y-0.5',
@@ -367,7 +418,7 @@ function rarityBadgeClass(rarity: Rarity) {
                       : 'border-violet/40 hover:border-ember',
                 )
               "
-              @click="previewSky = 'taking-off'"
+              @click="pickSky('taking-off')"
             >
               <span
                 v-if="hangarStore.skinId === 'taking-off'"
@@ -389,6 +440,29 @@ function rarityBadgeClass(rarity: Rarity) {
             </button>
           </li>
         </ul>
+      </div>
+
+      <!-- Always in reach (phones too): equip what's on the pad, then go fly. -->
+      <div
+        class="sticky bottom-0 z-20 -mx-4 mt-5 flex flex-wrap items-center gap-2 border-t-2 border-magenta/50 bg-void/90 px-4 py-2 backdrop-blur-md sm:-mx-6 sm:px-6"
+      >
+        <p class="w-full min-w-0 truncate text-sm leading-snug text-foreground sm:w-auto sm:flex-1" role="status" aria-live="polite">
+          <span class="font-bold uppercase tracking-[0.08em]">{{ previewName }}</span>
+          <span aria-hidden="true" class="text-[#a99bd4]"> · </span>
+          <span :class="previewEquipped || equipNote ? 'text-lime' : 'text-ember'">
+            {{ equipNote || (previewEquipped ? copy.equipped : copy.tapAgain) }}
+          </span>
+        </p>
+        <div class="flex w-full justify-end gap-2 sm:w-auto">
+          <ArcadeButton v-if="!previewEquipped" size="md" variant="magenta" class="flex-1 sm:flex-none" @click="equipPreview">
+            {{ copy.equip }}
+          </ArcadeButton>
+          <RouterLink to="/game" class="flex flex-1 sm:flex-none">
+            <ArcadeButton size="md" :variant="previewEquipped ? 'primary' : 'blue'" class="w-full">
+              {{ copy.proceed }}
+            </ArcadeButton>
+          </RouterLink>
+        </div>
       </div>
     </main>
 

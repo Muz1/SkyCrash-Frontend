@@ -36,9 +36,9 @@ function isActive(to: string) {
   return to === '/' ? route.path === '/' : route.path.startsWith(to)
 }
 
-/** The hangar tab lights up while a non-default plane or sky is equipped. */
+/** The hangar tab pulses a few times while it holds a plane or sky the player hasn't seen yet. */
 function glows(to: string) {
-  return to === '/hangar' && hangarStore.isCustomized
+  return to === '/hangar' && hangarStore.hasNew && !isActive(to)
 }
 
 // ---------- auto-hide (phones, game screen only) ----------
@@ -253,7 +253,7 @@ watch([() => route.path, collapsible], () => {
         <li v-for="item in items" :key="item.to" :class="glows(item.to) ? 'hangar-glow' : undefined">
           <RouterLink
             :to="item.to"
-            :aria-label="glows(item.to) ? `${item.label} (custom loadout equipped)` : item.label"
+            :aria-label="glows(item.to) ? `${item.label} (new planes or skies)` : item.label"
             :class="
               cn(
                 'group grid place-items-center gap-1 border-2 transition-all duration-150 clip-hud',
