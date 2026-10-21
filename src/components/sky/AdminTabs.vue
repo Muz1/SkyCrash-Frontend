@@ -23,6 +23,7 @@ import {
   Repeat,
   UserSearch,
   Scale,
+  HeartPulse,
 } from '@lucide/vue'
 import { usePlayerStore } from '@/stores/playerStore'
 
@@ -31,7 +32,13 @@ const route = useRoute()
 const playerStore = usePlayerStore()
 
 const groups = computed(() => [
-  { label: null, items: [{ to: '/admin', label: 'Overview', icon: LayoutDashboard }] },
+  {
+    label: null,
+    items: [
+      { to: '/admin', label: 'Overview', icon: LayoutDashboard },
+      { to: '/admin/health', label: 'System Health', icon: HeartPulse },
+    ],
+  },
   {
     label: 'Game Analytics',
     items: [

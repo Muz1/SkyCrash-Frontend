@@ -2540,3 +2540,7 @@
 .admin-console .adm-select {
   overflow: hidden;
 }
+.admin-console .adm-tile--info {
+  background: #1e3a8a;
+  border-color: #3b82f6;
+}

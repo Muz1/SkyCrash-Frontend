@@ -1,5 +1,6 @@
 import { expect, type Locator, type Page } from '@playwright/test'
 import playerFixtures from '../fixtures/player.json' with { type: 'json' }
+import adminFixtures from '../fixtures/admin.json' with { type: 'json' }
 import { mockApi, type MockOptions } from './mockApi'
 
 export interface Screen {
@@ -169,6 +170,7 @@ export const PLAYER_SCREENS: Screen[] = [
 const admin: MockOptions = { role: 'admin' }
 export const ADMIN_SCREENS: Screen[] = [
   ['overview', '/admin'],
+  ['system health', '/admin/health'],
   ['game performance', '/admin/game-performance'],
   ['player activity', '/admin/player-activity'],
   ['lobby analytics', '/admin/lobby-analytics'],
@@ -197,8 +199,25 @@ export const ADMIN_SCREENS: Screen[] = [
   ['volatility', '/volatility'],
 ].map(([name, path]) => ({ name: `admin ${name}`, path: path!, mock: admin }) as Screen)
 
-// Admin dialogs: each must fit a phone too.
+// Admin dialogs and alert states: each must fit a phone too.
 ADMIN_SCREENS.push(
+  {
+    name: 'admin health (loss limit hit)',
+    path: '/admin/health',
+    mock: {
+      role: 'admin',
+      overrides: {
+        '/admin/risk': {
+          ...(adminFixtures['/admin/risk'] as object),
+          status: { day: '2026-10-20', netGamingRevenueToday: -104200, dailyHouseLossLimit: 100000, bettingPaused: true, resumedByAdmin: false },
+        },
+      },
+    },
+    prepare: async (p) => {
+      await expect(p.getByRole('alert').filter({ hasText: /daily loss limit/i })).toBeVisible()
+      await expect(p.getByRole('button', { name: /resume betting/i })).toBeVisible()
+    },
+  },
   {
     name: 'admin block dialog',
     path: '/admin/players',

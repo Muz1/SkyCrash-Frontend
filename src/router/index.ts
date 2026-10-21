@@ -98,6 +98,8 @@ const router = createRouter({
     },
     // Account Rules: rule set + versions, sanctions, appeals, audit log (?tab=).
     { path: '/admin/rules', name: 'admin-rules', component: () => import('../views/admin/AdminRulesView.vue'), meta: admin },
+    // Big green/red tiles before a demo, and the daily loss circuit breaker.
+    { path: '/admin/health', name: 'admin-health', component: () => import('../views/admin/AdminHealthView.vue'), meta: admin },
     // Older reports kept reachable by URL but no longer in the navigation.
     { path: '/admin/reports', name: 'admin-reports', component: AdminReportsView, meta: admin },
   ],
