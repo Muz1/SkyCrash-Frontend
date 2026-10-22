@@ -13,7 +13,8 @@ import HouseEdgeConfirmModal from '@/components/HouseEdgeConfirmModal.vue'
 import ExportPdfButton from '@/components/sky/ExportPdfButton.vue'
 import { buildRtpReport } from '@/lib/adminReports'
 import { getPublicGameRules } from '@/services/adminOpsService'
-import { count } from '@/lib/reportFormat'
+import { zar } from '@/lib/reportFormat'
+import LimitsEditDialog from '@/components/admin/LimitsEditDialog.vue'
 import type { PublicGameRules } from '@/types/admin'
 
 const rtpStore = useRtpStore()
@@ -71,10 +72,16 @@ const capRows = computed(() => {
   }))
 })
 
-onMounted(async () => {
+const editingLimits = ref(false)
+
+function loadRules() {
   getPublicGameRules()
     .then((r) => (rules.value = r))
     .catch(() => (rules.value = null))
+}
+
+onMounted(async () => {
+  loadRules()
   rtpStore.fetchSummary()
   await adminSettingsStore.fetchSettings()
   if (adminSettingsStore.settings) {
@@ -133,8 +140,8 @@ function handleSaved() {
         </AdminKpi>
       </div>
 
-      <div class="grid min-h-0 flex-1 gap-4 lg:grid-cols-[minmax(320px,400px)_minmax(0,1fr)]">
-        <AdminPanel title="House Edge Setting" accent="magenta" fill>
+      <div class="grid shrink-0 gap-4 lg:grid-cols-[minmax(320px,400px)_minmax(0,1fr)]">
+        <AdminPanel title="House Edge Setting" accent="magenta">
           <div v-if="adminSettingsStore.settings" class="flex flex-col gap-4">
             <div class="flex items-end gap-3">
               <label class="block flex-1">
@@ -183,11 +190,10 @@ function handleSaved() {
           title="Actual vs theoretical return to player"
           caption="Distance of the actual payout rate from the configured target, in percentage points"
           accent="ember"
-          fill
         >
           <div class="flex min-h-0 flex-1 flex-col justify-center gap-2">
-            <div class="flex items-end gap-4 text-[0.75rem] font-bold uppercase tracking-[0.08em] text-[var(--adm-text-3)]">
-              <span class="w-36 shrink-0">Window</span>
+            <div class="flex items-end gap-2 text-[0.75rem] sm:gap-4 font-bold uppercase tracking-[0.08em] text-[var(--adm-text-3)]">
+              <span class="w-20 shrink-0 sm:w-36">Window</span>
               <div class="relative h-5 flex-1">
                 <span
                   v-for="t in rtpChart.ticks"
@@ -199,16 +205,16 @@ function handleSaved() {
                   {{ t.label }}
                 </span>
               </div>
-              <span class="w-28 shrink-0 text-right">Deviation</span>
+              <span class="w-16 shrink-0 text-right sm:w-28">Deviation</span>
             </div>
             <ul class="flex flex-col">
               <li
                 v-for="row in rtpChart.rows"
                 :key="row.label"
-                class="flex items-center gap-4 border-t border-[var(--adm-border)] py-5"
+                class="flex items-center gap-2 border-t border-[var(--adm-border)] py-5 sm:gap-4"
                 :title="`${row.label}: ${row.value}% actual vs ${rtpStore.summary.theoreticalRtpPercentage}% theoretical`"
               >
-                <span class="w-36 shrink-0">
+                <span class="w-20 shrink-0 sm:w-36">
                   <span class="block text-[0.9375rem] font-semibold text-[var(--adm-text)]">{{ row.label }}</span>
                   <span class="adm-num block text-[0.8125rem] text-[var(--adm-text-3)]">{{ row.value }}% actual</span>
                 </span>
@@ -233,7 +239,7 @@ function handleSaved() {
                     :style="{ left: row.pos + '%', background: row.color, boxShadow: `0 0 0 3px var(--adm-surface), 0 0 10px ${row.color}` }"
                   />
                 </div>
-                <span class="adm-num w-28 shrink-0 text-right text-[0.9375rem] font-semibold text-[var(--adm-text)]">
+                <span class="adm-num w-16 shrink-0 text-right text-[0.8125rem] font-semibold text-[var(--adm-text)] sm:w-28 sm:text-[0.9375rem]">
                   {{ deltaVsTheoretical(row.value).replace(' vs theoretical', '') }}
                 </span>
               </li>
@@ -244,7 +250,7 @@ function handleSaved() {
             </p>
           </div>
         </AdminPanel>
-        <AdminPanel v-else fill>
+        <AdminPanel v-else>
           <AdminLoading />
         </AdminPanel>
       </div>
@@ -255,6 +261,9 @@ function handleSaved() {
         :caption="`Max multiplier ${rules.maxMultiplier}×: RTP stays ${100 - rules.houseEdgePercentage}% at every cash-out target`"
         accent="lime"
       >
+        <template #actions>
+          <AdminButton size="sm" @click="editingLimits = true">Change limits</AdminButton>
+        </template>
         <div class="grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.3fr)]">
           <dl class="grid grid-cols-2 gap-x-4 gap-y-3 text-[0.9375rem]">
             <div>
@@ -267,15 +276,15 @@ function handleSaved() {
             </div>
             <div>
               <dt class="adm-label">Max profit / bet</dt>
-              <dd class="adm-num m-0 text-[var(--adm-text)]">{{ count(rules.maxProfitPerBet) }} credits</dd>
+              <dd class="adm-num m-0 text-[var(--adm-text)]">{{ zar(rules.maxProfitPerBet) }}</dd>
             </div>
             <div>
               <dt class="adm-label">Round liability</dt>
-              <dd class="adm-num m-0 text-[var(--adm-text)]">{{ count(rules.maxRoundLiability) }} credits</dd>
+              <dd class="adm-num m-0 text-[var(--adm-text)]">{{ zar(rules.maxRoundLiability) }}</dd>
             </div>
             <div>
               <dt class="adm-label">Bet range</dt>
-              <dd class="adm-num m-0 text-[var(--adm-text)]">{{ count(rules.minBet) }}–{{ count(rules.maxBet) }}</dd>
+              <dd class="adm-num m-0 text-[var(--adm-text)]">{{ zar(rules.minBet) }} – {{ zar(rules.maxBet) }}</dd>
             </div>
             <div>
               <dt class="adm-label">Formula</dt>
@@ -303,6 +312,8 @@ function handleSaved() {
         </div>
       </AdminPanel>
     </AdminPage>
+
+    <LimitsEditDialog v-if="editingLimits" @close="editingLimits = false" @saved="loadRules" />
 
     <HouseEdgeConfirmModal
       v-if="showConfirmModal"

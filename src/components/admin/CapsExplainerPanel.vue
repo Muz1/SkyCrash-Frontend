@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 import AdminPanel from './AdminPanel.vue'
+import AdminButton from './AdminButton.vue'
+import LimitsEditDialog from './LimitsEditDialog.vue'
+import { KeyRound } from '@lucide/vue'
 import { getRisk } from '@/services/adminOpsService'
 import { usePublicSettingsStore } from '@/stores/publicSettingsStore'
 import { zar } from '@/lib/reportFormat'
@@ -12,14 +15,25 @@ import type { GameLimits } from '@/types/admin'
  */
 const limits = ref<GameLimits | null>(null)
 const publicSettings = usePublicSettingsStore()
-onMounted(async () => {
-  void publicSettings.load()
+const editing = ref(false)
+
+async function loadLimits() {
   try {
     limits.value = (await getRisk()).limits
   } catch {
     limits.value = null
   }
+}
+
+onMounted(() => {
+  void publicSettings.load()
+  void loadLimits()
 })
+
+function onSaved() {
+  void loadLimits()
+  void publicSettings.refresh()
+}
 
 const edge = computed(() => publicSettings.rules?.houseEdgePercentage ?? null)
 
@@ -39,6 +53,9 @@ const example = computed(() => {
 
 <template>
   <AdminPanel title="How the caps work" caption="Why the house can still have a losing day, and how big a loss can get. 1 credit = R1." accent="ember">
+    <template #actions>
+      <AdminButton size="sm" @click="editing = true"><KeyRound aria-hidden="true" /> Change limits</AdminButton>
+    </template>
     <p v-if="!limits" class="adm-subline">Loading the live limits…</p>
     <div v-else class="space-y-3 text-sm leading-relaxed">
       <dl class="grid grid-cols-1 gap-x-6 gap-y-2 sm:grid-cols-2">
@@ -86,5 +103,6 @@ const example = computed(() => {
         Free and bonus credits count as a cost too, so they also push NGR down.
       </p>
     </div>
+    <LimitsEditDialog v-if="editing" @close="editing = false" @saved="onSaved" />
   </AdminPanel>
 </template>
