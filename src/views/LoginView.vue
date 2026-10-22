@@ -261,7 +261,7 @@ function submitGoogleProfile() {
         </div>
 
         <div class="mt-2 text-right">
-          <RouterLink to="/forgot-password" class="text-xs font-semibold text-electric underline-offset-2 hover:underline">{{ en.recovery.forgotLink }}</RouterLink>
+          <RouterLink to="/forgot-password" class="inline-flex min-h-11 min-w-11 items-center text-sm font-semibold text-electric underline-offset-2 hover:underline">{{ en.recovery.forgotLink }}</RouterLink>
         </div>
 
         <p v-if="errorMessage" role="alert" class="mt-4 font-arcade text-[0.5rem] uppercase leading-relaxed text-danger">
