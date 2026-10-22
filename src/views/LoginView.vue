@@ -48,6 +48,19 @@ const otpInput = ref<HTMLInputElement | null>(null)
 
 const block = ref<BlockedLogin | null>(null)
 
+// Signed up but hasn't opened the confirmation link yet: offer a fresh one.
+const unverifiedEmail = ref<string | null>(null)
+const resendNote = ref('')
+async function resendVerification() {
+  if (!unverifiedEmail.value) return
+  try {
+    await authService.resendVerificationByEmail(unverifiedEmail.value)
+    resendNote.value = en.register.sent
+  } catch {
+    resendNote.value = en.common.tryAgain
+  }
+}
+
 // New Google account: age gate and the two ticks, then the credential is posted again.
 const googleToken = ref<string | null>(null)
 const dob = ref('')
@@ -66,7 +79,13 @@ function finish() {
 
 /** Shared handling for 403 (blocked), 429 (locked out) and plain failures. */
 function handleError(err: unknown, fallback: string) {
-  const { status, data } = apiError<BlockedLogin & { message?: string }>(err)
+  const { status, data } = apiError<BlockedLogin & { message?: string; code?: string; email?: string }>(err)
+  if (status === 403 && data?.code === 'email-unverified') {
+    unverifiedEmail.value = data.email ?? email.value
+    resendNote.value = ''
+    errorMessage.value = t.unverified
+    return
+  }
   if (status === 403 && data && 'sanction' in data) {
     block.value = data
     step.value = 'blocked'
@@ -90,6 +109,7 @@ async function startOtp(id: string) {
 
 async function handleSubmit() {
   errorMessage.value = ''
+  unverifiedEmail.value = null
   isSubmitting.value = true
   try {
     const result = await authStore.login({ email: email.value, password: password.value })
@@ -240,9 +260,17 @@ function submitGoogleProfile() {
           />
         </div>
 
+        <div class="mt-2 text-right">
+          <RouterLink to="/forgot-password" class="text-xs font-semibold text-electric underline-offset-2 hover:underline">{{ en.recovery.forgotLink }}</RouterLink>
+        </div>
+
         <p v-if="errorMessage" role="alert" class="mt-4 font-arcade text-[0.5rem] uppercase leading-relaxed text-danger">
           {{ errorMessage }}
         </p>
+        <div v-if="unverifiedEmail" class="mt-2">
+          <ArcadeButton type="button" size="sm" variant="ghost" @click="resendVerification">{{ t.resend }}</ArcadeButton>
+          <p v-if="resendNote" class="mt-1 text-sm text-lime" role="status">{{ resendNote }}</p>
+        </div>
 
         <ArcadeButton type="submit" size="lg" variant="primary" class="mt-7 w-full" :disabled="isSubmitting">
           {{ isSubmitting ? 'Preparing Aircraft…' : 'Login' }}

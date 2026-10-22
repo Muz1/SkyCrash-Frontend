@@ -42,6 +42,8 @@ export const PLAYER_SCREENS: Screen[] = [
   },
   { name: 'login', path: '/login', mock: { role: 'guest' }, prepare: (p) => heading(p, /welcome back/i) },
   { name: 'register', path: '/register', mock: { role: 'guest' }, prepare: (p) => heading(p, /join the flight/i) },
+  { name: 'forgot password', path: '/forgot-password', mock: { role: 'guest' }, prepare: (p) => heading(p, /reset password/i) },
+  { name: 'reset password', path: '/reset-password?token=e2e', mock: { role: 'guest' }, prepare: (p) => heading(p, /new password/i) },
   {
     name: 'register terms dialog',
     path: '/register',

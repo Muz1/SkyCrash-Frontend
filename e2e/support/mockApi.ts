@@ -127,7 +127,10 @@ export async function mockApi(page: Page, opts: MockOptions = {}): Promise<{ unk
       if (opts.login === 'locked') return json({ message: 'Too many tries. Wait 15 minutes.' }, 429)
       return json(authResponse)
     }
-    if (path === '/auth/register' || path === '/auth/login/otp') return json({ ...authResponse, emailVerified: false })
+    if (path === '/auth/register') return json({ verificationRequired: true, email: 'pilot@skycrash.io', message: 'Check your email to finish signing up.' }, 201)
+    if (path === '/auth/login/otp') return json({ ...authResponse, emailVerified: false })
+    if (path === '/auth/resend-verification-email' || path === '/auth/forgot-password') return json({ message: 'If that email has an account, a link is on its way.' })
+    if (path === '/auth/reset-password') return json({ status: 'reset', message: 'Password changed. Log in.' })
     if (path === '/auth/verify-email') {
       const status = opts.verifyEmail ?? 'verified'
       return json({ status }, status === 'verified' || status === 'alreadyVerified' ? 200 : 400)

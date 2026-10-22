@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { useRoute } from 'vue-router'
 import { useAuthStore } from '../stores/AuthStore'
 import * as authService from '@/services/AuthService'
 import ArcadeButton from '@/components/sky/ArcadeButton.vue'
@@ -8,6 +8,8 @@ import ArcadeField from '@/components/sky/ArcadeField.vue'
 import CRTOverlay from '@/components/sky/CRTOverlay.vue'
 import SkyEnvironment from '@/components/sky/SkyEnvironment.vue'
 import Wordmark from '@/components/sky/Wordmark.vue'
+import NeonPanel from '@/components/sky/NeonPanel.vue'
+import { MailCheck } from '@lucide/vue'
 import TermsContent from '@/components/sky/TermsContent.vue'
 import SkyModal from '@/components/sky/SkyModal.vue'
 import RulesList from '@/components/sky/RulesList.vue'
@@ -16,7 +18,6 @@ import { isAtLeast18, latestAdultDob } from '@/lib/age'
 import { en } from '@/copy/en'
 
 const authStore = useAuthStore()
-const router = useRouter()
 const route = useRoute()
 
 const username = ref('')
@@ -34,6 +35,25 @@ const rulesStore = useRulesStore()
 /** Errors that belong to one field, shown under it. */
 const fieldErrors = ref<{ dateOfBirth?: string; password?: string; rules?: string }>({})
 const errorMessage = ref('')
+/** Set once the account exists: the "check your email" screen shows instead of the form. */
+const sentTo = ref<string | null>(null)
+const resending = ref(false)
+const resendMessage = ref('')
+// Where to go after signing in (e.g. back to an admin invite link).
+const redirect = typeof route.query.redirect === 'string' && route.query.redirect.startsWith('/') ? route.query.redirect : undefined
+
+async function resend() {
+  if (!sentTo.value || resending.value) return
+  resending.value = true
+  try {
+    await authService.resendVerificationByEmail(sentTo.value)
+    resendMessage.value = en.register.sent
+  } catch {
+    resendMessage.value = en.common.tryAgain
+  } finally {
+    resending.value = false
+  }
+}
 
 function openRules() {
   showRules.value = true
@@ -102,7 +122,7 @@ async function handleSubmit() {
 
   isSubmitting.value = true
   try {
-    await authStore.register({
+    const created = await authStore.register({
       username: username.value,
       email: email.value,
       password: password.value,
@@ -110,9 +130,7 @@ async function handleSubmit() {
       acceptRules: true,
       dateOfBirth: dateOfBirth.value,
     })
-    // Back to where they came from (e.g. an admin invite link), else the landing page.
-    const redirect = typeof route.query.redirect === 'string' && route.query.redirect.startsWith('/') ? route.query.redirect : '/'
-    router.push(redirect)
+    sentTo.value = created.email || email.value
   } catch (err: unknown) {
     type AxiosLikeError = { response?: { data?: unknown } }
     const data = (err as AxiosLikeError).response?.data as unknown
@@ -153,7 +171,21 @@ async function handleSubmit() {
       <!-- The logo is itself the link home (see Wordmark). -->
       <div class="mb-6 flex justify-center"><Wordmark compact /></div>
 
-      <form class="neon-panel clip-hud crt-scan p-6 sm:p-8" @submit.prevent="handleSubmit">
+      <NeonPanel v-if="sentTo" accent="lime" class="text-center">
+        <MailCheck class="mx-auto h-10 w-10 text-lime" aria-hidden="true" />
+        <h1 class="mt-2 font-display text-xl font-black uppercase tracking-[0.18em] text-lime text-glow-lime">{{ en.register.checkTitle }}</h1>
+        <p class="mt-2 text-sm text-foreground/85" role="status">{{ en.register.checkLine(sentTo) }}</p>
+        <p class="mt-2 text-xs text-muted-foreground">{{ en.register.checkHint }}</p>
+        <p v-if="resendMessage" class="mt-2 text-sm text-lime" role="status">{{ resendMessage }}</p>
+        <div class="mt-5 flex flex-wrap justify-center gap-2">
+          <ArcadeButton type="button" size="md" variant="ghost" :disabled="resending" @click="resend">{{ en.register.resend }}</ArcadeButton>
+          <RouterLink :to="{ name: 'login', query: redirect ? { redirect } : {} }">
+            <ArcadeButton size="md" tabindex="-1">{{ en.register.toLogin }}</ArcadeButton>
+          </RouterLink>
+        </div>
+      </NeonPanel>
+
+      <form v-else class="neon-panel clip-hud crt-scan p-6 sm:p-8" @submit.prevent="handleSubmit">
         <h1 class="text-center font-display text-xl font-black uppercase tracking-[0.18em] text-lime text-glow-lime">
           Join The Flight
         </h1>

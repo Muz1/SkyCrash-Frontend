@@ -23,9 +23,9 @@ export const useAuthStore = defineStore('auth', () => {
     localStorage.setItem('skycrash_player_id', authResponse.playerId)
   }
 
+  /** Creates the account; the player signs in after confirming their email. */
   async function register(payload: RegisterPayload) {
-    const response = await authService.register(payload)
-    setSession(response)
+    return authService.register(payload)
   }
 
   /**

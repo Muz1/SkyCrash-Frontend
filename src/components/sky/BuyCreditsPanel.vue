@@ -11,11 +11,6 @@ onMounted(() => {
   paymentStore.fetchPacks()
 })
 
-/** Credits per R10 for a pack, from the pack's own price and size. */
-function perTenRand(pack: { priceZar: number; credits: number }) {
-  return pack.priceZar > 0 ? creditWhole((pack.credits / pack.priceZar) * 10) : '—'
-}
-
 function buyPack(packId: string) {
   // Note: this navigates the whole page away to PayFast's hosted checkout.
   paymentStore.redirectToCheckout(packId)
@@ -28,6 +23,7 @@ function buyPack(packId: string) {
       Purchases add credits to your account for play here. They don't withdraw as real money.
       Payment is completed on PayFast's secure checkout page.
     </p>
+    <p class="mb-4 font-arcade text-[0.625rem] uppercase tracking-[0.2em] text-lime">{{ en.wallet.rate }}</p>
 
     <p v-if="paymentStore.isLoadingPacks" class="text-xs text-muted-foreground">Loading packs…</p>
     <p v-else-if="paymentStore.packsError" class="text-xs text-danger">{{ paymentStore.packsError }}</p>
@@ -49,7 +45,6 @@ function buyPack(packId: string) {
         <span class="mt-1 block text-[0.625rem] uppercase tracking-[0.2em] text-muted-foreground">
           {{ zar(pack.priceZar) }}
         </span>
-        <span class="mt-0.5 block text-[0.625rem] text-foreground/70">{{ en.wallet.rate(perTenRand(pack)) }}</span>
       </button>
     </div>
 

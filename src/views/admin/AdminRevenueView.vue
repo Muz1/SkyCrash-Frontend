@@ -8,6 +8,7 @@ import AdminTrendChart from '@/components/admin/AdminTrendChart.vue'
 import AdminBarChart from '@/components/admin/AdminBarChart.vue'
 import AdminInfo from '@/components/admin/AdminInfo.vue'
 import ReconciliationPanel from '@/components/admin/ReconciliationPanel.vue'
+import CapsExplainerPanel from '@/components/admin/CapsExplainerPanel.vue'
 import ExportPdfButton from '@/components/sky/ExportPdfButton.vue'
 import { useReport } from '@/composables/useReport'
 import { getRevenue } from '@/services/adminAnalyticsService'
@@ -239,6 +240,8 @@ function buildReport() {
           </table>
         </div>
       </AdminPanel>
+
+      <CapsExplainerPanel />
 
       <ReconciliationPanel />
     </template>

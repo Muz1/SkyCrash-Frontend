@@ -38,7 +38,7 @@ const about = {
     { term: 'Invitation status', definition: 'Pending (link not used yet), Accepted, Revoked (cancelled or replaced by a newer invite) or Expired (after 7 days).' },
   ],
   charts: 'No charts. The tables list current admins and every invitation.',
-  useFor: 'Give a teammate access by sending them the invite link (there’s no email service, so copy it into an email or chat yourself). They sign in or register with the invited email and press Accept.',
+  useFor: 'Give a teammate access: they get an email saying they’ve been given admin access, with the invite link. The link is also shown here to copy, in case the email doesn’t arrive. They sign in or register with the invited email and press Accept.',
 }
 
 async function load() {
@@ -57,9 +57,14 @@ async function sendInvite() {
   newLink.value = null
   copied.value = false
   try {
-    const { invitation, token } = await service.createInvitation({ name: name.value.trim(), email: email.value.trim(), role: role.value })
+    const { invitation, token, emailSent } = await service.createInvitation({ name: name.value.trim(), email: email.value.trim(), role: role.value })
     newLink.value = `${window.location.origin}/invite/${token}`
-    result.value = { ok: true, text: `Invitation created for ${invitation.email}. Copy the link below and send it to them.` }
+    result.value = {
+      ok: true,
+      text: emailSent
+        ? `Invitation emailed to ${invitation.email}. The link is below too, in case it doesn't arrive.`
+        : `Invitation created for ${invitation.email}, but the email couldn't be sent. Copy the link below and send it to them.`,
+    }
     name.value = ''
     email.value = ''
     await load()

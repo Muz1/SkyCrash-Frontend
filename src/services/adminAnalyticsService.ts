@@ -123,7 +123,7 @@ export async function getInvitations(): Promise<AdminInvitation[]> {
 
 /** The token comes back once; the link built from it is the only way to accept. */
 export async function createInvitation(payload: { name: string; email: string; role: AdminRole }) {
-  return (await api.post<{ invitation: AdminInvitation; token: string }>('/admin/roles/invitations', payload)).data
+  return (await api.post<{ invitation: AdminInvitation; token: string; emailSent?: boolean }>('/admin/roles/invitations', payload)).data
 }
 
 export async function revokeInvitation(id: string): Promise<void> {

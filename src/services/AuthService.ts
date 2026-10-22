@@ -16,8 +16,9 @@ function toLoginResult(status: number, body: LoginBody): LoginResult {
   return { kind: 'session', auth: body as AuthResponse }
 }
 
-export async function register(payload: RegisterPayload): Promise<AuthResponse> {
-  const response = await api.post<AuthResponse>('/auth/register', payload)
+/** Sign-up sends a confirmation email; there's no session until the email is verified. */
+export async function register(payload: RegisterPayload): Promise<{ email: string }> {
+  const response = await api.post<{ email: string }>('/auth/register', payload)
   return response.data
 }
 
@@ -61,6 +62,24 @@ export async function verifyEmail(token: string): Promise<VerifyEmailStatus> {
 
 export async function resendVerification(): Promise<void> {
   await api.post('/auth/resend-verification')
+}
+
+/** Signed-out resend (login screen, check-your-email screen). Always answers 200. */
+export async function resendVerificationByEmail(email: string): Promise<void> {
+  await api.post('/auth/resend-verification-email', { email })
+}
+
+/** "Forgot password": emails a one-hour reset link. Always answers 200. */
+export async function forgotPassword(email: string): Promise<void> {
+  await api.post('/auth/forgot-password', { email })
+}
+
+export type ResetPasswordStatus = 'reset' | 'expired' | 'used' | 'invalid'
+
+/** Sets the new password from the reset link's token. Password problems throw (400 with field). */
+export async function resetPassword(token: string, newPassword: string): Promise<ResetPasswordStatus> {
+  const response = await api.post<{ status?: ResetPasswordStatus }>('/auth/reset-password', { token, newPassword })
+  return response.data?.status ?? 'reset'
 }
 
 export async function checkUsername(username: string): Promise<UsernameAvailability> {

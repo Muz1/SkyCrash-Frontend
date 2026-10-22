@@ -115,7 +115,7 @@ export const en = {
 
   verifyEmail: {
     name: 'Verify email',
-    banner: 'Verify your email to unlock everything.',
+    banner: 'Verify your email to buy credits.',
     resend: 'Resend',
     sent: 'Link sent. Check your inbox.',
     already: 'Email already verified.',
@@ -145,6 +145,31 @@ export const en = {
     rulesLink: 'Account rules',
     rulesRequired: 'Tick the Account rules box.',
     breached: 'Password found in a breach. Pick another.',
+    checkTitle: 'Check your email',
+    checkLine: (email: string) => `We sent a link to ${email}. Open it to finish signing up.`,
+    checkHint: 'No email? Check spam, or resend.',
+    resend: 'Resend link',
+    sent: 'Link sent. Check your inbox.',
+    toLogin: 'Go to login',
+  },
+
+  recovery: {
+    forgotLink: 'Forgot password?',
+    forgotTitle: 'Reset password',
+    forgotLine: "Enter your email. We'll send a reset link.",
+    send: 'Send link',
+    sent: 'If that email has an account, a link is on its way. It works for 1 hour.',
+    resetTitle: 'New password',
+    resetLine: '8+ characters, a capital letter and a number.',
+    newPassword: 'New password',
+    confirm: 'Confirm password',
+    mismatch: 'Passwords do not match.',
+    save: 'Save password',
+    done: 'Password changed. Log in.',
+    expired: 'Link expired. Ask for a new one.',
+    used: 'Link already used. Ask for a new one.',
+    invalid: 'Link not valid. Ask for a new one.',
+    askAgain: 'Send a new link',
   },
 
   login: {
@@ -161,6 +186,8 @@ export const en = {
     googleProfileLine: 'Confirm your age and agree.',
     termsTick: 'I agree to the Terms of Service',
     continue: 'Continue',
+    unverified: 'Verify your email first. Check your inbox.',
+    resend: 'Resend link',
   },
 
   blocked: {
@@ -249,7 +276,7 @@ export const en = {
     wagering: (n: string) => `Wager ${n} to unlock bonus`,
     expires: (d: string) => `expires ${d}`,
     bonusInfo: 'Free credits are bonus credits. Wager them the shown amount to turn them into cash credits. Unused bonus expires.',
-    rate: (n: string) => `R10 ≈ ${n} credits`,
+    rate: '1 credit = R1',
     restricted: "Your account can't buy now.",
   },
 
