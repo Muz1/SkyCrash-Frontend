@@ -95,7 +95,7 @@ const lossUsed = computed(() => {
 </script>
 
 <template>
-  <AdminShell help-text="Big tiles: green = fine, amber = works but check it, red = broken. Refresh before a demo. The daily loss limit pauses new bets when today's NGR falls below minus the limit; Resume lets bets continue for the rest of the day.">
+  <AdminShell help-text="Each tile's dot and stripe: green = fine, amber = works but check it, pink = broken. Refresh before a demo. The daily loss limit pauses new bets when today's NGR falls below minus the limit; Resume lets bets continue for the rest of the day.">
     <AdminPage :title="copy.health.title" :eyebrow="copy.health.eyebrow" :subtitle="copy.health.subtitle">
       <template #actions>
         <AdminButton :disabled="loading" @click="load"><RefreshCw aria-hidden="true" />{{ loading ? 'Checking…' : 'Refresh' }}</AdminButton>
@@ -127,7 +127,7 @@ const lossUsed = computed(() => {
             Today's net gaming revenue {{ cr(risk.status.netGamingRevenueToday) }} · limit −{{ cr(risk.status.dailyHouseLossLimit) }}
           </p>
           <div class="relative mt-2 h-3 rounded-full bg-[var(--adm-surface-3)]" role="img" :aria-label="`${lossUsed.toFixed(0)}% of the daily loss limit used`">
-            <span class="absolute inset-y-0 left-0 rounded-full" :style="{ width: `${lossUsed}%`, background: lossUsed >= 100 ? '#ef4444' : lossUsed >= 60 ? '#f59e0b' : '#22c55e' }" />
+            <span class="absolute inset-y-0 left-0 rounded-full" :style="{ width: `${lossUsed}%`, background: lossUsed >= 100 ? 'var(--neon-magenta)' : lossUsed >= 60 ? 'var(--neon-orange)' : 'var(--neon-lime)' }" />
           </div>
           <p class="adm-subline mt-1">{{ lossUsed.toFixed(0) }}% of the limit used · {{ risk.status.day }} (UTC)</p>
           <dl class="mt-4 grid grid-cols-2 gap-x-4 gap-y-2 text-[0.9375rem] sm:grid-cols-3">

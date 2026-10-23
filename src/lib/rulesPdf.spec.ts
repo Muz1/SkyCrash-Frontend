@@ -39,7 +39,7 @@ describe('rules PDF', () => {
   })
 
   it('the builder writes every active rule into the PDF table', () => {
-    const spy = vi.fn(autoTable)
+    const spy = vi.fn<typeof autoTable>(autoTable)
     const doc = buildRulesPdf(set, { jsPDF, autoTable: spy })
     expect(spy).toHaveBeenCalledOnce()
     const body = spy.mock.calls[0]![1].body as string[][]

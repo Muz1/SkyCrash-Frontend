@@ -3,7 +3,7 @@ import { buildFeedbackReport, isRatingOnly } from './feedbackReport'
 import { FEEDBACK_EXPORT_PAGE_SIZE, getAllFeedbackSubmissions } from '@/services/adminAnalyticsService'
 import type { FeedbackSubmissionFilters, FeedbackSubmissionItem, FeedbackSubmissionsPage, ReportQuery } from '@/types/insights'
 
-vi.mock('@/services/api', () => ({ default: { get: vi.fn() } }))
+vi.mock('@/services/api', () => ({ default: { get: vi.fn<(...args: unknown[]) => Promise<unknown>>() } }))
 
 const item = (i: number, over: Partial<FeedbackSubmissionItem> = {}): FeedbackSubmissionItem => ({
   feedbackId: `f-${i}`,

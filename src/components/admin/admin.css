@@ -2178,7 +2178,9 @@
 }
 
 /* ---------- status badges ---------- */
+/* Status badges use the same tinted look as .adm-pill, in the console's neon tones. */
 .admin-console .adm-badge {
+  --adm-badge: var(--adm-text-3);
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -2189,20 +2191,24 @@
   letter-spacing: 0.06em;
   text-transform: uppercase;
   white-space: nowrap;
-  color: #ffffff;
-  background: #64748b;
+  color: var(--adm-badge);
+  background: color-mix(in oklab, var(--adm-badge) 14%, transparent);
+  border: 1px solid color-mix(in oklab, var(--adm-badge) 34%, transparent);
 }
 .admin-console .adm-badge--ok {
-  background: #15803d;
+  --adm-badge: var(--neon-lime);
 }
 .admin-console .adm-badge--bad {
-  background: #b91c1c;
+  --adm-badge: var(--neon-magenta);
 }
 .admin-console .adm-badge--warn {
-  background: #b45309;
+  --adm-badge: var(--neon-orange);
 }
 .admin-console .adm-badge--info {
-  background: #1d4ed8;
+  --adm-badge: var(--neon-blue);
+}
+.admin-console[data-theme='light'] .adm-badge {
+  color: color-mix(in oklab, var(--adm-badge) 55%, black);
 }
 
 /* ---------- alert banner ---------- */
@@ -2233,35 +2239,61 @@
   gap: 14px;
   grid-template-columns: repeat(auto-fill, minmax(min(100%, 220px), 1fr));
 }
+/* Status tiles (System Health): the same card as a KPI tile, with the status shown by the
+   accent stripe and a dot instead of a solid coloured block. */
 .admin-console .adm-tile {
+  --adm-tile-tone: var(--neon-blue);
+  position: relative;
   display: flex;
   flex-direction: column;
   gap: 6px;
   min-width: 0;
   padding: 16px 18px;
-  border-radius: 12px;
-  color: #ffffff;
-  background: #475569;
-  border: 2px solid #64748b;
+  color: var(--adm-text);
+  background: linear-gradient(180deg, var(--adm-surface-2), var(--adm-surface));
+  border: 1px solid var(--adm-border);
+  border-radius: var(--adm-radius);
+  box-shadow: var(--adm-shadow);
+  overflow: hidden;
+}
+.admin-console .adm-tile::before {
+  content: '';
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 3px;
+  background: var(--adm-tile-tone);
+  opacity: 0.85;
 }
 .admin-console .adm-tile--ok {
-  background: #166534;
-  border-color: #22c55e;
+  --adm-tile-tone: var(--neon-lime);
 }
 .admin-console .adm-tile--bad {
-  background: #991b1b;
-  border-color: #ef4444;
+  --adm-tile-tone: var(--neon-magenta);
 }
 .admin-console .adm-tile--warn {
-  background: #92400e;
-  border-color: #f59e0b;
+  --adm-tile-tone: var(--neon-orange);
+}
+.admin-console .adm-tile--info {
+  --adm-tile-tone: var(--neon-blue);
 }
 .admin-console .adm-tile-label {
-  font-size: 12.5px;
-  font-weight: 800;
-  letter-spacing: 0.1em;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-  opacity: 0.9;
+  color: var(--adm-text-3);
+}
+.admin-console .adm-tile-label::before {
+  content: '';
+  width: 9px;
+  height: 9px;
+  flex-shrink: 0;
+  border-radius: 999px;
+  background: var(--adm-tile-tone);
+  box-shadow: 0 0 0 3px color-mix(in oklch, var(--adm-tile-tone) 25%, transparent);
 }
 .admin-console .adm-tile-value {
   font-family: var(--font-display);
@@ -2273,7 +2305,7 @@
 .admin-console .adm-tile-detail {
   font-size: 13.5px;
   line-height: 1.4;
-  opacity: 0.92;
+  color: var(--adm-text-3);
   overflow-wrap: anywhere;
 }
 
@@ -2539,8 +2571,4 @@
 /* WebKit counts a select's long option text as overflow of the page; clip it inside the control. */
 .admin-console .adm-select {
   overflow: hidden;
-}
-.admin-console .adm-tile--info {
-  background: #1e3a8a;
-  border-color: #3b82f6;
 }
