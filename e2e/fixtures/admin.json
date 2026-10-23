@@ -3792,5 +3792,79 @@
       "feedbackRewardMinRounds": 5,
       "feedbackDuplicateWindowHours": 24
     }
-  }
+  },
+  "/admin/access-links": [
+    {
+      "id": "00000000-0000-4000-8000-0000000000a0",
+      "playerId": "00000000-0000-4000-8000-0000000000b0",
+      "username": "Goose",
+      "label": "Goose",
+      "url": "https://skycrash-frontend.vercel.app/play/sample-token-goose-0000000000000000000000",
+      "creditBalance": 500,
+      "createdAtUtc": "2026-10-23T09:00:00Z",
+      "lastUsedAtUtc": "2026-10-23T10:15:00Z",
+      "useCount": 2,
+      "active": true
+    },
+    {
+      "id": "00000000-0000-4000-8000-0000000000a1",
+      "playerId": "00000000-0000-4000-8000-0000000000b1",
+      "username": "Iceman",
+      "label": "Iceman",
+      "url": "https://skycrash-frontend.vercel.app/play/sample-token-iceman-0000000000000000000000",
+      "creditBalance": 500,
+      "createdAtUtc": "2026-10-23T09:00:00Z",
+      "lastUsedAtUtc": "2026-10-23T10:15:00Z",
+      "useCount": 2,
+      "active": true
+    },
+    {
+      "id": "00000000-0000-4000-8000-0000000000a2",
+      "playerId": "00000000-0000-4000-8000-0000000000b2",
+      "username": "Maverick",
+      "label": "Maverick",
+      "url": "https://skycrash-frontend.vercel.app/play/sample-token-maverick-0000000000000000000000",
+      "creditBalance": 500,
+      "createdAtUtc": "2026-10-23T09:00:00Z",
+      "lastUsedAtUtc": null,
+      "useCount": 0,
+      "active": true
+    },
+    {
+      "id": "00000000-0000-4000-8000-0000000000a3",
+      "playerId": "00000000-0000-4000-8000-0000000000b3",
+      "username": "Phoenix",
+      "label": "Phoenix",
+      "url": "https://skycrash-frontend.vercel.app/play/sample-token-phoenix-0000000000000000000000",
+      "creditBalance": 500,
+      "createdAtUtc": "2026-10-23T09:00:00Z",
+      "lastUsedAtUtc": null,
+      "useCount": 0,
+      "active": true
+    },
+    {
+      "id": "00000000-0000-4000-8000-0000000000a4",
+      "playerId": "00000000-0000-4000-8000-0000000000b4",
+      "username": "Rooster",
+      "label": "Rooster",
+      "url": "https://skycrash-frontend.vercel.app/play/sample-token-rooster-0000000000000000000000",
+      "creditBalance": 500,
+      "createdAtUtc": "2026-10-23T09:00:00Z",
+      "lastUsedAtUtc": null,
+      "useCount": 0,
+      "active": true
+    },
+    {
+      "id": "00000000-0000-4000-8000-0000000000a5",
+      "playerId": "00000000-0000-4000-8000-0000000000b5",
+      "username": "Viper",
+      "label": "Viper",
+      "url": "https://skycrash-frontend.vercel.app/play/sample-token-viper-0000000000000000000000",
+      "creditBalance": 0,
+      "createdAtUtc": "2026-10-23T09:00:00Z",
+      "lastUsedAtUtc": null,
+      "useCount": 0,
+      "active": false
+    }
+  ]
 }

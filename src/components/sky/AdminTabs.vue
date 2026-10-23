@@ -24,6 +24,7 @@ import {
   UserSearch,
   Scale,
   HeartPulse,
+  QrCode,
 } from '@lucide/vue'
 import { usePlayerStore } from '@/stores/playerStore'
 
@@ -70,6 +71,7 @@ const groups = computed(() => [
     label: 'Game Management',
     items: [
       { to: '/admin/players', label: 'Players', icon: UserCog },
+      { to: '/admin/access-links', label: 'Panel Access Links', icon: QrCode },
       { to: '/admin/rules', label: 'Account Rules', icon: Scale },
       { to: '/admin/rounds', label: 'Live Round', icon: Radio },
       { to: '/admin/lobbies', label: 'Lobbies', icon: Armchair },

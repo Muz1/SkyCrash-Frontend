@@ -318,6 +318,7 @@ export const ADMIN_SCREENS: Screen[] = [
   ['feedback keywords', '/admin/feedback/keywords'],
   ['ai advisor', '/admin/advisor'],
   ['players', '/admin/players'],
+  ['access links', '/admin/access-links'],
   ['account rules', '/admin/rules'],
   ['account rules sanctions', '/admin/rules?tab=sanctions'],
   ['account rules appeals', '/admin/rules?tab=appeals'],

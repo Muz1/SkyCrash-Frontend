@@ -86,3 +86,9 @@ export async function checkUsername(username: string): Promise<UsernameAvailabil
   const response = await api.get<UsernameAvailability>('/auth/check-username', { params: { username } })
   return response.data
 }
+
+/** Quick-access link (/play/:token): signs the linked player in without a password. */
+export async function linkLogin(token: string): Promise<AuthResponse> {
+  const response = await api.post<AuthResponse>('/auth/link', { token })
+  return response.data
+}
