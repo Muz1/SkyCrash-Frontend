@@ -288,12 +288,32 @@ const settledLabel: Record<string, string> = {
 }
 export const settledByLabel = (s: string) => settledLabel[s] ?? s.replace(/([a-z])([A-Z])/g, '$1 $2')
 
+/**
+ * "What if every credit had been bought?" (1 credit = R1). Free credits are valued as if the
+ * players had paid for them, so there is no bonus cost:
+ * - revenue: rands players would have paid in (actual purchases + free credits at R1);
+ * - profit: what the house kept from play, i.e. gross gaming revenue (wagered − payouts);
+ * - expected profit: the long-run figure the edge guarantees (wagered × house edge).
+ */
+export function theoreticalIfBought(r: RevenueReport) {
+  const bonusCost = r.bonusCost ?? r.freeCreditsGiven ?? 0
+  const purchases = r.purchaseRevenueZar ?? 0
+  return {
+    revenue: purchases + bonusCost,
+    purchases,
+    freeCredits: bonusCost,
+    profit: r.ggr ?? r.grossRevenue,
+    expectedProfit: r.expectedGrossRevenue,
+  }
+}
+
 export function buildRevenueReport(r: RevenueReport): ReportDefinition {
   const ggr = r.ggr ?? r.grossRevenue
   const ngr = r.ngr ?? r.netProfit
   const bonusCost = r.bonusCost ?? r.freeCreditsGiven
   const bySource = r.bonusCostBySource ?? r.freeCreditsBreakdown
   const range = `${longDate(r.range.from)} – ${longDate(r.range.to)} (${r.range.days} days, UTC)`
+  const theory = theoreticalIfBought(r)
   return {
     title: 'Revenue & Profit Report',
     fileName: 'skycrash-revenue',
@@ -329,6 +349,19 @@ export function buildRevenueReport(r: RevenueReport): ReportDefinition {
           ['Purchases (ZAR)', zar(r.purchaseRevenueZar)],
           ['Purchase count', count(r.purchaseCount)],
           ['Credits sold', cr(r.creditsSold)],
+        ],
+      },
+      {
+        kind: 'metrics',
+        heading: 'Theoretical: if every credit had been bought',
+        description:
+          'Values every free credit at R1 as if players had paid for it, so there is no bonus cost. Revenue = purchases + free credits. Profit = gross gaming revenue (wagered − payouts). Expected profit = wagered × house edge.',
+        rows: [
+          ['Theoretical revenue (money paid in)', zar(theory.revenue)],
+          ['  of which actual purchases', zar(theory.purchases)],
+          ['  of which free credits at R1', zar(theory.freeCredits)],
+          ['Theoretical profit (this period)', cr(theory.profit)],
+          ['Expected profit at the house edge', cr(theory.expectedProfit)],
         ],
       },
       ...(r.sampleSizeNote ? [{ kind: 'text' as const, heading: 'Sample size', description: r.sampleSizeNote }] : []),

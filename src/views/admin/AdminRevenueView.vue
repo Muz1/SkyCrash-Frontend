@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { Coins, HandCoins, Landmark, Gift, TrendingUp, Percent, Scale, Target, Wallet, Gauge, Info } from '@lucide/vue'
+import { Coins, HandCoins, Landmark, Gift, TrendingUp, Percent, Scale, Target, Wallet, Gauge, Info, ShoppingCart, PiggyBank, Calculator } from '@lucide/vue'
 import ReportLayout from '@/components/admin/ReportLayout.vue'
 import AdminKpi from '@/components/admin/AdminKpi.vue'
 import AdminPanel from '@/components/admin/AdminPanel.vue'
@@ -13,7 +13,7 @@ import ExportPdfButton from '@/components/sky/ExportPdfButton.vue'
 import { useReport } from '@/composables/useReport'
 import { getRevenue } from '@/services/adminAnalyticsService'
 import { ABOUT } from '@/lib/reportAbout'
-import { buildRevenueReport, settledByLabel } from '@/lib/adminReports'
+import { buildRevenueReport, settledByLabel, theoreticalIfBought } from '@/lib/adminReports'
 import { count, cr, dateTime, mult, pct2, zar } from '@/lib/reportFormat'
 import { admin as copy } from '@/copy/admin'
 
@@ -38,6 +38,8 @@ const v = computed(() => {
     annotated: r.daily.filter((d) => d.annotation).length,
   }
 })
+
+const theory = computed(() => (data.value ? theoreticalIfBought(data.value) : null))
 
 const zText = computed(() => {
   const z = data.value?.gapZScore
@@ -124,6 +126,45 @@ function buildReport() {
           <span class="adm-num">{{ cr(data.averageBet) }}</span>
         </AdminKpi>
       </div>
+
+      <AdminPanel
+        v-if="theory"
+        title="Theoretical: if every credit had been bought"
+        caption="Free credits valued at R1 each, as if players had paid for them (so no bonus cost)"
+        accent="lime"
+      >
+        <div class="adm-kpis">
+          <AdminKpi
+            label="Theoretical revenue"
+            info="Rands players would have paid in: actual purchases plus every free credit valued at R1."
+            :icon="ShoppingCart"
+            tone="lime"
+          >
+            <span class="adm-num">{{ zar(theory.revenue) }}</span>
+            <template #caption>
+              <span class="adm-num">Purchases {{ zar(theory.purchases) }} + free credits {{ zar(theory.freeCredits) }}</span>
+            </template>
+          </AdminKpi>
+          <AdminKpi
+            label="Theoretical profit"
+            info="What the house kept from play if no credits were free: wagered − payouts (gross gaming revenue). Can be negative on a lucky day for players."
+            :icon="PiggyBank"
+            :tone="theory.profit >= 0 ? 'lime' : 'magenta'"
+            caption="Wagered − payouts, with no bonus cost"
+          >
+            <span class="adm-num">{{ cr(theory.profit) }}</span>
+          </AdminKpi>
+          <AdminKpi
+            label="Expected profit (house edge)"
+            info="The long-run profit the edge guarantees on this much betting: wagered × house edge. Actual profit swings around this."
+            :icon="Calculator"
+            tone="violet"
+            :caption="`Wagered ${cr(data.totalWagered)} × ${data.houseEdgePercentage}% edge`"
+          >
+            <span class="adm-num">{{ cr(theory.expectedProfit) }}</span>
+          </AdminKpi>
+        </div>
+      </AdminPanel>
 
       <p v-if="data.gapExplanation" class="adm-callout adm-callout--info">
         <Info aria-hidden="true" />
