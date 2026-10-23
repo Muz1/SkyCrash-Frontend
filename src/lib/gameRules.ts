@@ -22,12 +22,11 @@ export function autoPresets(rules: PublicGameRules | null | undefined): number[]
   return AUTO_PRESETS.filter((p) => p <= cap)
 }
 
-export type StakeProblem = 'none' | 'empty' | 'tooSmall' | 'tooBig' | 'noCredits'
+export type StakeProblem = 'none' | 'empty' | 'tooSmall' | 'noCredits'
 
 export function stakeProblem(stake: number, credits: number, rules: PublicGameRules | null | undefined): StakeProblem {
   if (!Number.isFinite(stake) || stake <= 0) return 'empty'
   if (rules && stake < rules.minBet) return 'tooSmall'
-  if (rules && stake > rules.maxBet) return 'tooBig'
   if (stake > credits) return 'noCredits'
   return 'none'
 }
@@ -43,13 +42,12 @@ export function autoTargetProblem(target: number, rules: PublicGameRules | null 
 /** Quick bet chips that the limits allow. */
 export function allowedSteps(steps: readonly number[], rules: PublicGameRules | null | undefined): number[] {
   if (!rules) return [...steps]
-  return steps.filter((s) => s >= rules.minBet && s <= rules.maxBet)
+  return steps.filter((s) => s >= rules.minBet)
 }
 
-/** The "Max" chip: as much as the player has, but never above the max bet. */
+/** The "Max" chip: as much as the player has (there is no maximum bet). */
 export function maxStake(credits: number, rules: PublicGameRules | null | undefined): number {
-  const top = rules ? Math.min(credits, rules.maxBet) : credits
-  return Math.max(0, Math.floor(top * 100) / 100)
+  return Math.max(0, Math.floor(credits * 100) / 100)
 }
 
 /** Cosmetic sky stage for the climb: 0 below 10×, then 1 (10×), 2 (50×), 3 (100×). */

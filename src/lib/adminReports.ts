@@ -288,23 +288,53 @@ const settledLabel: Record<string, string> = {
 }
 export const settledByLabel = (s: string) => settledLabel[s] ?? s.replace(/([a-z])([A-Z])/g, '$1 $2')
 
+/** How to read the z-score: how many typical swings (standard deviations) profit is from expected. */
+export const Z_BANDS = [
+  { key: 'normal', range: 'Between −2 and +2', meaning: 'Normal luck. Happens about 95% of the time. Nothing to do.' },
+  { key: 'watch', range: '−3 to −2, or +2 to +3', meaning: 'Unusually unlucky (or lucky). It happens, but keep an eye on it.' },
+  { key: 'investigate', range: 'Below −3 or above +3', meaning: 'Under a 0.3% chance by luck alone. Check for a bug, a mispaid bet or a cheating player.' },
+] as const
+export type ZBand = (typeof Z_BANDS)[number]['key']
+
+export function zBand(z: number): ZBand {
+  const a = Math.abs(z)
+  return a <= 2 ? 'normal' : a <= 3 ? 'watch' : 'investigate'
+}
+
+// Standard normal CDF (Abramowitz & Stegun 7.1.26, error < 1.5e-7).
+function normalCdf(x: number): number {
+  const t = 1 / (1 + 0.3275911 * Math.abs(x) / Math.SQRT2)
+  const erf = 1 - (((((1.061405429 * t - 1.453152027) * t + 1.421413741) * t - 0.284496736) * t + 0.254829592) * t) * Math.exp(-(x * x) / 2)
+  return x >= 0 ? (1 + erf) / 2 : (1 - erf) / 2
+}
+
 /**
- * "What if every credit had been bought?" (1 credit = R1). Free credits are valued as if the
- * players had paid for them, so there is no bonus cost:
- * - revenue: rands players would have paid in (actual purchases + free credits at R1);
- * - profit: what the house kept from play, i.e. gross gaming revenue (wagered − payouts);
- * - expected profit: the long-run figure the edge guarantees (wagered × house edge).
+ * "Is this profit just luck?" Profit from play (GGR) swings around wagered × edge; the
+ * standard deviation is the size of a normal swing for these exact bets (from the API).
+ * - lossChance: chance a period with this much betting shows a loss by luck alone;
+ * - wageredForRareLoss: total wagered (same mix of bets) before a loss is a 1-in-20 event.
+ *   Expected profit grows with the amount bet, the swing only with its square root.
  */
-export function theoreticalIfBought(r: RevenueReport) {
-  const bonusCost = r.bonusCost ?? r.freeCreditsGiven ?? 0
-  const purchases = r.purchaseRevenueZar ?? 0
-  return {
-    revenue: purchases + bonusCost,
-    purchases,
-    freeCredits: bonusCost,
-    profit: r.ggr ?? r.grossRevenue,
-    expectedProfit: r.expectedGrossRevenue,
-  }
+export function luckCheck(r: RevenueReport) {
+  const actual = r.ggr ?? r.grossRevenue
+  const expected = r.expectedGrossRevenue
+  const gap = r.gapToExpected ?? actual - expected
+  const sd = r.ggrStandardDeviation ?? null
+  const z = r.gapZScore ?? (sd ? gap / sd : null)
+  const lossChance = sd && sd > 0 ? normalCdf(-expected / sd) : null
+  const wageredForRareLoss = sd && sd > 0 && expected > 0 ? r.totalWagered * ((1.645 * sd) / expected) ** 2 : null
+  return { actual, expected, gap, sd, z, band: z == null ? null : zBand(z), lossChance, wageredForRareLoss }
+}
+
+/** One plain sentence for the verdict. */
+export function luckVerdict(l: ReturnType<typeof luckCheck>): string {
+  if (l.z == null || !l.sd) return 'Not enough bets yet to judge.'
+  const dir = l.gap >= 0 ? 'above' : 'below'
+  const swings = Math.abs(l.z).toFixed(1)
+  const base = `Profit is ${cr(Math.abs(l.gap))} ${dir} expected. A normal swing for these bets is ±${cr(l.sd)}, so this is ${swings} swings ${dir}: `
+  if (l.band === 'normal') return base + 'normal luck.'
+  if (l.band === 'watch') return base + 'unusual, keep an eye on it.'
+  return base + 'too far to be luck. Run the reconciliation check below.'
 }
 
 export function buildRevenueReport(r: RevenueReport): ReportDefinition {
@@ -313,56 +343,57 @@ export function buildRevenueReport(r: RevenueReport): ReportDefinition {
   const bonusCost = r.bonusCost ?? r.freeCreditsGiven
   const bySource = r.bonusCostBySource ?? r.freeCreditsBreakdown
   const range = `${longDate(r.range.from)} – ${longDate(r.range.to)} (${r.range.days} days, UTC)`
-  const theory = theoreticalIfBought(r)
+  const luck = luckCheck(r)
   return {
     title: 'Revenue & Profit Report',
     fileName: 'skycrash-revenue',
     summary:
       `${range}. ${r.includesTestAccounts ? 'Test accounts included.' : 'Test accounts excluded.'} ` +
       'All amounts are in rands (R). ' +
-      (r.gapExplanation ? r.gapExplanation : ''),
+      luckVerdict(luck),
     sections: [
       {
         kind: 'metrics',
         heading: 'Headline figures',
         description:
-          'Gross gaming revenue (GGR) = wagered − payouts. Net gaming revenue (NGR) = GGR − bonus cost. Hold percentage = GGR ÷ wagered. NGR margin = NGR ÷ wagered. Expected from house edge = wagered × edge.',
+          'Gross gaming revenue (GGR) = wagered − payouts: what the house kept from play. Net gaming revenue (NGR) = GGR − bonus cost. Return to player (RTP) = payouts ÷ wagered.',
         rows: [
           ['Gross gaming revenue (GGR)', cr(ggr)],
-          ['Gross gaming revenue on bought-credit stakes', cr(r.ggrCash)],
-          ['Gross gaming revenue on bonus-credit stakes', cr(r.ggrBonus)],
-          ['Expected from house edge', cr(r.expectedGrossRevenue)],
-          ['Gap to expected', cr(r.gapToExpected)],
-          ['Gap in std devs (z)', r.gapZScore == null ? '—' : r.gapZScore.toFixed(2)],
-          ['Standard deviation of gross gaming revenue', cr(r.ggrStandardDeviation)],
+          ['Net gaming revenue (NGR)', cr(ngr)],
           ['Actual return to player (RTP)', pct2(r.actualRtpPercentage)],
           ['Theoretical return to player (RTP)', pct2(r.theoreticalRtpPercentage ?? 100 - r.houseEdgePercentage)],
-          ['Bonus cost', cr(bonusCost)],
-          ['Bonus forfeited', cr(r.bonusForfeited)],
-          ['Net gaming revenue (NGR)', cr(ngr)],
-          ['Hold %', pct2(r.holdPercentage)],
-          ['Net gaming revenue margin', pct2(r.ngrMarginPercentage ?? r.profitMarginPercentage)],
           ['Wagered', cr(r.totalWagered)],
           ['Payouts', cr(r.totalPayouts)],
           ['Resolved bets', count(r.betCount)],
           ['Average bet', cr(r.averageBet)],
+          ['Bonus cost', cr(bonusCost)],
+          ['Bonus forfeited', cr(r.bonusForfeited)],
           ['Purchases (ZAR)', zar(r.purchaseRevenueZar)],
           ['Purchase count', count(r.purchaseCount)],
-          ['Credits sold', cr(r.creditsSold)],
         ],
       },
       {
         kind: 'metrics',
-        heading: 'Theoretical: if every credit had been bought',
+        heading: 'Statistics: is this profit just luck?',
         description:
-          'Values every free credit at R1 as if players had paid for it, so there is no bonus cost. Revenue = purchases + free credits. Profit = gross gaming revenue (wagered − payouts). Expected profit = wagered × house edge.',
+          'Expected profit = wagered × house edge. The standard deviation is the size of a normal swing for these bets. The z-score = (actual − expected) ÷ standard deviation: how many normal swings the result is from expected.',
         rows: [
-          ['Theoretical revenue (money paid in)', zar(theory.revenue)],
-          ['  of which actual purchases', zar(theory.purchases)],
-          ['  of which free credits at R1', zar(theory.freeCredits)],
-          ['Theoretical profit (this period)', cr(theory.profit)],
-          ['Expected profit at the house edge', cr(theory.expectedProfit)],
+          ['Actual profit (GGR)', cr(luck.actual)],
+          ['Expected profit (wagered × edge)', cr(luck.expected)],
+          ['Gap to expected', cr(luck.gap)],
+          ['Standard deviation (normal swing)', luck.sd == null ? '—' : `±${cr(luck.sd)}`],
+          ['z-score', luck.z == null ? '—' : luck.z.toFixed(2)],
+          ['Verdict', luckVerdict(luck)],
+          ['Chance of a loss by luck at this volume', luck.lossChance == null ? '—' : pct2(luck.lossChance * 100)],
+          ['Wagered needed before a loss is a 1-in-20 event', luck.wageredForRareLoss == null ? '—' : cr(luck.wageredForRareLoss)],
         ],
+      },
+      {
+        kind: 'table',
+        heading: 'How to read the z-score',
+        description: 'Most periods land between −2 and +2. Only results beyond ±3 are worth investigating.',
+        columns: ['z-score', 'Meaning'],
+        rows: Z_BANDS.map((b) => [b.range, b.meaning]),
       },
       ...(r.sampleSizeNote ? [{ kind: 'text' as const, heading: 'Sample size', description: r.sampleSizeNote }] : []),
       {
@@ -393,7 +424,7 @@ export function buildRevenueReport(r: RevenueReport): ReportDefinition {
       {
         kind: 'table',
         heading: 'Cap events',
-        description: 'Bets cashed out by a risk cap: profit cap (10 000 max profit), max multiplier (100x) or round liability.',
+        description: 'Bets cashed out by a risk cap: the profit cap, the max multiplier or the round liability cap.',
         columns: ['Reason', 'Bets', 'Payouts'],
         rows: (r.capEvents ?? []).map((c) => [settledByLabel(c.reason), count(c.count), cr(c.payouts)]),
         emptyText: 'No caps fired in this range.',

@@ -45,8 +45,8 @@ const example = computed(() => {
   const profit = Math.min(stake * (l.maxMultiplier - 1), l.maxProfitPerBet)
   // The edge earns this % of every rand bet, so a win this size takes this much betting to earn back.
   const wageredToEarnBack = edge.value ? profit / (edge.value / 100) : null
-  // The multiplier at which a max bet hits the profit cap.
-  const capMultiplier = l.maxBet > 0 ? 1 + l.maxProfitPerBet / l.maxBet : null
+  // The multiplier at which this stake hits the profit cap.
+  const capMultiplier = 1 + l.maxProfitPerBet / stake
   return { stake, profit, wageredToEarnBack, capMultiplier }
 })
 </script>
@@ -68,7 +68,7 @@ const example = computed(() => {
           <dd>
             A bet is cashed out automatically once its profit reaches {{ zar(limits.maxProfitPerBet) }}.
             Payout = the smaller of stake × multiplier and stake + {{ zar(limits.maxProfitPerBet) }}.
-            <template v-if="example?.capMultiplier">A max bet of {{ zar(limits.maxBet) }} hits this cap at {{ example.capMultiplier.toFixed(2) }}×.</template>
+            <template v-if="example?.capMultiplier">A {{ zar(example.stake) }} bet hits this cap at {{ example.capMultiplier.toFixed(2) }}×.</template>
           </dd>
         </div>
         <div>
@@ -80,7 +80,7 @@ const example = computed(() => {
           <dd>When today's net gaming revenue (NGR) drops below −{{ zar(limits.dailyHouseLossLimit) }}, new bets pause until tomorrow (or until a manager resumes play).</dd>
         </div>
         <div>
-          <dt class="adm-label !mb-0">Stakes: {{ zar(limits.minBet) }} – {{ zar(limits.maxBet) }}</dt>
+          <dt class="adm-label !mb-0">Stakes: from {{ zar(limits.minBet) }}, no maximum</dt>
           <dd>Bets paid from bonus credits are capped at {{ zar(limits.maxBetFromBonusBalance) }}.</dd>
         </div>
         <div>

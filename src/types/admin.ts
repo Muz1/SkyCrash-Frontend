@@ -150,7 +150,6 @@ export interface GameLimits {
   maxMultiplier: number
   maxProfitPerBet: number
   minBet: number
-  maxBet: number
   maxRoundLiability: number
   dailyHouseLossLimit: number
   maxBetFromBonusBalance: number
@@ -190,7 +189,6 @@ export interface PublicGameRules {
   theoreticalRtpPercentage: number
   crashFormulaVersion: number
   minBet: number
-  maxBet: number
   maxMultiplier: number
   maxProfitPerBet: number
   maxRoundLiability: number

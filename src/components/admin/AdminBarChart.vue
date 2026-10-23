@@ -115,7 +115,11 @@ function pct(v: number) {
               {{ format(item.value) }}
             </span>
           </span>
-          <span v-if="active === i" class="adm-tooltip" role="presentation">
+          <span
+            v-if="active === i"
+            :class="['adm-tooltip', items.length > 2 && i === 0 && 'is-start', items.length > 2 && i === items.length - 1 && 'is-end']"
+            role="presentation"
+          >
             <strong>{{ item.label }}</strong>
             <span class="adm-num">{{ format(item.value) }}</span>
             <span v-if="item.detail">{{ item.detail }}</span>

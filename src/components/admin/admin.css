@@ -654,6 +654,13 @@
 .admin-console .adm-table tbody tr:hover td {
   background: oklch(0.62 0.26 305 / 0.07);
 }
+.admin-console .adm-table caption {
+  caption-side: top;
+  padding: 0 0 6px;
+}
+.admin-console .adm-table tbody tr.adm-row-current td {
+  background: oklch(0.75 0.17 231 / 0.1);
+}
 .admin-console .adm-table tbody tr:last-child td {
   border-bottom: 0;
 }
@@ -1186,6 +1193,16 @@
 .admin-console .adm-vchart-col .adm-tooltip {
   top: 0;
   transform: translate(-50%, calc(-100% - 6px));
+}
+/* Edge columns: line the tooltip up with the chart's edge instead of centring it past it. */
+.admin-console .adm-vchart-col .adm-tooltip.is-start {
+  left: 0;
+  transform: translate(0, calc(-100% - 6px));
+}
+.admin-console .adm-vchart-col .adm-tooltip.is-end {
+  left: auto;
+  right: 0;
+  transform: translate(0, calc(-100% - 6px));
 }
 .admin-console .adm-tooltip--trend {
   top: 4px;
@@ -2054,12 +2071,10 @@
   outline-offset: 1px;
 }
 .admin-console .adm-info-pop {
-  position: absolute;
-  z-index: 30;
-  top: calc(100% + 6px);
-  left: 0;
+  position: fixed;
+  z-index: 60;
   width: max-content;
-  max-width: min(300px, calc(100vw - 48px));
+  max-width: min(300px, calc(100vw - 16px));
   padding: 10px 12px;
   border-radius: 8px;
   font-size: 13.5px;
@@ -2073,10 +2088,6 @@
   background: var(--adm-surface-solid);
   border: 1px solid var(--adm-border-strong);
   box-shadow: 0 12px 28px -10px #000000b3;
-}
-.admin-console .adm-info-pop.is-right {
-  left: auto;
-  right: 0;
 }
 .admin-console .adm-info-pop strong {
   display: block;

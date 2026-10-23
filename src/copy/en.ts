@@ -29,7 +29,6 @@ export const en = {
     capsInfo: 'Wins are capped per bet and per round. Caps never change the 1% house edge.',
     rulesLink: 'Game rules',
     tooSmall: (n: string) => `Min bet ${n}`,
-    tooBig: (n: string) => `Max bet ${n}`,
     noCredits: 'Not enough credits',
     autoTooHigh: (n: string) => `Auto max ${n}x`,
     autoTooLow: 'Auto min 1.01x',

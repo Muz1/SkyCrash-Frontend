@@ -16,7 +16,7 @@ const rows = computed(() => {
   return [
     { label: t.edge, value: `${r.houseEdgePercentage}%` },
     { label: t.rtp, value: `${r.theoreticalRtpPercentage}%` },
-    { label: t.stake, value: `${creditAmount(r.minBet)} – ${creditAmount(r.maxBet)}` },
+    { label: t.stake, value: `${creditAmount(r.minBet)} min, no max` },
     { label: t.maxMultiplier, value: `${r.maxMultiplier}x` },
     { label: t.maxProfit, value: creditAmount(r.maxProfitPerBet) },
     { label: t.roundCap, value: creditAmount(r.maxRoundLiability) },

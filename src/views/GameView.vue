@@ -153,8 +153,6 @@ const stakeHint = computed(() => {
   switch (stakeIssue.value) {
     case 'tooSmall':
       return en.bet.tooSmall(creditAmount(rules.value?.minBet ?? 0))
-    case 'tooBig':
-      return en.bet.tooBig(creditAmount(rules.value?.maxBet ?? 0))
     case 'noCredits':
       return en.bet.noCredits
     default:
@@ -390,7 +388,7 @@ function crashChipClass(value: number) {
                     type="number"
                     inputmode="decimal"
                     :min="rules?.minBet ?? 1"
-                    :max="rules ? Math.min(rules.maxBet, credits) : credits"
+                    :max="credits"
                     :aria-invalid="!!stakeHint"
                     class="block w-24 border-2 pointer-coarse:min-h-11 border-violet/50 bg-void/70 px-2 py-1 font-arcade text-base text-ember text-glow-ember focus:border-magenta focus:outline-none sm:w-28"
                   />

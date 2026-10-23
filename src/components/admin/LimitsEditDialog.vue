@@ -34,8 +34,7 @@ const fields: { key: keyof EditableLimits; label: string; hint: string; suffix: 
   { key: 'maxMultiplier', label: 'Max multiplier', hint: 'Rounds never fly past this. 2–10 000.', suffix: '×' },
   { key: 'maxProfitPerBet', label: 'Max profit per bet', hint: 'A bet is cashed out once its profit hits this.', suffix: 'R' },
   { key: 'minBet', label: 'Minimum bet', hint: 'Smallest stake allowed.', suffix: 'R' },
-  { key: 'maxBet', label: 'Maximum bet', hint: 'Largest stake allowed.', suffix: 'R' },
-  { key: 'maxRoundLiability', label: 'Round liability', hint: 'At least twice the maximum bet.', suffix: 'R' },
+  { key: 'maxRoundLiability', label: 'Round liability', hint: 'At least twice the minimum bet.', suffix: 'R' },
   { key: 'dailyHouseLossLimit', label: 'Daily house loss limit', hint: 'Betting pauses past this loss. 0 turns it off.', suffix: 'R' },
   { key: 'maxBetFromBonusBalance', label: 'Bonus stake cap', hint: 'Most of a stake that can be bonus credits.', suffix: 'R' },
 ]

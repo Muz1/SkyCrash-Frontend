@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { Coins, HandCoins, Landmark, Gift, TrendingUp, Percent, Scale, Target, Wallet, Gauge, Info, ShoppingCart, PiggyBank, Calculator } from '@lucide/vue'
+import { Coins, HandCoins, Landmark, Gift, TrendingUp, Target, Wallet, Gauge, Activity, Sigma } from '@lucide/vue'
 import ReportLayout from '@/components/admin/ReportLayout.vue'
 import AdminKpi from '@/components/admin/AdminKpi.vue'
 import AdminPanel from '@/components/admin/AdminPanel.vue'
@@ -13,7 +13,7 @@ import ExportPdfButton from '@/components/sky/ExportPdfButton.vue'
 import { useReport } from '@/composables/useReport'
 import { getRevenue } from '@/services/adminAnalyticsService'
 import { ABOUT } from '@/lib/reportAbout'
-import { buildRevenueReport, settledByLabel, theoreticalIfBought } from '@/lib/adminReports'
+import { buildRevenueReport, luckCheck, luckVerdict, settledByLabel, Z_BANDS } from '@/lib/adminReports'
 import { count, cr, dateTime, mult, pct2, zar } from '@/lib/reportFormat'
 import { admin as copy } from '@/copy/admin'
 
@@ -29,8 +29,6 @@ const v = computed(() => {
     ngr: r.ngr ?? r.netProfit,
     bonusCost: r.bonusCost ?? r.freeCreditsGiven,
     bySource: r.bonusCostBySource ?? r.freeCreditsBreakdown,
-    hold: r.holdPercentage ?? (r.totalWagered ? ((r.totalWagered - r.totalPayouts) / r.totalWagered) * 100 : null),
-    ngrMargin: r.ngrMarginPercentage ?? r.profitMarginPercentage,
     theoretical: r.theoreticalRtpPercentage ?? 100 - r.houseEdgePercentage,
     wins: r.largestWins ?? [],
     caps: r.capEvents ?? [],
@@ -39,12 +37,9 @@ const v = computed(() => {
   }
 })
 
-const theory = computed(() => (data.value ? theoreticalIfBought(data.value) : null))
-
-const zText = computed(() => {
-  const z = data.value?.gapZScore
-  return z == null ? 'z n/a' : `z ${z >= 0 ? '+' : '−'}${Math.abs(z).toFixed(2)}`
-})
+const luck = computed(() => (data.value ? luckCheck(data.value) : null))
+const zTone = computed(() => (luck.value?.band === 'normal' ? 'lime' : luck.value?.band === 'watch' ? 'ember' : 'magenta'))
+const signed = (n: number) => `${n >= 0 ? '+' : '−'}${Math.abs(n).toFixed(2)}`
 
 function buildReport() {
   return data.value ? buildRevenueReport(data.value) : null
@@ -77,14 +72,8 @@ function buildReport() {
             <span class="adm-num">Cash {{ cr(data.ggrCash) }} · Bonus {{ cr(data.ggrBonus) }}</span>
           </template>
         </AdminKpi>
-        <AdminKpi :label="k.expected.label" :info="k.expected.info" :icon="Target" tone="violet">
-          <span class="adm-num">{{ cr(data.expectedGrossRevenue) }}</span>
-          <template #caption>
-            <span class="adm-num">
-              Gap {{ cr(data.gapToExpected ?? v.ggr - data.expectedGrossRevenue) }} · {{ zText }}
-              <template v-if="data.ggrStandardDeviation != null"> · SD {{ cr(data.ggrStandardDeviation) }}</template>
-            </span>
-          </template>
+        <AdminKpi :label="k.ngr.label" :info="k.ngr.info" :icon="TrendingUp" :tone="v.ngr >= 0 ? 'lime' : 'magenta'" caption="Gross gaming revenue − bonus cost">
+          <span class="adm-num">{{ cr(v.ngr) }}</span>
         </AdminKpi>
         <AdminKpi :label="k.rtp.label" :info="k.rtp.info" :icon="Gauge" tone="ember">
           <span class="adm-num">{{ pct2(data.actualRtpPercentage) }}</span>
@@ -92,14 +81,14 @@ function buildReport() {
             <span class="adm-num">vs {{ pct2(v.theoretical) }} theoretical</span>
           </template>
         </AdminKpi>
-        <AdminKpi :label="k.ngr.label" :info="k.ngr.info" :icon="TrendingUp" :tone="v.ngr >= 0 ? 'lime' : 'magenta'" caption="Gross gaming revenue − bonus cost">
-          <span class="adm-num">{{ cr(v.ngr) }}</span>
+        <AdminKpi :label="k.wagered.label" :info="k.wagered.info" :icon="Coins" tone="blue">
+          <span class="adm-num">{{ cr(data.totalWagered) }}</span>
+          <template #caption>
+            <span class="adm-num">{{ count(data.betCount) }} bets · average {{ cr(data.averageBet) }}</span>
+          </template>
         </AdminKpi>
-        <AdminKpi :label="k.hold.label" :info="k.hold.info" :icon="Percent" tone="blue" caption="Gross gaming revenue ÷ wagered">
-          <span class="adm-num">{{ pct2(v.hold) }}</span>
-        </AdminKpi>
-        <AdminKpi :label="k.ngrMargin.label" :info="k.ngrMargin.info" :icon="Percent" tone="lime" caption="Net gaming revenue ÷ wagered">
-          <span class="adm-num">{{ pct2(v.ngrMargin) }}</span>
+        <AdminKpi :label="k.payouts.label" :info="k.payouts.info" :icon="HandCoins" tone="ember">
+          <span class="adm-num">{{ cr(data.totalPayouts) }}</span>
         </AdminKpi>
         <AdminKpi :label="k.bonusCost.label" :info="k.bonusCost.info" :icon="Gift" tone="magenta">
           <span class="adm-num">{{ cr(v.bonusCost) }}</span>
@@ -113,67 +102,68 @@ function buildReport() {
             <span class="adm-num">{{ count(data.purchaseCount) }} purchases · {{ cr(data.creditsSold) }} credits sold</span>
           </template>
         </AdminKpi>
-        <AdminKpi :label="k.wagered.label" :info="k.wagered.info" :icon="Coins" tone="blue">
-          <span class="adm-num">{{ cr(data.totalWagered) }}</span>
-          <template #caption>
-            <span class="adm-num">{{ count(data.betCount) }} bets · cash {{ cr(data.cashWagered) }} · bonus {{ cr(data.bonusWagered) }}</span>
-          </template>
-        </AdminKpi>
-        <AdminKpi :label="k.payouts.label" :info="k.payouts.info" :icon="HandCoins" tone="ember">
-          <span class="adm-num">{{ cr(data.totalPayouts) }}</span>
-        </AdminKpi>
-        <AdminKpi :label="k.avgBet.label" :info="k.avgBet.info" :icon="Scale" tone="blue">
-          <span class="adm-num">{{ cr(data.averageBet) }}</span>
-        </AdminKpi>
       </div>
 
-      <AdminPanel
-        v-if="theory"
-        title="Theoretical: if every credit had been bought"
-        caption="Free credits valued at R1 each, as if players had paid for them (so no bonus cost)"
-        accent="lime"
-      >
+      <AdminPanel v-if="luck" :title="copy.revenue.luck.title" :caption="copy.revenue.luck.caption" accent="violet">
         <div class="adm-kpis">
-          <AdminKpi
-            label="Theoretical revenue"
-            info="Rands players would have paid in: actual purchases plus every free credit valued at R1."
-            :icon="ShoppingCart"
-            tone="lime"
-          >
-            <span class="adm-num">{{ zar(theory.revenue) }}</span>
-            <template #caption>
-              <span class="adm-num">Purchases {{ zar(theory.purchases) }} + free credits {{ zar(theory.freeCredits) }}</span>
-            </template>
+          <AdminKpi :label="k.expected.label" :info="k.expected.info" :icon="Target" tone="violet" :caption="`Wagered ${cr(data.totalWagered)} × ${data.houseEdgePercentage}% edge`">
+            <span class="adm-num">{{ cr(luck.expected) }}</span>
           </AdminKpi>
-          <AdminKpi
-            label="Theoretical profit"
-            info="What the house kept from play if no credits were free: wagered − payouts (gross gaming revenue). Can be negative on a lucky day for players."
-            :icon="PiggyBank"
-            :tone="theory.profit >= 0 ? 'lime' : 'magenta'"
-            caption="Wagered − payouts, with no bonus cost"
-          >
-            <span class="adm-num">{{ cr(theory.profit) }}</span>
+          <AdminKpi :label="k.gap.label" :info="k.gap.info" :icon="Landmark" :tone="luck.gap >= 0 ? 'lime' : 'magenta'" :caption="`Actual ${cr(luck.actual)} − expected`">
+            <span class="adm-num">{{ cr(luck.gap) }}</span>
           </AdminKpi>
-          <AdminKpi
-            label="Expected profit (house edge)"
-            info="The long-run profit the edge guarantees on this much betting: wagered × house edge. Actual profit swings around this."
-            :icon="Calculator"
-            tone="violet"
-            :caption="`Wagered ${cr(data.totalWagered)} × ${data.houseEdgePercentage}% edge`"
-          >
-            <span class="adm-num">{{ cr(theory.expectedProfit) }}</span>
+          <AdminKpi :label="k.sd.label" :info="k.sd.info" :icon="Activity" tone="blue" caption="A normal swing for these bets">
+            <span class="adm-num">{{ luck.sd == null ? '—' : `±${cr(luck.sd)}` }}</span>
           </AdminKpi>
+          <AdminKpi :label="k.z.label" :info="k.z.info" :icon="Sigma" :tone="zTone" caption="Gap ÷ standard deviation">
+            <span class="adm-num">{{ luck.z == null ? '—' : signed(luck.z) }}</span>
+          </AdminKpi>
+        </div>
+
+        <p class="adm-callout adm-callout--info mt-3">
+          <Sigma aria-hidden="true" />
+          <span>{{ luckVerdict(luck) }}</span>
+        </p>
+
+        <div class="adm-grid-2 mt-3">
+          <div class="adm-table-wrap">
+            <table class="adm-table">
+              <caption class="adm-label text-left">How to read the z-score</caption>
+              <thead>
+                <tr>
+                  <th>z-score</th>
+                  <th>Meaning</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="b in Z_BANDS" :key="b.key" :class="{ 'adm-row-current': b.key === luck.band }">
+                  <td class="adm-strong">{{ b.range }}<span v-if="b.key === luck.band" class="adm-subline"> ← now</span></td>
+                  <td>{{ b.meaning }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="space-y-2 text-sm leading-relaxed">
+            <p class="adm-label !mb-0">Can profit still be negative?</p>
+            <p>
+              Yes, for a while. Every bet gives the house a small cut on average ({{ data.houseEdgePercentage }}%), but single bets are a coin flip,
+              and a few big wins can wipe out the cut from hundreds of small bets.
+            </p>
+            <p>
+              The cut adds up steadily with every bet. The luck mostly cancels out, so it grows far more slowly.
+              Bet 100 times more and expected profit is 100 times bigger, but the normal swing is only 10 times bigger. With enough betting the cut always wins.
+            </p>
+            <p v-if="luck.lossChance != null">
+              <strong>Right now:</strong> with this much betting, a period has about a <span class="adm-num">{{ pct2(luck.lossChance * 100) }}</span> chance of showing a loss by luck alone.
+              <template v-if="luck.wageredForRareLoss != null">
+                At this mix of bets, a loss becomes a 1-in-20 event once a period has about <span class="adm-num">{{ cr(luck.wageredForRareLoss) }}</span> wagered.
+              </template>
+            </p>
+            <p v-if="data.sampleSizeNote" class="adm-subline">{{ data.sampleSizeNote }}</p>
+          </div>
         </div>
       </AdminPanel>
 
-      <p v-if="data.gapExplanation" class="adm-callout adm-callout--info">
-        <Info aria-hidden="true" />
-        <span>{{ data.gapExplanation }}</span>
-      </p>
-      <p v-if="data.sampleSizeNote" class="adm-callout">
-        <Gauge aria-hidden="true" />
-        <span><strong>Return to player (RTP) sample size:</strong> {{ data.sampleSizeNote }}</span>
-      </p>
       <p class="adm-note">{{ copy.credits.note }}</p>
 
       <div class="adm-grid-2">

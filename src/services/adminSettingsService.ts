@@ -15,7 +15,6 @@ export interface EditableLimits {
   maxMultiplier: number
   maxProfitPerBet: number
   minBet: number
-  maxBet: number
   maxRoundLiability: number
   dailyHouseLossLimit: number
   maxBetFromBonusBalance: number

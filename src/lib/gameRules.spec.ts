@@ -7,7 +7,6 @@ const rules: PublicGameRules = {
   theoreticalRtpPercentage: 99,
   crashFormulaVersion: 2,
   minBet: 10,
-  maxBet: 1000,
   maxMultiplier: 100,
   maxProfitPerBet: 10000,
   maxRoundLiability: 50000,
@@ -33,7 +32,7 @@ describe('gameRules', () => {
 
   it('checks stake and auto target against the limits', () => {
     expect(stakeProblem(5, 100, rules)).toBe('tooSmall')
-    expect(stakeProblem(2000, 5000, rules)).toBe('tooBig')
+    expect(stakeProblem(2000, 5000, rules)).toBe('none')
     expect(stakeProblem(100, 50, rules)).toBe('noCredits')
     expect(stakeProblem(100, 500, rules)).toBe('none')
     expect(autoTargetProblem(1, rules)).toBe('tooLow')
@@ -42,8 +41,8 @@ describe('gameRules', () => {
   })
 
   it('limits chips and the max stake', () => {
-    expect(allowedSteps([5, 100, 1000, 2000], rules)).toEqual([100, 1000])
-    expect(maxStake(5000, rules)).toBe(1000)
+    expect(allowedSteps([5, 100, 1000, 2000], rules)).toEqual([100, 1000, 2000])
+    expect(maxStake(5000, rules)).toBe(5000)
     expect(maxStake(321.456, rules)).toBe(321.45)
   })
 

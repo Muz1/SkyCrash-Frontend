@@ -134,7 +134,7 @@ const lossUsed = computed(() => {
             <div><dt class="adm-label">Max multiplier</dt><dd class="adm-num m-0">{{ risk.limits.maxMultiplier }}×</dd></div>
             <div><dt class="adm-label">Max profit / bet</dt><dd class="adm-num m-0">{{ cr(risk.limits.maxProfitPerBet) }}</dd></div>
             <div><dt class="adm-label">Round liability</dt><dd class="adm-num m-0">{{ cr(risk.limits.maxRoundLiability) }}</dd></div>
-            <div><dt class="adm-label">Bet range</dt><dd class="adm-num m-0">{{ cr(risk.limits.minBet) }} – {{ cr(risk.limits.maxBet) }}</dd></div>
+            <div><dt class="adm-label">Min bet</dt><dd class="adm-num m-0">{{ cr(risk.limits.minBet) }} (no max)</dd></div>
             <div><dt class="adm-label">Bonus per stake</dt><dd class="adm-num m-0">{{ cr(risk.limits.maxBetFromBonusBalance) }}</dd></div>
             <div><dt class="adm-label">Wagering</dt><dd class="adm-num m-0">{{ risk.limits.bonusWageringMultiple }}× in {{ risk.limits.bonusExpiryDays }} days</dd></div>
           </dl>

@@ -385,7 +385,6 @@ export interface PublicGameRules {
   theoreticalRtpPercentage: number
   crashFormulaVersion: number
   minBet: number
-  maxBet: number
   maxMultiplier: number
   maxProfitPerBet: number
   maxRoundLiability: number

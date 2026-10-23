@@ -283,8 +283,8 @@ function handleSaved() {
               <dd class="adm-num m-0 text-[var(--adm-text)]">{{ zar(rules.maxRoundLiability) }}</dd>
             </div>
             <div>
-              <dt class="adm-label">Bet range</dt>
-              <dd class="adm-num m-0 text-[var(--adm-text)]">{{ zar(rules.minBet) }} – {{ zar(rules.maxBet) }}</dd>
+              <dt class="adm-label">Min bet</dt>
+              <dd class="adm-num m-0 text-[var(--adm-text)]">{{ zar(rules.minBet) }} (no max)</dd>
             </div>
             <div>
               <dt class="adm-label">Formula</dt>
