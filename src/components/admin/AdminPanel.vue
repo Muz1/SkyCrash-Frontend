@@ -28,7 +28,8 @@ const dot = computed(() => ({ background: ACCENTS[props.accent], boxShadow: `0 0
 </script>
 
 <template>
-  <section :class="['adm-panel', fill && 'adm-panel--fill']">
+  <!-- Only fill/scroll panels may shrink; any other panel shrinking would spill its content over the next one. -->
+  <section :class="['adm-panel', fill && 'adm-panel--fill', !fill && !scroll && 'shrink-0']">
     <header v-if="title || $slots.actions" class="adm-panel-header">
       <div class="min-w-0">
         <h2 v-if="title" class="adm-panel-title">

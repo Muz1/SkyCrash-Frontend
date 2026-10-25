@@ -1,16 +1,14 @@
 import { describe, expect, it } from 'vitest'
-import { allowedSteps, autoPresets, autoTargetProblem, maxStake, maxWin, skyMilestone, stakeProblem } from './gameRules'
+import { autoPresets, autoTargetProblem, maxStake, maxWin, skyMilestone, stakeProblem } from './gameRules'
 import type { PublicGameRules } from '@/types'
 
 const rules: PublicGameRules = {
   houseEdgePercentage: 1,
   theoreticalRtpPercentage: 99,
   crashFormulaVersion: 2,
-  minBet: 10,
   maxMultiplier: 100,
   maxProfitPerBet: 10000,
   maxRoundLiability: 50000,
-  maxBetFromBonusBalance: 200,
   bonusWageringMultiple: 5,
   bonusExpiryDays: 7,
   bettingPaused: false,
@@ -31,19 +29,18 @@ describe('gameRules', () => {
   })
 
   it('checks stake and auto target against the limits', () => {
-    expect(stakeProblem(5, 100, rules)).toBe('tooSmall')
-    expect(stakeProblem(2000, 5000, rules)).toBe('none')
-    expect(stakeProblem(100, 50, rules)).toBe('noCredits')
-    expect(stakeProblem(100, 500, rules)).toBe('none')
+    expect(stakeProblem(0, 100)).toBe('empty')
+    expect(stakeProblem(0.01, 100)).toBe('none') // no minimum bet
+    expect(stakeProblem(2000, 5000)).toBe('none')
+    expect(stakeProblem(100, 50)).toBe('noCredits')
     expect(autoTargetProblem(1, rules)).toBe('tooLow')
     expect(autoTargetProblem(150, rules)).toBe('tooHigh')
     expect(autoTargetProblem(100, rules)).toBe('none')
   })
 
-  it('limits chips and the max stake', () => {
-    expect(allowedSteps([5, 100, 1000, 2000], rules)).toEqual([100, 1000, 2000])
-    expect(maxStake(5000, rules)).toBe(5000)
-    expect(maxStake(321.456, rules)).toBe(321.45)
+  it('the max stake is the whole balance', () => {
+    expect(maxStake(5000)).toBe(5000)
+    expect(maxStake(321.456)).toBe(321.45)
   })
 
   it('maps multipliers to sky milestones', () => {

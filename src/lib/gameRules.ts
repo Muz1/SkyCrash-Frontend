@@ -22,11 +22,11 @@ export function autoPresets(rules: PublicGameRules | null | undefined): number[]
   return AUTO_PRESETS.filter((p) => p <= cap)
 }
 
-export type StakeProblem = 'none' | 'empty' | 'tooSmall' | 'noCredits'
+export type StakeProblem = 'none' | 'empty' | 'noCredits'
 
-export function stakeProblem(stake: number, credits: number, rules: PublicGameRules | null | undefined): StakeProblem {
+/** There are no stake limits: any amount above 0, up to the player's credits. */
+export function stakeProblem(stake: number, credits: number): StakeProblem {
   if (!Number.isFinite(stake) || stake <= 0) return 'empty'
-  if (rules && stake < rules.minBet) return 'tooSmall'
   if (stake > credits) return 'noCredits'
   return 'none'
 }
@@ -39,14 +39,8 @@ export function autoTargetProblem(target: number, rules: PublicGameRules | null 
   return 'none'
 }
 
-/** Quick bet chips that the limits allow. */
-export function allowedSteps(steps: readonly number[], rules: PublicGameRules | null | undefined): number[] {
-  if (!rules) return [...steps]
-  return steps.filter((s) => s >= rules.minBet)
-}
-
 /** The "Max" chip: as much as the player has (there is no maximum bet). */
-export function maxStake(credits: number, _rules?: PublicGameRules | null): number {
+export function maxStake(credits: number): number {
   return Math.max(0, Math.floor(credits * 100) / 100)
 }
 

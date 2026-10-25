@@ -3,7 +3,6 @@ import { useChallengeStore } from '@/stores/challengeStore'
 import { usePlayerStore } from '@/stores/playerStore'
 import { useAuthStore } from '@/stores/AuthStore'
 import { useGameStore } from '@/stores/gameStore'
-import { BET_STEPS } from '@/lib/betSteps'
 
 function readKey(key: string) {
   try {
@@ -37,9 +36,9 @@ export function useGameScreenPrompts() {
   // Closing the wheel snoozes the automatic prompt until credits recover and run out again.
   const wheelDismissed = ref(false)
 
-  const minBet = BET_STEPS[0]
+  // Any amount can be bet, so the wheel is offered once less than 1 credit is left.
   const outOfCredits = computed(
-    () => !!playerStore.profile && !playerStore.profile.isAdmin && playerStore.profile.creditBalance < minBet,
+    () => !!playerStore.profile && !playerStore.profile.isAdmin && playerStore.profile.creditBalance < 1,
   )
   // The challenge bar doesn't block anything; only the out-of-credits notice does.
   const anyOpen = computed(() => wheelOpen.value)

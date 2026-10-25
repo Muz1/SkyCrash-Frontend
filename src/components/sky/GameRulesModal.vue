@@ -16,11 +16,10 @@ const rows = computed(() => {
   return [
     { label: t.edge, value: `${r.houseEdgePercentage}%` },
     { label: t.rtp, value: `${r.theoreticalRtpPercentage}%` },
-    { label: t.stake, value: `${creditAmount(r.minBet)} min, no max` },
+    { label: t.stake, value: t.stakeAny },
     { label: t.maxMultiplier, value: `${r.maxMultiplier}x` },
     { label: t.maxProfit, value: creditAmount(r.maxProfitPerBet) },
     { label: t.roundCap, value: creditAmount(r.maxRoundLiability) },
-    { label: t.bonusStake, value: creditAmount(r.maxBetFromBonusBalance) },
   ]
 })
 </script>

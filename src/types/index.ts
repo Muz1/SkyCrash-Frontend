@@ -384,11 +384,9 @@ export interface PublicGameRules {
   houseEdgePercentage: number
   theoreticalRtpPercentage: number
   crashFormulaVersion: number
-  minBet: number
   maxMultiplier: number
   maxProfitPerBet: number
   maxRoundLiability: number
-  maxBetFromBonusBalance: number
   bonusWageringMultiple: number
   bonusExpiryDays: number
   bettingPaused: boolean

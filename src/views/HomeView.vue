@@ -63,11 +63,12 @@ onMounted(() => {
       <Plane
         :craft="hangarStore.craftId"
         :size="200"
-        class="mb-1 !h-[clamp(56px,12dvh,170px)] !w-[clamp(56px,12dvh,170px)] -translate-x-6 sm:mb-2"
+        class="mb-1 !h-[clamp(48px,9dvh,150px)] !w-[clamp(48px,9dvh,150px)] -translate-x-6 sm:mb-2"
       />
 
       <h1 class="sr-only">Sky Crash</h1>
-      <Wordmark />
+      <!-- A little smaller than on the auth screens, so the how-it-works row fits above the dock. -->
+      <Wordmark class="[&_img]:max-h-[min(9rem,15dvh)] sm:[&_img]:max-h-[min(13rem,18dvh)]" />
       <!-- The game in one line, before anyone has to sign up. -->
       <p class="mt-2 font-display text-sm font-bold uppercase tracking-[0.12em] text-foreground sm:text-base">
         {{ copy.landing.tagline }}

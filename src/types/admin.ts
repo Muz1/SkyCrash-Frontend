@@ -149,10 +149,8 @@ export interface HouseRiskStatus {
 export interface GameLimits {
   maxMultiplier: number
   maxProfitPerBet: number
-  minBet: number
   maxRoundLiability: number
   dailyHouseLossLimit: number
-  maxBetFromBonusBalance: number
   bonusWageringMultiple: number
   bonusExpiryDays: number
   feedbackRewardMinRounds?: number
@@ -188,11 +186,9 @@ export interface PublicGameRules {
   houseEdgePercentage: number
   theoreticalRtpPercentage: number
   crashFormulaVersion: number
-  minBet: number
   maxMultiplier: number
   maxProfitPerBet: number
   maxRoundLiability: number
-  maxBetFromBonusBalance: number
   bonusWageringMultiple: number
   bonusExpiryDays: number
   bettingPaused: boolean

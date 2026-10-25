@@ -14,10 +14,8 @@ export async function updateHouseEdge(houseEdgePercentage: number, password: str
 export interface EditableLimits {
   maxMultiplier: number
   maxProfitPerBet: number
-  minBet: number
   maxRoundLiability: number
   dailyHouseLossLimit: number
-  maxBetFromBonusBalance: number
 }
 
 export interface LimitsSettings {

@@ -91,7 +91,8 @@ function dismiss() {
             <span class="font-arcade text-[0.625rem] text-magenta text-glow-magenta">{{ i + 1 }}</span>
             <span class="font-display text-[0.6875rem] font-black uppercase leading-tight tracking-[0.08em] text-foreground">{{ s.title }}</span>
           </p>
-          <p class="mt-1 text-sm leading-snug text-[#d8ccf5] [@media(max-height:640px)]:hidden">{{ s.body }}</p>
+          <!-- Laptop-height windows show titles only, so the whole landing page fits one screen. -->
+          <p class="mt-1 text-sm leading-snug text-[#d8ccf5] [@media(max-height:960px)]:hidden">{{ s.body }}</p>
         </div>
       </li>
     </ol>

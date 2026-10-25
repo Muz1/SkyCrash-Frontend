@@ -33,7 +33,7 @@ import SpinWheel from '@/components/sky/SpinWheel.vue'
 import { useGameScreenPrompts } from '@/composables/useGameScreenPrompts'
 import { useChallengeStore } from '@/stores/challengeStore'
 import { usePublicSettingsStore } from '@/stores/publicSettingsStore'
-import { allowedSteps, autoTargetProblem, maxStake, maxWin, skyMilestone, stakeProblem } from '@/lib/gameRules'
+import { autoTargetProblem, maxStake, maxWin, skyMilestone, stakeProblem } from '@/lib/gameRules'
 import { creditAmount, multiplier as fmtMultiplier } from '@/lib/format'
 import { en } from '@/copy/en'
 import InfoTip from '@/components/sky/InfoTip.vue'
@@ -148,18 +148,15 @@ const autoCashoutError = computed(() => {
 })
 
 // The server enforces every limit; these checks only stop bets it would refuse anyway.
-const stakeIssue = computed(() => stakeProblem(betAmountInput.value, credits.value, rules.value))
+const stakeIssue = computed(() => stakeProblem(betAmountInput.value, credits.value))
 const stakeHint = computed(() => {
   switch (stakeIssue.value) {
-    case 'tooSmall':
-      return en.bet.tooSmall(creditAmount(rules.value?.minBet ?? 0))
     case 'noCredits':
       return en.bet.noCredits
     default:
       return null
   }
 })
-const betSteps = computed(() => allowedSteps(BET_STEPS, rules.value))
 const potentialMaxWin = computed(() => maxWin(betAmountInput.value, rules.value))
 const milestone = computed(() => (flying.value || crashed.value ? skyMilestone(gameStore.currentMultiplier) : 0))
 
@@ -387,7 +384,8 @@ function crashChipClass(value: number) {
                     v-model.number="betAmountInput"
                     type="number"
                     inputmode="decimal"
-                    :min="rules?.minBet ?? 1"
+                    :min="0.01"
+                    step="0.01"
                     :max="credits"
                     :aria-invalid="!!stakeHint"
                     class="block w-[calc(6rem*var(--text-scale,1))] border-2 pointer-coarse:min-h-11 border-violet/50 bg-void/70 px-2 py-1 font-arcade text-base text-ember text-glow-ember focus:border-magenta focus:outline-none sm:w-[calc(7rem*var(--text-scale,1))]"
@@ -395,7 +393,7 @@ function crashChipClass(value: number) {
                 </label>
                 <div data-scroll-x class="-my-1 flex min-w-0 flex-1 gap-2 overflow-x-auto py-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                   <button
-                    v-for="v in betSteps"
+                    v-for="v in BET_STEPS"
                     :key="v"
                     type="button"
                     :class="[
@@ -411,7 +409,7 @@ function crashChipClass(value: number) {
                   <button
                     type="button"
                     class="clip-hud shrink-0 border-2 border-magenta/60 px-2.5 py-1.5 font-arcade text-[0.5625rem] text-magenta transition-all hover:[box-shadow:var(--glow-magenta)] pointer-coarse:min-h-11 pointer-coarse:min-w-11"
-                    @click="betAmountInput = maxStake(credits, rules)"
+                    @click="betAmountInput = maxStake(credits)"
                   >
                     Max
                   </button>

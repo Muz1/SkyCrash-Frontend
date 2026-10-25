@@ -80,8 +80,8 @@ const example = computed(() => {
           <dd>When today's net gaming revenue (NGR) drops below −{{ zar(limits.dailyHouseLossLimit) }}, new bets pause until tomorrow (or until a manager resumes play).</dd>
         </div>
         <div>
-          <dt class="adm-label !mb-0">Stakes: from {{ zar(limits.minBet) }}, no maximum</dt>
-          <dd>Bets paid from bonus credits are capped at {{ zar(limits.maxBetFromBonusBalance) }}.</dd>
+          <dt class="adm-label !mb-0">Stakes: no minimum, no maximum</dt>
+          <dd>A bet can be any amount up to the player's balance, from cash or bonus credits.</dd>
         </div>
         <div>
           <dt class="adm-label !mb-0">House edge: {{ edge != null ? `${edge}%` : '—' }}</dt>
