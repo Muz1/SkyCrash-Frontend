@@ -101,7 +101,7 @@ const tiles = computed<{ label: string; value: string; detail: string; tone: Ton
       detail: `${h.ai.primaryKey ? 'Primary key ✓' : 'No primary key'} · ${h.ai.backupKey ? 'backup key ✓' : 'no backup key'} · ${h.ai.model}${h.ai.fallbackModel ? ` → ${h.ai.fallbackModel}` : ''}`,
       tone: h.ai.primaryKey ? 'ok' : 'warn',
     },
-    { label: 'Email', value: String(h.email).toUpperCase(), detail: h.email === 'Log' ? 'Written to email-outbox/ (not sent)' : 'Sent by SMTP', tone: h.email === 'Log' ? 'warn' : 'ok' },
+    { label: 'Email', value: String(h.email).toUpperCase(), detail: h.email === 'Log' ? 'Written to email-outbox/ (not sent)' : h.email === 'Brevo' ? 'Sent by the Brevo API (HTTPS)' : 'Sent by SMTP', tone: h.email === 'Log' ? 'warn' : 'ok' },
     { label: 'Login OTP', value: h.loginOtp ? 'ON' : 'OFF', detail: h.loginOtp ? 'A code is emailed at sign-in' : 'Password only', tone: h.loginOtp ? 'ok' : 'warn' },
     { label: 'Google sign-in', value: h.googleSignIn ? 'ON' : 'OFF', detail: h.googleSignIn ? 'Client ID set' : 'No client ID', tone: h.googleSignIn ? 'ok' : 'info' },
     { label: 'Version', value: h.version.split('+')[0] || h.version, detail: `Checked ${dateTime(h.checkedAtUtc)}`, tone: 'info' },

@@ -46,7 +46,7 @@ export function allowedSteps(steps: readonly number[], rules: PublicGameRules | 
 }
 
 /** The "Max" chip: as much as the player has (there is no maximum bet). */
-export function maxStake(credits: number, rules: PublicGameRules | null | undefined): number {
+export function maxStake(credits: number, _rules?: PublicGameRules | null): number {
   return Math.max(0, Math.floor(credits * 100) / 100)
 }
 
