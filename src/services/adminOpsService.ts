@@ -26,3 +26,16 @@ export async function getPublicGameRules(): Promise<PublicGameRules | null> {
   const data = (await api.get<{ rules?: PublicGameRules }>('/settings/public')).data
   return data.rules ?? null
 }
+
+export interface TestEmailResult {
+  ok: boolean
+  mode: string
+  message?: string
+  error?: string
+  server?: string
+}
+
+/** System Health → "Send test email": sends through the configured sender and returns the real error, if any. */
+export async function sendTestEmail(to: string): Promise<TestEmailResult> {
+  return (await api.post<TestEmailResult>('/admin/health/test-email', { to })).data
+}

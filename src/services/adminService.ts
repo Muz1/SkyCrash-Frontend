@@ -26,6 +26,11 @@ export async function unblockPlayer(playerId: string, reason?: string): Promise<
   await api.post(`/admin/players/${playerId}/unblock`, { reason })
 }
 
+/** Marks a player's email verified when the verification email never arrived. */
+export async function verifyPlayerEmail(playerId: string): Promise<void> {
+  await api.post(`/admin/players/${playerId}/verify-email`)
+}
+
 export async function setTestAccount(playerId: string, isTestAccount: boolean): Promise<void> {
   await api.put(`/admin/players/${playerId}/test-account`, { isTestAccount })
 }

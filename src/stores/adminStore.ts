@@ -61,6 +61,12 @@ export const useAdminStore = defineStore('admin', () => {
     if (p) p.isTestAccount = isTestAccount
   }
 
+  async function verifyEmail(playerId: string) {
+    await adminService.verifyPlayerEmail(playerId)
+    const p = players.value.find((x) => x.playerId === playerId)
+    if (p) p.emailVerified = true
+  }
+
   async function adjustBalance(playerId: string, amount: number, reason: string) {
     await adminService.adjustBalance(playerId, amount, reason)
     await fetchPlayers()
@@ -78,6 +84,7 @@ export const useAdminStore = defineStore('admin', () => {
     sortDir,
     toggleSortDir,
     fetchPlayers,
+    verifyEmail,
     promote,
     demote,
     block,

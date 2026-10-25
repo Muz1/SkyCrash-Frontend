@@ -46,6 +46,16 @@ async function applyUnblock(reason: string) {
   }
 }
 
+async function verifyEmail(playerId: string, username: string) {
+  if (!confirm(`Mark ${username}'s email as verified? They can then log in and buy credits.`)) return
+  testError.value = ''
+  try {
+    await adminStore.verifyEmail(playerId)
+  } catch {
+    testError.value = 'Could not verify that email. Is the API up to date?'
+  }
+}
+
 async function toggleTest(playerId: string, value: boolean) {
   testError.value = ''
   try {
@@ -241,6 +251,15 @@ onMounted(() => {
                       @click="modalTarget = { playerId: player.playerId, username: player.username }"
                     >
                       Adjust
+                    </AdminButton>
+                    <AdminButton
+                      v-if="!player.isAdmin && !player.emailVerified"
+                      size="sm"
+                      variant="success"
+                      :title="`Mark ${player.email} verified (use when the email never arrived)`"
+                      @click="verifyEmail(player.playerId, player.username)"
+                    >
+                      Verify email
                     </AdminButton>
                   </div>
                 </td>

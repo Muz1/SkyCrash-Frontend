@@ -1,13 +1,14 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 import axios from 'axios'
-import { RefreshCw, Play } from '@lucide/vue'
+import { RefreshCw, Play, Send } from '@lucide/vue'
 import AdminShell from '@/components/sky/AdminShell.vue'
 import AdminPage from '@/components/admin/AdminPage.vue'
 import AdminPanel from '@/components/admin/AdminPanel.vue'
 import AdminButton from '@/components/admin/AdminButton.vue'
 import AdminLoading from '@/components/admin/AdminLoading.vue'
-import { getHealth, getRisk, resumeBetting } from '@/services/adminOpsService'
+import { getHealth, getRisk, resumeBetting, sendTestEmail } from '@/services/adminOpsService'
+import type { TestEmailResult } from '@/services/adminOpsService'
 import { useHouseLossAlert } from '@/composables/useHouseLossAlert'
 import type { AdminHealth, AdminRiskResponse } from '@/types/admin'
 import { count, cr, dateTime } from '@/lib/reportFormat'
@@ -52,6 +53,26 @@ async function resume() {
       (axios.isAxiosError(err) ? (err.response?.data as { message?: string } | undefined)?.message : undefined) ?? 'Resume failed.'
   } finally {
     resuming.value = false
+  }
+}
+
+// "Send test email": proves SMTP works end to end, or shows the server's real error.
+const testTo = ref('')
+const testing = ref(false)
+const testResult = ref<TestEmailResult | null>(null)
+async function runTestEmail() {
+  testing.value = true
+  testResult.value = null
+  try {
+    testResult.value = await sendTestEmail(testTo.value.trim())
+  } catch (err) {
+    testResult.value = {
+      ok: false,
+      mode: health.value?.email ?? '',
+      error: (axios.isAxiosError(err) ? (err.response?.data as { message?: string } | undefined)?.message : undefined) ?? 'The request failed.',
+    }
+  } finally {
+    testing.value = false
   }
 }
 
@@ -111,6 +132,20 @@ const lossUsed = computed(() => {
         </div>
       </div>
       <AdminLoading v-else-if="!error" text="Checking…" />
+
+      <AdminPanel title="Test email" caption="Sends a short message through the live email settings, so you can see whether verification and reset emails will arrive" accent="blue">
+        <form class="flex flex-wrap items-end gap-3" @submit.prevent="runTestEmail">
+          <label class="block min-w-0 flex-1">
+            <span class="adm-label">Send to</span>
+            <input v-model="testTo" type="email" required autocomplete="email" placeholder="you@example.com" class="adm-input w-full" />
+          </label>
+          <AdminButton type="submit" variant="primary" :disabled="testing || !testTo"><Send aria-hidden="true" />{{ testing ? 'Sending…' : 'Send test email' }}</AdminButton>
+        </form>
+        <p v-if="testResult?.ok" class="adm-success mt-3" role="status">{{ testResult.message }}</p>
+        <p v-else-if="testResult" class="adm-error mt-3" role="alert">
+          Not sent{{ testResult.server ? ` (${testResult.server})` : '' }}: {{ testResult.error }}
+        </p>
+      </AdminPanel>
 
       <AdminPanel title="Daily loss circuit breaker" caption="Pauses new bets when today's net gaming revenue (NGR, UTC day) falls below −limit" accent="ember">
         <template v-if="risk" #actions>
