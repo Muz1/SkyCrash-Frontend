@@ -47,3 +47,19 @@ test('text size setting applies and persists', async ({ page }) => {
   await page.reload()
   await expect(html).toHaveAttribute('data-text-size', '125')
 })
+
+// The game on a PC at larger text: side panels, stake box and bet controls must still fit.
+for (const [w, h] of [[1280, 720], [1366, 768], [1920, 1080]] as const) {
+  for (const size of ['125', '150'] as const) {
+    for (const name of ['game (betting open)', 'game (in flight)']) {
+      test(`${name} fits at ${size}% text on a ${w}×${h} PC`, async ({ page, isMobile }) => {
+        test.skip(isMobile, 'desktop sizes only')
+        await page.setViewportSize({ width: w, height: h })
+        await page.addInitScript((s) => localStorage.setItem('skycrash_text_size', s), size)
+        await openScreen(page, PLAYER_SCREENS.find((s) => s.name === name)!)
+        await settle(page)
+        await expectCleanLayout(page, `${name} @${size}% ${w}×${h}`)
+      })
+    }
+  }
+}

@@ -100,7 +100,7 @@ function statusClass(row: FlightRow) {
         :class="[
           'neon-panel clip-hud min-h-0 overflow-y-auto p-2',
           mode === 'panel'
-            ? 'w-64'
+            ? 'w-[calc(16rem*var(--text-scale,1))] max-w-[34vw]'
             : 'fixed inset-x-3 top-[calc(env(safe-area-inset-top)+7rem)] z-[61] max-h-[60dvh]',
         ]"
       >

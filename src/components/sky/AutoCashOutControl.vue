@@ -129,7 +129,7 @@ const shown = computed(() => (Number.isFinite(target.value) ? target.value : 0))
           :min="MIN_AUTO_TARGET"
           :max="props.max ?? undefined"
           step="0.05"
-          class="block w-20 border-2 border-violet/50 bg-void/70 px-2 py-0.5 font-arcade text-base pointer-coarse:min-h-11 sm:w-16 sm:text-sm pointer-coarse:sm:w-20 pointer-coarse:sm:text-base text-electric text-glow-blue focus:border-electric focus:outline-none"
+          class="block w-[calc(5rem*var(--text-scale,1))] border-2 border-violet/50 bg-void/70 px-2 py-0.5 font-arcade text-base pointer-coarse:min-h-11 sm:w-[calc(4rem*var(--text-scale,1))] sm:text-sm pointer-coarse:sm:w-[calc(5rem*var(--text-scale,1))] pointer-coarse:sm:text-base text-electric text-glow-blue focus:border-electric focus:outline-none"
           @focus="enabled = true"
         />
         <span class="font-arcade text-[0.625rem] text-electric">x</span>

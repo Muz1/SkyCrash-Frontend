@@ -192,7 +192,7 @@ function handleLogout() {
         <div v-if="houseLoss.alert.value" class="adm-banner adm-banner--global" role="alert">
           <p>
             <strong>{{ copy.health.lossBanner }}</strong>
-            Today's NGR {{ cr(houseLoss.alert.value.netGamingRevenueToday) }} (limit −{{ cr(houseLoss.alert.value.limit) }} credits).
+            Today's NGR {{ cr(houseLoss.alert.value.netGamingRevenueToday) }} (limit −{{ cr(houseLoss.alert.value.limit) }}).
           </p>
           <RouterLink to="/admin/health" class="adm-btn adm-btn--secondary adm-btn--sm">Review &amp; resume</RouterLink>
           <button type="button" class="adm-btn adm-btn--ghost adm-btn--sm" aria-label="Dismiss loss-limit alert" @click="houseLoss.dismiss()">
@@ -202,5 +202,7 @@ function handleLogout() {
         <slot />
       </main>
     </div>
+    <!-- Admin tooltips render here: inside the console (so its theme applies) but outside every card. -->
+    <div id="adm-tooltip-layer" />
   </div>
 </template>

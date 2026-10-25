@@ -1847,6 +1847,10 @@
     flex: 0 0 auto;
     min-height: auto;
   }
+  /* Stacked header: the title block's 20rem flex-basis would otherwise become a 20rem height. */
+  .admin-console .adm-page-header > :first-child {
+    flex: 0 0 auto;
+  }
   .admin-console .adm-page-header {
     flex-direction: column;
     align-items: stretch;

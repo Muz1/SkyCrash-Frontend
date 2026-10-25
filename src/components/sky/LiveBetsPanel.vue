@@ -34,7 +34,7 @@ function statusClass(row: LiveBetRow) {
   <div
     :class="
       props.mode === 'panel'
-        ? 'pointer-events-auto absolute right-0 top-24 z-10 hidden max-h-[calc(100%-7rem)] w-56 flex-col lg:flex'
+        ? 'pointer-events-auto absolute right-0 top-24 z-10 hidden max-h-[calc(100%-7rem)] w-[calc(14rem*var(--text-scale,1))] max-w-[34vw] flex-col lg:flex'
         : 'shrink-0 lg:hidden'
     "
   >
@@ -78,7 +78,7 @@ function statusClass(row: LiveBetRow) {
           <li v-for="row in rows" :key="row.username" class="flex items-center gap-2 py-1 text-xs">
             <span class="min-w-0 flex-1 truncate font-semibold text-foreground">{{ row.username }}</span>
             <span class="shrink-0 tabular-nums text-muted-foreground">{{ creditAmount(row.amount) }}</span>
-            <span :class="['w-12 shrink-0 text-right font-arcade text-[0.5rem] tabular-nums', statusClass(row)]">{{ statusText(row) }}</span>
+            <span :class="['w-[calc(3rem*var(--text-scale,1))] shrink-0 text-right font-arcade text-[0.5rem] tabular-nums', statusClass(row)]">{{ statusText(row) }}</span>
           </li>
         </ul>
       </section>

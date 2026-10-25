@@ -366,7 +366,7 @@ const multiplierClass = computed(() =>
         class="h-auto w-full object-contain opacity-80 [filter:drop-shadow(0_0_6px_var(--neon-violet))]"
         :style="{ transform: `rotate(${f.rotate.toFixed(1)}deg)` }"
       />
-      <span class="absolute left-1/2 top-full max-w-24 -translate-x-1/2 truncate whitespace-nowrap border border-violet/50 bg-void/80 px-1 font-arcade text-[0.4375rem] uppercase text-foreground">
+      <span class="absolute left-1/2 top-full max-w-24 -translate-x-1/2 truncate whitespace-nowrap border border-violet/50 bg-void/80 px-1 font-arcade text-[0.44rem] uppercase text-foreground">
         {{ f.w.username }}
       </span>
     </div>

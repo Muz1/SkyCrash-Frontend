@@ -390,7 +390,7 @@ function crashChipClass(value: number) {
                     :min="rules?.minBet ?? 1"
                     :max="credits"
                     :aria-invalid="!!stakeHint"
-                    class="block w-24 border-2 pointer-coarse:min-h-11 border-violet/50 bg-void/70 px-2 py-1 font-arcade text-base text-ember text-glow-ember focus:border-magenta focus:outline-none sm:w-28"
+                    class="block w-[calc(6rem*var(--text-scale,1))] border-2 pointer-coarse:min-h-11 border-violet/50 bg-void/70 px-2 py-1 font-arcade text-base text-ember text-glow-ember focus:border-magenta focus:outline-none sm:w-[calc(7rem*var(--text-scale,1))]"
                   />
                 </label>
                 <div data-scroll-x class="-my-1 flex min-w-0 flex-1 gap-2 overflow-x-auto py-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
