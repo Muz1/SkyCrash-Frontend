@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
-import { RefreshCw } from '@lucide/vue'
+import { MonitorPlay, RefreshCw } from '@lucide/vue'
+import { RouterLink } from 'vue-router'
 import type { HubConnection } from '@microsoft/signalr'
 import AdminShell from '@/components/sky/AdminShell.vue'
 import AdminPage from '@/components/admin/AdminPage.vue'
@@ -155,6 +156,9 @@ const phaseText = computed(() =>
     <AdminPage title="Panel game" eyebrow="Game management" subtitle="The panel's shared lobby, live, with their leaderboard.">
       <template #actions>
         <AdminButton @click="loadOverview"><RefreshCw aria-hidden="true" /> Refresh</AdminButton>
+        <RouterLink to="/watch/panel" class="inline-flex">
+          <AdminButton variant="primary"><MonitorPlay aria-hidden="true" /> Watch in their lobby</AdminButton>
+        </RouterLink>
       </template>
 
       <p v-if="error" class="adm-error" role="alert">{{ error }}</p>

@@ -32,7 +32,7 @@ export function toCraft(id: string | null | undefined): CraftId {
  * with their plane, stake and status this round. Only lobby-mates are ever included (the
  * server only sends their bets); when I'm not in a lobby the board is just me.
  */
-export function useLobbyFlight() {
+export function useLobbyFlight(options: { spectate?: () => Promise<void> } = {}) {
   const gameStore = useGameStore()
   const playerStore = usePlayerStore()
   const privateLobbyStore = usePrivateLobbyStore()
@@ -91,6 +91,8 @@ export function useLobbyFlight() {
 
   /** Load the lobby (direct visits to /game) and catch up on bets already placed this round. */
   async function refresh() {
+    // An admin watching the panel lobby catches up through the hub instead (usePanelSpectator).
+    if (options.spectate) return options.spectate()
     const roundId = gameStore.roundId
     if (!roundId || !inLobby.value) return
     try {
@@ -101,6 +103,7 @@ export function useLobbyFlight() {
   }
 
   onMounted(async () => {
+    if (options.spectate) return
     if (!privateLobbyStore.lobby) {
       await privateLobbyStore.fetchMyLobby().catch(() => undefined)
     }

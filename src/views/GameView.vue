@@ -43,6 +43,8 @@ import LiveBetsPanel from '@/components/sky/LiveBetsPanel.vue'
 import AccountNotices from '@/components/sky/AccountNotices.vue'
 import RealityCheckModal from '@/components/sky/RealityCheckModal.vue'
 import { useRealityCheck } from '@/composables/useRealityCheck'
+import { usePanelSpectator } from '@/composables/usePanelSpectator'
+import { RouterLink } from 'vue-router'
 
 const gameStore = useGameStore()
 const playerStore = usePlayerStore()
@@ -58,12 +60,27 @@ onMounted(() => void publicSettings.load())
 useGameAudio()
 const prompts = useGameScreenPrompts()
 const challengeStore = useChallengeStore()
-const lobbyFlight = useLobbyFlight()
+/**
+ * spectate: an admin watching the panel lobby (/watch/panel). Same screen the pilots see,
+ * inside their lobby, but with no bet controls, no personal flight and no player prompts.
+ */
+const props = withDefaults(defineProps<{ spectate?: boolean }>(), { spectate: false })
+const spectator = props.spectate ? usePanelSpectator() : null
+const lobbyFlight = useLobbyFlight(spectator ? { spectate: spectator.catchUp } : {})
 const tutorial = useTutorial()
 const feedback = useFeedbackPrompt({ isBlocked: () => prompts.anyOpen.value || tutorial.isOpen.value })
 
 const skin = computed(() => (hangarStore.skinId === 'taking-off' ? 'taking-off' : hangarStore.skinId))
 const craft = computed(() => hangarStore.craftId)
+// Watching: the first pilot with a stake leads the formation, the rest fly as wingmen.
+const stageLead = computed(() =>
+  props.spectate ? (lobbyFlight.mates.value.find((m) => m.bet !== null) ?? lobbyFlight.mates.value[0] ?? null) : null,
+)
+const stageCraft = computed(() => stageLead.value?.craftId ?? craft.value)
+const stageWingmen = computed(() =>
+  props.spectate ? lobbyFlight.mates.value.filter((m) => m !== stageLead.value) : lobbyFlight.mates.value,
+)
+const boardMe = computed(() => (props.spectate ? null : lobbyFlight.me.value))
 
 // ---------- remembered bet settings (so a returning pilot doesn't re-enter them) ----------
 
@@ -216,7 +233,7 @@ function runPrimaryAction() {
 
 // Space bar = the main button (bet / cash out / queue), like most crash games.
 function onKeyDown(e: KeyboardEvent) {
-  if (e.code !== 'Space' || e.repeat) return
+  if (props.spectate || e.code !== 'Space' || e.repeat) return
   const el = e.target as HTMLElement | null
   if (el?.closest('input, textarea, select, button, a, [contenteditable="true"]')) return
   e.preventDefault()
@@ -246,7 +263,16 @@ function crashChipClass(value: number) {
     </div>
     <CRTOverlay />
 
-    <HudHeader>
+    <div v-if="spectate" class="relative z-30 flex items-center gap-3 border-b-2 border-magenta/60 bg-void/85 px-4 py-2">
+      <span class="clip-hud border-2 border-magenta px-2 py-0.5 font-arcade text-[0.5rem] uppercase tracking-[0.2em] text-magenta">Watching</span>
+      <p class="min-w-0 flex-1 truncate font-display text-sm font-black uppercase tracking-[0.14em] text-foreground">
+        {{ lobbyFlight.lobbyName.value ?? 'Panel Squadron' }}<span class="hidden font-sans font-semibold normal-case tracking-normal text-muted-foreground sm:inline"> · you're in their lobby, view only</span>
+      </p>
+      <RouterLink to="/admin/panel-game" class="inline-flex">
+        <ArcadeButton size="sm" variant="blue">Back to admin</ArcadeButton>
+      </RouterLink>
+    </div>
+    <HudHeader v-else>
       <!-- On phones the strip's help and sound buttons move into the header menu. -->
       <template #menu="{ close }">
         <HudMenuItem accent="ember" @click="(close(), tutorial.open())">
@@ -262,7 +288,7 @@ function crashChipClass(value: number) {
         </HudMenuItem>
       </template>
     </HudHeader>
-    <AccountNotices />
+    <AccountNotices v-if="!spectate" />
 
     <!-- stage above, controls below (beside it on a phone held sideways). The stage always keeps
          at least 40% of the screen height (a third on short phones); when space is tight the
@@ -286,7 +312,7 @@ function crashChipClass(value: number) {
           <LiveBetsPanel mode="chip" />
           <LobbyFlightBoard
             mode="chip"
-            :me="lobbyFlight.me.value"
+            :me="boardMe"
             :mates="lobbyFlight.mates.value"
             :in-lobby="lobbyFlight.inLobby.value"
             :lobby-name="lobbyFlight.lobbyName.value"
@@ -314,9 +340,9 @@ function crashChipClass(value: number) {
           </button>
         </div>
 
-        <HowToPlay compact class="mt-1.5" />
+        <HowToPlay v-if="!spectate" compact class="mt-1.5" />
 
-        <FlightStage :craft="craft" :wingmen="lobbyFlight.mates.value" class="mt-1 min-h-[11.25rem] flex-1 short:min-h-[8.5rem]">
+        <FlightStage :craft="stageCraft" :wingmen="stageWingmen" class="mt-1 min-h-[11.25rem] flex-1 short:min-h-[8.5rem]">
           <template #readout>
             <div v-if="crashed && gameStore.maxReached" class="animate-sky-pop mt-2 text-center" role="status">
               <p class="font-display text-xs font-black uppercase tracking-[0.24em] text-lime text-glow-lime sm:text-lg">
@@ -355,13 +381,13 @@ function crashChipClass(value: number) {
           <LiveBetsPanel mode="panel" />
 
           <!-- my last win: stake, multiplier, payout, profit; dismissable, never over the controls -->
-          <div v-if="gameStore.lastWin" class="pointer-events-none absolute bottom-1 left-0 z-10">
+          <div v-if="gameStore.lastWin && !spectate" class="pointer-events-none absolute bottom-1 left-0 z-10">
             <WinSummaryCard :win="gameStore.lastWin" @dismiss="gameStore.dismissWin()" />
           </div>
 
           <!-- me + my lobby-mates this round: panel on larger screens, tap-to-open chip on phones -->
           <LobbyFlightBoard
-            :me="lobbyFlight.me.value"
+            :me="boardMe"
             :mates="lobbyFlight.mates.value"
             :in-lobby="lobbyFlight.inLobby.value"
             :lobby-name="lobbyFlight.lobbyName.value"
@@ -372,7 +398,17 @@ function crashChipClass(value: number) {
 
       <!-- controls: one compact panel for every phase. On phones the bottom padding keeps the
            nav dock's handle (and the bottom-edge swipe zone) clear of the buttons. -->
-      <div class="relative z-20 min-h-0 overflow-y-auto pb-[calc(env(safe-area-inset-bottom)+2.125rem)] landscape-phone:w-[min(24rem,50vw)] landscape-phone:shrink-0 [@media(min-width:48rem)_and_(min-height:500.02px)]:pb-2 pl-[max(0.75rem,env(safe-area-inset-left))] pr-[max(0.75rem,env(safe-area-inset-right))] pt-2 sm:pl-[max(1rem,env(safe-area-inset-left))] sm:pr-[max(1rem,env(safe-area-inset-right))]">
+      <!-- watching: no controls, just who's betting -->
+      <div v-if="spectate" class="relative z-20 px-4 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] pt-2">
+        <NeonPanel accent="magenta" class="mx-auto w-full max-w-[64rem] [&>div]:p-3">
+          <p v-if="spectator?.error.value" role="alert" class="text-center text-sm font-semibold text-danger">{{ spectator.error.value }}</p>
+          <p v-else class="text-center text-sm text-foreground/85">
+            <span class="font-bold text-foreground">{{ lobbyFlight.mates.value.filter((m) => m.bet !== null).length }} of {{ lobbyFlight.mates.value.length }}</span>
+            pilots have a bet this round · {{ phaseLabel }}. Admins watch only and can't bet.
+          </p>
+        </NeonPanel>
+      </div>
+      <div v-else class="relative z-20 min-h-0 overflow-y-auto pb-[calc(env(safe-area-inset-bottom)+2.125rem)] landscape-phone:w-[min(24rem,50vw)] landscape-phone:shrink-0 [@media(min-width:48rem)_and_(min-height:500.02px)]:pb-2 pl-[max(0.75rem,env(safe-area-inset-left))] pr-[max(0.75rem,env(safe-area-inset-right))] pt-2 sm:pl-[max(1rem,env(safe-area-inset-left))] sm:pr-[max(1rem,env(safe-area-inset-right))]">
         <NeonPanel accent="magenta" class="mx-auto w-full max-w-[64rem] [&>div]:p-2.5 sm:[&>div]:p-3 landscape-phone:[&>div]:p-2.5">
           <div class="grid gap-2.5 md:grid-cols-[minmax(0,1fr)_minmax(13rem,16rem)] md:items-center md:gap-5 landscape-phone:grid-cols-1 landscape-phone:gap-2.5">
             <div class="min-w-0 space-y-2">
@@ -532,25 +568,25 @@ function crashChipClass(value: number) {
       </div>
     </div>
 
-    <NavDock auto-hide />
+    <NavDock v-if="!spectate" auto-hide />
 
     <DailyChallengeBar
-      v-if="prompts.briefingOpen.value"
+      v-if="!spectate && prompts.briefingOpen.value"
       :challenges="challengeStore.challenges"
       @close="prompts.closeBriefing"
     />
-    <SpinWheel v-if="prompts.wheelOpen.value" :out-of-credits="prompts.outOfCredits.value" @close="prompts.closeWheel" />
+    <SpinWheel v-if="!spectate && prompts.wheelOpen.value" :out-of-credits="prompts.outOfCredits.value" @close="prompts.closeWheel" />
 
     <FeedbackPrompt
-      v-if="feedback.isOpen.value && !prompts.anyOpen.value && !tutorial.isOpen.value"
+      v-if="!spectate && feedback.isOpen.value && !prompts.anyOpen.value && !tutorial.isOpen.value"
       :controller="feedback"
     />
 
-    <TutorialOverlay v-if="tutorial.isOpen.value" @close="tutorial.finish" />
+    <TutorialOverlay v-if="!spectate && tutorial.isOpen.value" @close="tutorial.finish" />
 
     <GameRulesModal v-if="rulesOpen" @close="rulesOpen = false" />
     <RealityCheckModal
-      v-if="realityCheck.isOpen.value && realityCheck.session.value && !tutorial.isOpen.value"
+      v-if="!spectate && realityCheck.isOpen.value && realityCheck.session.value && !tutorial.isOpen.value"
       :session="realityCheck.session.value"
       @close="realityCheck.close()"
     />

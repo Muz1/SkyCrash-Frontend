@@ -86,6 +86,8 @@ const router = createRouter({
     { path: '/admin/players', name: 'admin-players', component: AdminView, meta: admin },
     { path: '/admin/access-links', name: 'admin-access-links', component: () => import('../views/admin/AdminAccessLinksView.vue'), meta: admin },
     { path: '/admin/panel-game', name: 'admin-panel-game', component: () => import('../views/admin/AdminPanelGameView.vue'), meta: admin },
+    // The real game screen, inside the panel lobby, for an admin to watch (no betting).
+    { path: '/watch/panel', name: 'watch-panel', component: GameView, props: { spectate: true }, meta: admin },
     { path: '/admin/rounds', name: 'admin-rounds', component: AdminCurrentRoundView, meta: admin },
     { path: '/admin/lobbies', name: 'admin-lobbies', component: () => import('../views/admin/AdminLobbiesView.vue'), meta: admin },
     { path: '/admin/payments', name: 'admin-payments', component: () => import('../views/admin/AdminPaymentsView.vue'), meta: admin },

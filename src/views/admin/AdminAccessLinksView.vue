@@ -133,7 +133,7 @@ function printSheet() {
       <template #actions>
         <AdminButton :disabled="busy" @click="createPilots"><UserPlus aria-hidden="true" /> Create the 6 panel pilots</AdminButton>
         <AdminButton :disabled="busy || !links.some((l) => l.active)" @click="printSheet"><Printer aria-hidden="true" /> Print QR sheet</AdminButton>
-        <RouterLink to="/admin/panel-game" class="inline-flex">
+        <RouterLink to="/watch/panel" class="inline-flex">
           <AdminButton variant="primary"><MonitorPlay aria-hidden="true" /> View game</AdminButton>
         </RouterLink>
       </template>
@@ -147,7 +147,7 @@ function printSheet() {
         :caption="`Every pilot joins this lobby when they open their link or QR code. ${panel.members.length} in it, ${panel.members.filter((m) => m.online).length} online.`"
         accent="magenta"
       >
-        <RouterLink to="/admin/panel-game" class="inline-flex">
+        <RouterLink to="/watch/panel" class="inline-flex">
           <AdminButton variant="primary"><MonitorPlay aria-hidden="true" /> View their game live</AdminButton>
         </RouterLink>
       </AdminPanel>
