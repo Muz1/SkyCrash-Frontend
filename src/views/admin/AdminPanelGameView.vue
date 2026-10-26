@@ -15,7 +15,7 @@ import { toCraft, type FlightRow } from '@/composables/useLobbyFlight'
 import * as service from '@/services/accessLinkService'
 import type { PanelOverview } from '@/services/accessLinkService'
 import type { LobbyRoundBet } from '@/types'
-import { apiMessage } from '@/lib/apiError'
+import { apiError, apiMessage } from '@/lib/apiError'
 import { cr, mult } from '@/lib/reportFormat'
 
 /**
@@ -39,7 +39,10 @@ async function loadOverview() {
     overview.value = await service.getPanelOverview()
     error.value = ''
   } catch (e) {
-    error.value = apiMessage(e) ?? 'Could not load the panel lobby.'
+    error.value =
+      apiError(e).status === 404
+        ? "The server doesn't have the panel lobby yet: the API needs redeploying (Render → skycrash-api → Manual Deploy → Deploy latest commit)."
+        : (apiMessage(e) ?? 'Could not load the panel lobby.')
   }
 }
 

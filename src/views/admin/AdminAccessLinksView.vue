@@ -25,7 +25,16 @@ const busy = ref(false)
 const error = ref('')
 const copied = ref<string | null>(null)
 const panel = ref<PanelOverview | null>(null)
-const loadPanel = () => service.getPanelOverview().then((p) => (panel.value = p)).catch(() => undefined)
+const panelMissing = ref(false)
+// 404 = the API hasn't been redeployed with the panel lobby yet.
+const loadPanel = () =>
+  service
+    .getPanelOverview()
+    .then((p) => {
+      panel.value = p
+      panelMissing.value = false
+    })
+    .catch(() => (panelMissing.value = true))
 
 async function draw() {
   const next: Record<string, string> = {}
@@ -129,6 +138,9 @@ function printSheet() {
         </RouterLink>
       </template>
 
+      <p v-if="panelMissing" class="adm-error" role="alert">
+        The panel lobby and leaderboard aren't available on the server yet: the API needs redeploying (Render → skycrash-api → Manual Deploy → Deploy latest commit).
+      </p>
       <AdminPanel
         v-if="panel"
         :title="`${panel.lobbyName} · lobby ${panel.inviteCode}`"
