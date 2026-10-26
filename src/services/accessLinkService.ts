@@ -30,3 +30,42 @@ export async function regenerateAccessLink(id: string): Promise<AccessLink> {
 export async function revokeAccessLink(id: string): Promise<void> {
   await api.post(`/admin/access-links/${id}/revoke`)
 }
+
+export interface PanelLobbyMember {
+  playerId: string
+  username: string
+  online: boolean
+  joinedAtUtc: string
+  equippedCraftId: string | null
+}
+
+/** One panel pilot's results over all their settled bets. net = paidOut − wagered. */
+export interface PanelLeaderboardRow {
+  playerId: string
+  username: string
+  online: boolean
+  inPanelLobby: boolean
+  creditBalance: number
+  rounds: number
+  wins: number
+  losses: number
+  wagered: number
+  paidOut: number
+  net: number
+  bestCashOutMultiplier: number | null
+  biggestWin: number
+  lastBetAtUtc: string | null
+}
+
+export interface PanelOverview {
+  lobbyId: string | null
+  lobbyName: string
+  inviteCode: string
+  members: PanelLobbyMember[]
+  leaderboard: PanelLeaderboardRow[]
+}
+
+/** The shared panel lobby (every pilot joins it when their link is opened) and the leaderboard. */
+export async function getPanelOverview(): Promise<PanelOverview> {
+  return (await api.get<PanelOverview>('/admin/access-links/panel')).data
+}

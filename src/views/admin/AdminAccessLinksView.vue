@@ -1,14 +1,16 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
 import QRCode from 'qrcode'
-import { Copy, Printer, RefreshCw, Ban, UserPlus, Power } from '@lucide/vue'
+import { Copy, Printer, RefreshCw, Ban, UserPlus, Power, MonitorPlay } from '@lucide/vue'
+import { RouterLink } from 'vue-router'
+import PanelLeaderboard from '@/components/admin/PanelLeaderboard.vue'
 import AdminShell from '@/components/sky/AdminShell.vue'
 import AdminPage from '@/components/admin/AdminPage.vue'
 import AdminPanel from '@/components/admin/AdminPanel.vue'
 import AdminButton from '@/components/admin/AdminButton.vue'
 import AdminLoading from '@/components/admin/AdminLoading.vue'
 import * as service from '@/services/accessLinkService'
-import type { AccessLink } from '@/services/accessLinkService'
+import type { AccessLink, PanelOverview } from '@/services/accessLinkService'
 import { apiMessage } from '@/lib/apiError'
 import { count, cr, dateTime } from '@/lib/reportFormat'
 
@@ -22,6 +24,8 @@ const loading = ref(true)
 const busy = ref(false)
 const error = ref('')
 const copied = ref<string | null>(null)
+const panel = ref<PanelOverview | null>(null)
+const loadPanel = () => service.getPanelOverview().then((p) => (panel.value = p)).catch(() => undefined)
 
 async function draw() {
   const next: Record<string, string> = {}
@@ -54,12 +58,16 @@ async function run(action: () => Promise<void>) {
   }
 }
 
-onMounted(() => run(async () => {
-  links.value = await service.listAccessLinks()
-}).finally(() => (loading.value = false)))
+onMounted(() => {
+  void loadPanel()
+  return run(async () => {
+    links.value = await service.listAccessLinks()
+  }).finally(() => (loading.value = false))
+})
 
 const createPilots = () => run(async () => {
   links.value = await service.createPanelPilots()
+  await loadPanel()
 })
 
 const regenerate = (l: AccessLink) => {
@@ -116,7 +124,21 @@ function printSheet() {
       <template #actions>
         <AdminButton :disabled="busy" @click="createPilots"><UserPlus aria-hidden="true" /> Create the 6 panel pilots</AdminButton>
         <AdminButton :disabled="busy || !links.some((l) => l.active)" @click="printSheet"><Printer aria-hidden="true" /> Print QR sheet</AdminButton>
+        <RouterLink to="/admin/panel-game" class="inline-flex">
+          <AdminButton variant="primary"><MonitorPlay aria-hidden="true" /> View game</AdminButton>
+        </RouterLink>
       </template>
+
+      <AdminPanel
+        v-if="panel"
+        :title="`${panel.lobbyName} · lobby ${panel.inviteCode}`"
+        :caption="`Every pilot joins this lobby when they open their link or QR code. ${panel.members.length} in it, ${panel.members.filter((m) => m.online).length} online.`"
+        accent="magenta"
+      >
+        <RouterLink to="/admin/panel-game" class="inline-flex">
+          <AdminButton variant="primary"><MonitorPlay aria-hidden="true" /> View their game live</AdminButton>
+        </RouterLink>
+      </AdminPanel>
 
       <p v-if="error" class="adm-error" role="alert">{{ error }}</p>
       <AdminLoading v-if="loading" text="Loading links…" />
@@ -148,6 +170,8 @@ function printSheet() {
       <p v-if="rows.length" class="adm-note mt-3">
         Open a link on the panel member's phone, not in this browser: opening it here would sign you out of the admin console.
       </p>
+
+      <PanelLeaderboard v-if="panel" class="mt-4" :rows="panel.leaderboard" />
     </AdminPage>
   </AdminShell>
 </template>

@@ -17,8 +17,9 @@ function toLoginResult(status: number, body: LoginBody): LoginResult {
 }
 
 /** Sign-up sends a confirmation email; there's no session until the email is verified. */
-export async function register(payload: RegisterPayload): Promise<{ email: string }> {
-  const response = await api.post<{ email: string }>('/auth/register', payload)
+/** verificationRequired is false when the server confirmed the email straight away (no email is sent). */
+export async function register(payload: RegisterPayload): Promise<{ email: string; verificationRequired?: boolean }> {
+  const response = await api.post<{ email: string; verificationRequired?: boolean }>('/auth/register', payload)
   return response.data
 }
 

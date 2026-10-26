@@ -85,6 +85,7 @@ const router = createRouter({
     { path: '/admin/feedback/insights', name: 'admin-feedback-insights', component: () => import('../views/admin/AdminAiInsightsView.vue'), meta: admin },
     { path: '/admin/players', name: 'admin-players', component: AdminView, meta: admin },
     { path: '/admin/access-links', name: 'admin-access-links', component: () => import('../views/admin/AdminAccessLinksView.vue'), meta: admin },
+    { path: '/admin/panel-game', name: 'admin-panel-game', component: () => import('../views/admin/AdminPanelGameView.vue'), meta: admin },
     { path: '/admin/rounds', name: 'admin-rounds', component: AdminCurrentRoundView, meta: admin },
     { path: '/admin/lobbies', name: 'admin-lobbies', component: () => import('../views/admin/AdminLobbiesView.vue'), meta: admin },
     { path: '/admin/payments', name: 'admin-payments', component: () => import('../views/admin/AdminPaymentsView.vue'), meta: admin },

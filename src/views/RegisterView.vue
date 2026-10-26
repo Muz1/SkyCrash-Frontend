@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/AuthStore'
 import * as authService from '@/services/AuthService'
 import ArcadeButton from '@/components/sky/ArcadeButton.vue'
@@ -19,6 +19,7 @@ import { en } from '@/copy/en'
 
 const authStore = useAuthStore()
 const route = useRoute()
+const router = useRouter()
 
 const username = ref('')
 const email = ref('')
@@ -130,6 +131,18 @@ async function handleSubmit() {
       acceptRules: true,
       dateOfBirth: dateOfBirth.value,
     })
+    // Already confirmed (the server isn't sending emails): sign straight in instead of waiting for a link.
+    if (created.verificationRequired === false) {
+      const result = await authStore.login({ email: email.value, password: password.value }).catch(() => null)
+      if (result?.kind === 'session') {
+        await router.push(redirect ?? '/')
+        return
+      }
+      if (result?.kind === 'otp') {
+        await router.push({ name: 'login', query: redirect ? { redirect } : {} })
+        return
+      }
+    }
     sentTo.value = created.email || email.value
   } catch (err: unknown) {
     type AxiosLikeError = { response?: { data?: unknown } }

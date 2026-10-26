@@ -14,6 +14,7 @@ import {
   Bot,
   Tags,
   UserCog,
+  Trophy,
   Radio,
   Armchair,
   Volume2,
@@ -72,6 +73,7 @@ const groups = computed(() => [
     items: [
       { to: '/admin/players', label: 'Players', icon: UserCog },
       { to: '/admin/access-links', label: 'Panel Access Links', icon: QrCode },
+      { to: '/admin/panel-game', label: 'Panel Game & Leaderboard', icon: Trophy },
       { to: '/admin/rules', label: 'Account Rules', icon: Scale },
       { to: '/admin/rounds', label: 'Live Round', icon: Radio },
       { to: '/admin/lobbies', label: 'Lobbies', icon: Armchair },

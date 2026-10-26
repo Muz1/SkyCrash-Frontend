@@ -23,7 +23,7 @@ export interface FlightRow {
 }
 
 const CRAFT_IDS = new Set<string>(CRAFTS.map((c) => c.id))
-function toCraft(id: string | null | undefined): CraftId {
+export function toCraft(id: string | null | undefined): CraftId {
   return id && CRAFT_IDS.has(id) ? (id as CraftId) : DEFAULT_CRAFT
 }
 
