@@ -6,13 +6,15 @@ import { ShieldCheck } from '@lucide/vue'
 import Shell from '@/components/sky/Shell.vue'
 import NeonPanel from '@/components/sky/NeonPanel.vue'
 import ArcadeButton from '@/components/sky/ArcadeButton.vue'
+import ArcadeField from '@/components/sky/ArcadeField.vue'
 import { useAuthStore } from '@/stores/AuthStore'
 import { usePlayerStore } from '@/stores/playerStore'
-import { acceptInvitation, previewInvitation } from '@/services/adminAnalyticsService'
+import { acceptInvitation, completeInvitation, previewInvitation } from '@/services/adminAnalyticsService'
 import type { InvitationPreview } from '@/types/insights'
 
-// Where an admin invite link lands. Shows who invited whom, asks the person to sign in (or
-// register) with the invited email, then accepts and opens the admin dashboard.
+// Where an admin invite link lands. Shows who invited whom. An invitee with no account sets a
+// username and password here, which creates their admin account and signs them in; one who
+// already has an account signs in with the invited email and accepts. Then the dashboard opens.
 const route = useRoute()
 const router = useRouter()
 const authStore = useAuthStore()
@@ -22,6 +24,34 @@ const token = computed(() => String(route.params.token ?? ''))
 const invite = ref<InvitationPreview | null>(null)
 const error = ref<string | null>(null)
 const accepting = ref(false)
+const username = ref('')
+const password = ref('')
+const confirm = ref('')
+
+/** First time: create the admin account with the chosen password, then sign straight in. */
+async function setPassword() {
+  if (!invite.value) return
+  error.value = null
+  if (password.value !== confirm.value) {
+    error.value = 'The two passwords don’t match.'
+    return
+  }
+  accepting.value = true
+  try {
+    await completeInvitation(token.value, { username: username.value, password: password.value })
+    const result = await authStore.login({ email: invite.value.email, password: password.value })
+    if (result.kind === 'otp') {
+      router.push({ name: 'login', query: { redirect: '/admin' } })
+      return
+    }
+    await playerStore.fetchProfile()
+    router.push('/admin')
+  } catch (err) {
+    error.value = messageOf(err, 'Your password could not be set. Try again.')
+  } finally {
+    accepting.value = false
+  }
+}
 
 const signedInAsInvitee = computed(
   () => authStore.isAuthenticated && invite.value && authStore.email?.toLowerCase() === invite.value.email.toLowerCase(),
@@ -86,12 +116,17 @@ function switchAccount() {
                 <p>You're signed in as {{ authStore.email }}. Sign in as {{ invite.email }} to accept.</p>
                 <ArcadeButton variant="blue" @click="switchAccount">Switch account</ArcadeButton>
               </div>
-              <div v-else class="flex flex-col gap-3 sm:flex-row">
-                <RouterLink :to="{ name: 'login', query: { redirect: route.fullPath } }" class="flex-1">
+              <form v-else-if="!invite.accountExists" class="flex flex-col gap-3" @submit.prevent="setPassword">
+                <p class="font-semibold">Set up your admin account for {{ invite.email }}.</p>
+                <ArcadeField v-model="username" label="Username" autocomplete="username" placeholder="3-20 letters, numbers or _" required maxlength="20" />
+                <ArcadeField v-model="password" label="Password" type="password" autocomplete="new-password" placeholder="8+ characters, a capital and a number" required />
+                <ArcadeField v-model="confirm" label="Confirm password" type="password" autocomplete="new-password" placeholder="••••••••" required />
+                <ArcadeButton type="submit" size="lg" :disabled="accepting">{{ accepting ? 'Setting up…' : 'Set password & open the console' }}</ArcadeButton>
+              </form>
+              <div v-else class="flex flex-col gap-3">
+                <p>You already have an account with {{ invite.email }}. Sign in, and you'll come back here to accept.</p>
+                <RouterLink :to="{ name: 'login', query: { redirect: route.fullPath } }">
                   <ArcadeButton class="w-full">Sign in</ArcadeButton>
-                </RouterLink>
-                <RouterLink v-if="!invite.accountExists" :to="{ name: 'register', query: { redirect: route.fullPath } }" class="flex-1">
-                  <ArcadeButton variant="blue" class="w-full">Create account</ArcadeButton>
                 </RouterLink>
               </div>
             </template>

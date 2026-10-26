@@ -134,6 +134,11 @@ export async function previewInvitation(token: string): Promise<InvitationPrevie
   return (await api.get<InvitationPreview>(`/invitations/${encodeURIComponent(token)}`)).data
 }
 
+/** No account yet: creates the invitee's admin account with the password they chose. */
+export async function completeInvitation(token: string, payload: { username: string; password: string }): Promise<{ message: string; email: string }> {
+  return (await api.post<{ message: string; email: string }>(`/invitations/${encodeURIComponent(token)}/complete`, payload)).data
+}
+
 export async function acceptInvitation(token: string): Promise<string> {
   return (await api.post<{ message: string }>(`/invitations/${encodeURIComponent(token)}/accept`)).data.message
 }

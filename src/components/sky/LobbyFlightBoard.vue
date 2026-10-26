@@ -15,7 +15,8 @@ import type { FlightRow } from '@/composables/useLobbyFlight'
  */
 const props = withDefaults(
   defineProps<{
-    me: FlightRow
+    /** Null when an admin is only watching the lobby: no "My flight" row. */
+    me: FlightRow | null
     mates: FlightRow[]
     inLobby: boolean
     lobbyName: string | null
@@ -29,7 +30,7 @@ const open = ref(false)
 const airborneCount = computed(
   () =>
     props.mates.filter((m) => m.status === 'flying').length +
-    (props.me.status === 'flying' ? 1 : 0),
+    (props.me?.status === 'flying' ? 1 : 0),
 )
 const bettingCount = computed(() => props.mates.filter((m) => m.bet !== null).length)
 
@@ -104,6 +105,7 @@ function statusClass(row: FlightRow) {
             : 'fixed inset-x-3 top-[calc(env(safe-area-inset-top)+7rem)] z-[61] max-h-[60dvh]',
         ]"
       >
+        <template v-if="me">
         <p class="font-display text-[0.5625rem] font-black uppercase tracking-[0.3em] text-ember">
           My flight
         </p>
@@ -132,8 +134,9 @@ function statusClass(row: FlightRow) {
             >{{ statusText(me) }}</span
           >
         </div>
+        </template>
 
-        <div class="mt-2 border-t border-violet/40 pt-2">
+        <div :class="me ? 'mt-2 border-t border-violet/40 pt-2' : ''">
           <template v-if="inLobby">
             <p
               class="flex items-baseline justify-between gap-2 font-display text-[0.5625rem] font-black uppercase tracking-[0.3em] text-magenta"
