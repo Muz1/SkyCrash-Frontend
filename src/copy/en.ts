@@ -271,10 +271,11 @@ export const en = {
     phone: '0800 006 008',
     tel: 'tel:0800006008',
     whatsapp: '076 675 0710',
+    whatsappUrl: 'https://wa.me/27766750710',
     site: 'responsiblegambling.org.za',
     url: 'https://www.responsiblegambling.org.za',
     ageLine: '18+ · Winners know when to stop',
-    watermark: '18+ · Gambling help 0800 006 008',
+    watermark: '18+ · Gambling help',
   },
 
   spin: {

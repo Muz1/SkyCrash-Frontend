@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { LifeBuoy, Phone, Globe } from '@lucide/vue'
+import { LifeBuoy, Phone, Globe, MessageCircle } from '@lucide/vue'
 import NeonPanel from './NeonPanel.vue'
 import { en } from '@/copy/en'
 
@@ -28,7 +28,9 @@ const t = en.helpline
       <a :href="t.url" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 font-semibold text-electric underline-offset-2 hover:underline pointer-coarse:min-h-11">
         <Globe class="h-4 w-4" aria-hidden="true" /> {{ t.site }}
       </a>
-      <span class="inline-flex items-center text-muted-foreground">WhatsApp {{ t.whatsapp }}</span>
+      <a :href="t.whatsappUrl" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 font-semibold text-lime underline-offset-2 hover:underline pointer-coarse:min-h-11">
+        <MessageCircle class="h-4 w-4" aria-hidden="true" /> WhatsApp {{ t.whatsapp }}
+      </a>
     </div>
     <p class="mt-2 text-xs text-muted-foreground">{{ t.ageLine }}</p>
   </NeonPanel>

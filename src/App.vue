@@ -49,13 +49,18 @@ onBeforeUnmount(() => {
 
 <template>
   <RouterView />
-  <!-- Helpline watermark on every player screen: sits in the header's top padding, never takes clicks. -->
+  <!-- Helpline watermark on every player screen, in the bottom-left corner (the dock's bottom
+       padding). Only the links take clicks; the phone game's slide-up dock (z-40) covers it. -->
   <p
     v-if="isPlayerRoute"
-    aria-hidden="true"
-    class="pointer-events-none fixed right-[max(0.75rem,env(safe-area-inset-right))] top-[max(1px,calc(env(safe-area-inset-top)-12px))] z-[60] select-none whitespace-nowrap font-sans text-[0.5625rem] font-semibold tracking-wide text-foreground/55"
+    class="pointer-events-none fixed bottom-[max(1px,calc(env(safe-area-inset-bottom)-10px))] left-[max(0.5rem,env(safe-area-inset-left))] z-[35] whitespace-nowrap font-sans text-[0.5625rem] font-semibold leading-none tracking-wide text-foreground/60"
   >
-    {{ en.helpline.watermark }}<span class="hidden sm:inline"> · {{ en.helpline.site }}</span>
+    {{ en.helpline.watermark }}:
+    <a :href="en.helpline.tel" class="pointer-events-auto text-ember/90 underline-offset-2 hover:underline">{{ en.helpline.phone }}</a>
+    ·
+    <a :href="en.helpline.whatsappUrl" target="_blank" rel="noopener noreferrer" class="pointer-events-auto text-lime/90 underline-offset-2 hover:underline">WhatsApp<span class="hidden sm:inline"> {{ en.helpline.whatsapp }}</span></a>
+    ·
+    <a :href="en.helpline.url" target="_blank" rel="noopener noreferrer" class="pointer-events-auto text-electric/90 underline-offset-2 hover:underline"><span class="sm:hidden">Website</span><span class="hidden sm:inline">{{ en.helpline.site }}</span></a>
   </p>
   <ToastStack />
   <BadgeViewer />
