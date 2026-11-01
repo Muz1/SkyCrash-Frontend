@@ -243,8 +243,11 @@ export const en = {
     lostToday: (n: string) => `Lost today: ${n}`,
     lostWeek: (n: string) => `Lost this week: ${n}`,
     pending: (d: string) => `Raise applies ${d}`,
+    activeNow: (n: string) => `Active now: ${n}`,
+    changesTo: (n: string, d: string) => `Changes to ${n} on ${d}`,
     saved: 'Limits saved',
     invalid: 'Use a number above 0, or leave empty.',
+    weeklyBelowDaily: 'Weekly limit must be at least the daily limit.',
     breakTitle: 'Take a break',
     breakInfo: 'Self-exclusion stops play for the chosen time. It cannot be undone early.',
     breakOptions: { 1: '24 hours', 7: '7 days', 30: '30 days' } as Record<1 | 7 | 30, string>,
@@ -258,6 +261,20 @@ export const en = {
     keepPlaying: 'Keep playing',
     takeBreak: 'Take a break',
     minutes: (n: number) => `${n} min`,
+  },
+
+  // South Africa's National Responsible Gambling Programme (NRGP).
+  helpline: {
+    title: 'Need help with gambling?',
+    body: 'Free, confidential counselling, 24/7.',
+    org: 'National Responsible Gambling Programme',
+    phone: '0800 006 008',
+    tel: 'tel:0800006008',
+    whatsapp: '076 675 0710',
+    site: 'responsiblegambling.org.za',
+    url: 'https://www.responsiblegambling.org.za',
+    ageLine: '18+ · Winners know when to stop',
+    watermark: '18+ · Gambling help 0800 006 008',
   },
 
   spin: {

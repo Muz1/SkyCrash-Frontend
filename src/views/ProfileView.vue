@@ -18,6 +18,7 @@ import ArcadeButton from '@/components/sky/ArcadeButton.vue'
 import AchievementBadge from '@/components/sky/AchievementBadge.vue'
 import AccountStandingCard from '@/components/sky/AccountStandingCard.vue'
 import ResponsiblePlayPanel from '@/components/sky/ResponsiblePlayPanel.vue'
+import GamblingHelp from '@/components/sky/GamblingHelp.vue'
 import { useRulesStore } from '@/stores/rulesStore'
 import { useResendVerification } from '@/composables/useResendVerification'
 import { en } from '@/copy/en'
@@ -237,6 +238,8 @@ async function handleSave() {
         <AccountStandingCard class="mt-5" />
 
         <ResponsiblePlayPanel class="mt-5" />
+
+        <GamblingHelp class="mt-5" />
 
         <NeonPanel class="mt-5" accent="lime">
           <RouterLink to="/missions" class="block">

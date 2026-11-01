@@ -34,11 +34,26 @@ const excluding = ref(false)
 const breakMessage = ref<string | null>(null)
 const breakError = ref<string | null>(null)
 
+/** While a raise (or removal) waits out its 24 h, the fields show the chosen limit, not the active one. */
 function fill(l: LossLimits) {
   limits.value = l
-  daily.value = l.daily === null ? '' : String(l.daily)
-  weekly.value = l.weekly === null ? '' : String(l.weekly)
+  const waiting = l.pendingFromUtc !== null
+  const d = waiting ? l.pendingDaily : l.daily
+  const w = waiting ? l.pendingWeekly : l.weekly
+  daily.value = d === null ? '' : String(d)
+  weekly.value = w === null ? '' : String(w)
 }
+
+const limitText = (n: number | null) => (n === null ? t.none : creditAmount(n))
+
+/** "Active now: X · Changes to Y on <date>" for a field whose change is still waiting; else null. */
+function pendingNote(active: number | null, next: number | null): string | null {
+  const from = limits.value?.pendingFromUtc
+  if (!from || active === next) return null
+  return `${t.activeNow(limitText(active))} · ${t.changesTo(limitText(next), dateTime(from))}`
+}
+const dailyNote = computed(() => (limits.value ? pendingNote(limits.value.daily, limits.value.pendingDaily) : null))
+const weeklyNote = computed(() => (limits.value ? pendingNote(limits.value.weekly, limits.value.pendingWeekly) : null))
 
 onMounted(async () => {
   try {
@@ -58,7 +73,7 @@ function parse(v: string | number): number | null | undefined {
 
 const pendingLine = computed(() => {
   const l = limits.value
-  if (!l?.pendingFromUtc || (l.pendingDaily === null && l.pendingWeekly === null)) return null
+  if (!l?.pendingFromUtc || (!dailyNote.value && !weeklyNote.value)) return null
   return t.pending(dateTime(l.pendingFromUtc))
 })
 
@@ -68,6 +83,10 @@ async function saveLimits() {
   const w = parse(weekly.value)
   if (d === undefined || w === undefined) {
     limitError.value = t.invalid
+    return
+  }
+  if (d !== null && w !== null && w < d) {
+    limitError.value = t.weeklyBelowDaily
     return
   }
   saving.value = true
@@ -117,6 +136,7 @@ async function startBreak() {
             class="clip-hud w-full border-2 border-violet/50 bg-void/70 px-3 py-2 text-base text-foreground placeholder:text-muted-foreground/60 focus:border-ember focus:outline-none"
           />
           <span v-if="limits" class="mt-1 block text-xs text-muted-foreground">{{ t.lostToday(creditAmount(limits.netLossToday)) }}</span>
+          <span v-if="dailyNote" class="mt-1 block text-xs text-ember">{{ dailyNote }}</span>
         </label>
         <label class="block">
           <span class="mb-1 block font-display text-[0.5625rem] uppercase tracking-[0.3em] text-muted-foreground">{{ t.weekly }}</span>
@@ -130,11 +150,10 @@ async function startBreak() {
             class="clip-hud w-full border-2 border-violet/50 bg-void/70 px-3 py-2 text-base text-foreground placeholder:text-muted-foreground/60 focus:border-ember focus:outline-none"
           />
           <span v-if="limits" class="mt-1 block text-xs text-muted-foreground">{{ t.lostWeek(creditAmount(limits.netLossThisWeek)) }}</span>
+          <span v-if="weeklyNote" class="mt-1 block text-xs text-ember">{{ weeklyNote }}</span>
         </label>
       </div>
-      <p v-if="pendingLine" class="text-sm text-ember" role="status">
-        {{ pendingLine }}<template v-if="limits?.pendingDaily != null"> · {{ t.daily }} {{ creditAmount(limits.pendingDaily) }}</template><template v-if="limits?.pendingWeekly != null"> · {{ t.weekly }} {{ creditAmount(limits.pendingWeekly) }}</template>
-      </p>
+      <p v-if="pendingLine" class="text-sm text-ember" role="status">{{ pendingLine }}</p>
       <p v-if="limitError" role="alert" class="text-sm text-danger">{{ limitError }}</p>
       <ArcadeButton type="submit" size="sm" variant="blue" :disabled="saving">{{ saving ? en.common.saving : en.common.save }}</ArcadeButton>
     </form>

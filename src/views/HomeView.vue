@@ -17,6 +17,7 @@ import ArcadeButton from '@/components/sky/ArcadeButton.vue'
 import HowToPlay from '@/components/sky/HowToPlay.vue'
 import FeedbackPrompt from '@/components/sky/FeedbackPrompt.vue'
 import TutorialOverlay from '@/components/sky/TutorialOverlay.vue'
+import GamblingHelp from '@/components/sky/GamblingHelp.vue'
 import { polishCopy as copy } from '@/copy/polish'
 
 const playerStore = usePlayerStore()
@@ -114,6 +115,8 @@ onMounted(() => {
       >
         {{ copy.landing.fullTutorial }}
       </button>
+
+      <GamblingHelp compact class="mt-3" />
 
       <p class="mt-4 font-arcade text-[0.5rem] uppercase tracking-[0.3em] text-[#c4b5fd] [@media(max-height:900px)]:hidden">
         High risk. High thrill. Beat the sky.

@@ -1,11 +1,12 @@
 <script setup lang="ts">
-import { onBeforeUnmount, onMounted, watch } from 'vue'
+import { computed, onBeforeUnmount, onMounted, watch } from 'vue'
 import { RouterView, useRoute } from 'vue-router'
 import { useSignalRConnection } from '@/composables/useSignalRConnection'
 import { useAudioStore } from '@/stores/audioStore'
 import { soundEngine } from '@/lib/soundEngine'
 import ToastStack from '@/components/sky/ToastStack.vue'
 import BadgeViewer from '@/components/sky/BadgeViewer.vue'
+import { en } from '@/copy/en'
 
 useSignalRConnection()
 
@@ -14,10 +15,11 @@ const audioStore = useAudioStore()
 
 // The soundtrack belongs to the player app; the admin console stays quiet.
 const ADMIN_PREFIXES = ['/admin', '/ops', '/rtp', '/volatility']
+const isPlayerRoute = computed(() => !ADMIN_PREFIXES.some((p) => route.path.startsWith(p)))
 watch(
-  () => route.path,
-  (path) => {
-    audioStore.musicAllowed = !ADMIN_PREFIXES.some((p) => path.startsWith(p))
+  isPlayerRoute,
+  (player) => {
+    audioStore.musicAllowed = player
   },
   { immediate: true },
 )
@@ -47,6 +49,14 @@ onBeforeUnmount(() => {
 
 <template>
   <RouterView />
+  <!-- Helpline watermark on every player screen: sits in the header's top padding, never takes clicks. -->
+  <p
+    v-if="isPlayerRoute"
+    aria-hidden="true"
+    class="pointer-events-none fixed right-[max(0.75rem,env(safe-area-inset-right))] top-[max(1px,calc(env(safe-area-inset-top)-12px))] z-[60] select-none whitespace-nowrap font-sans text-[0.5625rem] font-semibold tracking-wide text-foreground/55"
+  >
+    {{ en.helpline.watermark }}<span class="hidden sm:inline"> · {{ en.helpline.site }}</span>
+  </p>
   <ToastStack />
   <BadgeViewer />
 </template>
